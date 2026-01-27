@@ -32,6 +32,7 @@ add_subdirectory(${LIB_DIR}/glm)
 set(SRC
     src/main.cpp
     sigel/SigelEngine.cpp
+    sigel/Instance.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SRC})
