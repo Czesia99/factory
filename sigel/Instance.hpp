@@ -1,3 +1,5 @@
+#pragma once
+
 #include <vulkan/vulkan_raii.hpp>
 
 namespace sigel
@@ -7,9 +9,11 @@ namespace sigel
         private:
             vk::raii::Context  context;
             vk::raii::Instance instance = nullptr;
+            vk::raii::DebugUtilsMessengerEXT debugMessenger = nullptr;
         public:
             Instance() = default;
             void createInstance();
+            void setupDebugMessenger();
         private:
     };
 }

@@ -13,7 +13,7 @@ namespace sigel
     void SigelEngine::initWindow()
     {
         glfwInit();
-        
+
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
@@ -23,6 +23,7 @@ namespace sigel
     void SigelEngine::initVulkan()
     {
         instance.createInstance();
+        instance.setupDebugMessenger();
         printf("instance created\n");
     }
 
