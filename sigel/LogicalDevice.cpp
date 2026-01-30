@@ -60,7 +60,7 @@ namespace sigel
 		vk::DeviceCreateInfo deviceCreateInfo { .pNext                   = &featureChain.get<vk::PhysicalDeviceFeatures2>(),
                                                 .queueCreateInfoCount    = 1,
                                                 .pQueueCreateInfos       = &deviceQueueCreateInfo,
-                                                .enabledExtensionCount   = deviceExtensions.size(),
+                                                .enabledExtensionCount   = static_cast<uint32_t>(deviceExtensions.size()),
                                                 .ppEnabledExtensionNames = deviceExtensions.data()};
 
 		device = vk::raii::Device(pdevice, deviceCreateInfo);

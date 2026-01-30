@@ -29,7 +29,7 @@ namespace sigel
         physicalDevice.pickPhysicalDevice(instance.getInstance());
         printf("physical device selected\n");
         physicalDevice.printDeviceInfo();
-        logicalDevice.createLogicalDevice(physicalDevice.get(), surface.getSurface());
+        logicalDevice.createLogicalDevice(physicalDevice.getDevice(), surface.getSurface());
         printf("logical device created\n");
     }
 

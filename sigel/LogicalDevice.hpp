@@ -10,6 +10,8 @@ namespace sigel
             vk::raii::Device device = nullptr;
             vk::raii::Queue graphicsQueue = nullptr;
             vk::raii::Queue presentQueue = nullptr;
+
+            vk::raii::Device& getDevice() { return device; }
         private:
             std::vector<const char *> requiredDeviceExtension = {vk::KHRSwapchainExtensionName};
         public:
