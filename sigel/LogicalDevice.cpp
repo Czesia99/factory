@@ -47,28 +47,21 @@ namespace sigel
             throw std::runtime_error( "Could not find a queue for graphics or present -> terminating" );
         }
 
-        // query for Vulkan 1.3 features
-        auto features = pdevice.getFeatures2();
-        vk::PhysicalDeviceVulkan13Features vulkan13Features;
-        vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT extendedDynamicStateFeatures;
-        vulkan13Features.dynamicRendering = vk::True;
-        extendedDynamicStateFeatures.extendedDynamicState = vk::True;
-        vulkan13Features.pNext = &extendedDynamicStateFeatures;
-        features.pNext = &vulkan13Features;
-
 		vk::StructureChain<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceVulkan13Features, vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT> featureChain = {
 		    {},                                   // vk::PhysicalDeviceFeatures2
 		    {.dynamicRendering = true},           // vk::PhysicalDeviceVulkan13Features
 		    {.extendedDynamicState = true}        // vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT
 		};
 
+        std::vector deviceExtensions = { vk::KHRSwapchainExtensionName };
+
         float queuePriority = 0.5f;
 		vk::DeviceQueueCreateInfo deviceQueueCreateInfo{.queueFamilyIndex = graphicsIndex, .queueCount = 1, .pQueuePriorities = &queuePriority};
-		vk::DeviceCreateInfo      deviceCreateInfo{.pNext                   = &featureChain.get<vk::PhysicalDeviceFeatures2>(),
-		                                           .queueCreateInfoCount    = 1,
-		                                           .pQueueCreateInfos       = &deviceQueueCreateInfo,
-		                                           .enabledExtensionCount   = static_cast<uint32_t>(requiredDeviceExtension.size()),
-		                                           .ppEnabledExtensionNames = requiredDeviceExtension.data()};
+		vk::DeviceCreateInfo deviceCreateInfo { .pNext                   = &featureChain.get<vk::PhysicalDeviceFeatures2>(),
+                                                .queueCreateInfoCount    = 1,
+                                                .pQueueCreateInfos       = &deviceQueueCreateInfo,
+                                                .enabledExtensionCount   = deviceExtensions.size(),
+                                                .ppEnabledExtensionNames = deviceExtensions.data()};
 
 		device = vk::raii::Device(pdevice, deviceCreateInfo);
 		graphicsQueue = vk::raii::Queue(device, graphicsIndex, 0);

@@ -12,7 +12,6 @@ namespace sigel
             vk::raii::Queue presentQueue = nullptr;
         private:
             std::vector<const char *> requiredDeviceExtension = {vk::KHRSwapchainExtensionName};
-            std::vector<const char*> deviceExtensions = {vk::KHRSwapchainExtensionName};
         public:
             void createLogicalDevice(vk::raii::PhysicalDevice &pdevice, vk::raii::SurfaceKHR &surface);
         private:
