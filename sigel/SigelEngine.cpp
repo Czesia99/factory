@@ -22,9 +22,13 @@ namespace sigel
 
     void SigelEngine::initVulkan()
     {
-        instance.createInstance();
-        instance.setupDebugMessenger();
+        instance.init();
         printf("instance created\n");
+        physicalDevice.pickPhysicalDevice(instance.get());
+        printf("physical device selected\n");
+        physicalDevice.printDeviceInfo();
+        logicalDevice.createLogicalDevice(physicalDevice.get());
+        printf("logical device created\n");
     }
 
     void SigelEngine::mainLoop()

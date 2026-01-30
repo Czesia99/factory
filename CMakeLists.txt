@@ -34,6 +34,7 @@ set(SRC
     sigel/SigelEngine.cpp
     sigel/Instance.cpp
     sigel/PhysicalDevice.cpp
+    sigel/LogicalDevice.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SRC})

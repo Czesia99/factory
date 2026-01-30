@@ -16,6 +16,12 @@ namespace sigel
         return extensions;
     }
 
+    void Instance::init()
+    {
+        createInstance();
+        setupDebugMessenger();
+    }
+    
     void Instance::createInstance()
     {
         constexpr vk::ApplicationInfo appInfo { 

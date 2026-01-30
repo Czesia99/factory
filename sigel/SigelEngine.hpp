@@ -2,6 +2,8 @@
 
 #include <GLFW/glfw3.h>
 #include "Instance.hpp"
+#include "PhysicalDevice.hpp"
+#include "LogicalDevice.hpp"
 
 namespace sigel
 {
@@ -12,6 +14,8 @@ namespace sigel
         public:
             GLFWwindow *window;
             Instance instance;
+            PhysicalDevice physicalDevice;
+            LogicalDevice logicalDevice;
         public:
             SigelEngine() = default;
             void run();

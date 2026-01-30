@@ -43,4 +43,15 @@ namespace sigel
 
         return static_cast<uint32_t>( std::distance( queueFamilyProperties.begin(), graphicsQueueFamilyProperty ) );
     }
+
+    void PhysicalDevice::printDeviceInfo()
+    {
+        vk::PhysicalDeviceProperties props = physicalDevice.getProperties();
+        printf("Selected GPU: %s\n", props.deviceName.data());
+        printf("Type: %s\n", vk::to_string(props.deviceType).c_str());
+        printf("Vulkan API Version: %d.%d.%d\n", 
+            VK_API_VERSION_MAJOR(props.apiVersion),
+            VK_API_VERSION_MINOR(props.apiVersion),
+            VK_API_VERSION_PATCH(props.apiVersion));
+    }
 }
