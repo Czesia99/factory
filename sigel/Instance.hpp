@@ -9,8 +9,11 @@ namespace sigel
         public:
             vk::raii::Context  context;
             vk::raii::Instance instance = nullptr;
-            vk::raii::Instance& get() { return instance; }
             vk::raii::DebugUtilsMessengerEXT debugMessenger = nullptr;
+
+            vk::raii::Context& getContext() { return context; }
+            vk::raii::Instance& getInstance() { return instance; }
+
         public:
             Instance() = default;
             void init();

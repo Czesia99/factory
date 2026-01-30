@@ -2,6 +2,7 @@
 
 #include <GLFW/glfw3.h>
 #include "Instance.hpp"
+#include "WindowSurface.hpp"
 #include "PhysicalDevice.hpp"
 #include "LogicalDevice.hpp"
 
@@ -14,6 +15,7 @@ namespace sigel
         public:
             GLFWwindow *window;
             Instance instance;
+            WindowSurface surface;
             PhysicalDevice physicalDevice;
             LogicalDevice logicalDevice;
         public:

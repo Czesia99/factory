@@ -35,6 +35,7 @@ set(SRC
     sigel/Instance.cpp
     sigel/PhysicalDevice.cpp
     sigel/LogicalDevice.cpp
+    sigel/WindowSurface.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SRC})

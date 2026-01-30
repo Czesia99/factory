@@ -24,10 +24,12 @@ namespace sigel
     {
         instance.init();
         printf("instance created\n");
-        physicalDevice.pickPhysicalDevice(instance.get());
+        surface.createSurface(instance.getInstance(), window);
+        printf("surface created\n");
+        physicalDevice.pickPhysicalDevice(instance.getInstance());
         printf("physical device selected\n");
         physicalDevice.printDeviceInfo();
-        logicalDevice.createLogicalDevice(physicalDevice.get());
+        logicalDevice.createLogicalDevice(physicalDevice.get(), surface.getSurface());
         printf("logical device created\n");
     }
 

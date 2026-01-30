@@ -9,10 +9,12 @@ namespace sigel
         public:
             vk::raii::Device device = nullptr;
             vk::raii::Queue graphicsQueue = nullptr;
+            vk::raii::Queue presentQueue = nullptr;
         private:
             std::vector<const char *> requiredDeviceExtension = {vk::KHRSwapchainExtensionName};
+            std::vector<const char*> deviceExtensions = {vk::KHRSwapchainExtensionName};
         public:
-            void createLogicalDevice(vk::raii::PhysicalDevice &pdevice);
+            void createLogicalDevice(vk::raii::PhysicalDevice &pdevice, vk::raii::SurfaceKHR &surface);
         private:
     };
 }
