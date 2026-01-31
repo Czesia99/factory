@@ -5,6 +5,7 @@
 #include "WindowSurface.hpp"
 #include "PhysicalDevice.hpp"
 #include "LogicalDevice.hpp"
+#include "Swapchain.hpp"
 
 namespace sigel
 {
@@ -18,6 +19,7 @@ namespace sigel
             WindowSurface surface;
             PhysicalDevice physicalDevice;
             LogicalDevice logicalDevice;
+            Swapchain swapchain;
         public:
             SigelEngine() = default;
             void run();

@@ -65,6 +65,6 @@ namespace sigel
 
 		device = vk::raii::Device(pdevice, deviceCreateInfo);
 		graphicsQueue = vk::raii::Queue(device, graphicsIndex, 0);
-        presentQueue = vk::raii::Queue( device, presentIndex, 0 );
+        presentQueue = vk::raii::Queue(device, presentIndex, 0);
     }
 }

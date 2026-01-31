@@ -18,13 +18,14 @@ namespace sigel
             vk::Extent2D swapChainExtent;
             std::vector<vk::raii::ImageView> swapChainImageViews;
         private:
-            PhysicalDevice& _pDevice;
-            LogicalDevice&  _lDevice;
-            WindowSurface&  _surface;
-            GLFWwindow* _window;
+            PhysicalDevice *_pDevice = nullptr;
+            LogicalDevice *_lDevice = nullptr;
+            WindowSurface *_surface = nullptr;
+            GLFWwindow *_window = nullptr;
 
         public:
-            Swapchain(PhysicalDevice& pDevice, LogicalDevice& lDevice, WindowSurface& surface, GLFWwindow* window);
+            Swapchain() = default;
+            void init(PhysicalDevice *pDevice, LogicalDevice *lDevice, WindowSurface *surface, GLFWwindow *window);
             void createSwapChain();
         private:
             vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats);

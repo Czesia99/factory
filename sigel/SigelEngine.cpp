@@ -31,6 +31,10 @@ namespace sigel
         physicalDevice.printDeviceInfo();
         logicalDevice.createLogicalDevice(physicalDevice.getDevice(), surface.getSurface());
         printf("logical device created\n");
+        swapchain.init(&physicalDevice, &logicalDevice, &surface, window);
+        swapchain.createSwapChain();
+        printf("swapchain created\n");
+
     }
 
     void SigelEngine::mainLoop()

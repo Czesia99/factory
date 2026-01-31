@@ -9,6 +9,7 @@ namespace sigel
         public:
             vk::raii::PhysicalDevice physicalDevice = nullptr;
             vk::raii::PhysicalDevice& getDevice() { return physicalDevice; }
+
         private:
             std::vector<const char*> deviceExtensions = {
                 vk::KHRSwapchainExtensionName

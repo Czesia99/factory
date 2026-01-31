@@ -6,10 +6,18 @@
 
 namespace sigel
 {
+    void Swapchain::init(PhysicalDevice *pDevice, LogicalDevice *lDevice, WindowSurface *surface, GLFWwindow *window)
+    {
+        _pDevice = pDevice;
+        _lDevice = lDevice;
+        _surface = surface;
+        _window = window;
+    }
+
     void Swapchain::createSwapChain()
     {
-        auto surfaceCapabilities = _pDevice.getDevice().getSurfaceCapabilitiesKHR(*_surface.getSurface());
-        swapChainSurfaceFormat = chooseSwapSurfaceFormat(_pDevice.getDevice().getSurfaceFormatsKHR(*_surface.getSurface()));
+        auto surfaceCapabilities = _pDevice->getDevice().getSurfaceCapabilitiesKHR(*_surface->getSurface());
+        swapChainSurfaceFormat = chooseSwapSurfaceFormat(_pDevice->getDevice().getSurfaceFormatsKHR(*_surface->getSurface()));
         swapChainExtent = chooseSwapExtent(surfaceCapabilities);
         auto minImageCount = std::max(3u, surfaceCapabilities.minImageCount);
         minImageCount = ( surfaceCapabilities.maxImageCount > 0 && minImageCount > surfaceCapabilities.maxImageCount ) ? surfaceCapabilities.maxImageCount : minImageCount;
@@ -21,23 +29,24 @@ namespace sigel
 
         vk::SwapchainCreateInfoKHR swapChainCreateInfo{
             .flags = vk::SwapchainCreateFlagsKHR(),
-            .surface = *_surface.getSurface(),
+            .surface = *_surface->getSurface(),
             .minImageCount = minImageCount,
             .imageFormat = swapChainSurfaceFormat.format,
             .imageColorSpace = swapChainSurfaceFormat.colorSpace,
             .imageExtent = swapChainExtent,
-            .imageArrayLayers =1,
+            .imageArrayLayers = 1,
             .imageUsage = vk::ImageUsageFlagBits::eColorAttachment,
             .imageSharingMode = vk::SharingMode::eExclusive,
             .preTransform = surfaceCapabilities.currentTransform,
             .compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
-            .presentMode = chooseSwapPresentMode(_pDevice.getDevice().getSurfacePresentModesKHR(*_surface.getSurface())), 
+            .presentMode = chooseSwapPresentMode(_pDevice->getDevice().getSurfacePresentModesKHR(*_surface->getSurface())), 
             .clipped = true,
             .oldSwapchain = nullptr
         };
 
-        // auto indices = _pDevice.findQueueFamilies(_pDevice.getDevice());
-        // uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value( )};
+        // QueueFamilyIndices indices = _pDevice.findQueueFamilies(_pDevice.getDevice());
+        // uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
+        // uint32_t queueFamilyIndices[] = {graphicsFamily, presentFamily};
 
         // if (indices.graphicsFamily != indices.presentFamily) {
         //     swapChainCreateInfo.imageSharingMode = vk::SharingMode::eConcurrent;
@@ -49,7 +58,7 @@ namespace sigel
         //     swapChainCreateInfo.pQueueFamilyIndices = nullptr; // Optional
         // }
 
-        swapChain = vk::raii::SwapchainKHR( _lDevice.getDevice(), swapChainCreateInfo );
+        swapChain = vk::raii::SwapchainKHR( _lDevice->getDevice(), swapChainCreateInfo );
         swapChainImages = swapChain.getImages();
     }
 
