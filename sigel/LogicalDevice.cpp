@@ -9,9 +9,9 @@ namespace sigel
 		auto graphicsQueueFamilyProperty = std::ranges::find_if(queueFamilyProperties, [](auto const &qfp) { return (qfp.queueFlags & vk::QueueFlagBits::eGraphics) != static_cast<vk::QueueFlags>(0); });
 		assert(graphicsQueueFamilyProperty != queueFamilyProperties.end() && "No graphics queue family found!");
 
-		auto graphicsIndex = static_cast<uint32_t>(std::distance(queueFamilyProperties.begin(), graphicsQueueFamilyProperty));
+		graphicsIndex = static_cast<uint32_t>(std::distance(queueFamilyProperties.begin(), graphicsQueueFamilyProperty));
 
-        auto presentIndex = pdevice.getSurfaceSupportKHR(graphicsIndex, *surface)
+        presentIndex = pdevice.getSurfaceSupportKHR(graphicsIndex, *surface)
                                             ? graphicsIndex
                                             : static_cast<uint32_t>(queueFamilyProperties.size());
         

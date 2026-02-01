@@ -44,19 +44,21 @@ namespace sigel
             .oldSwapchain = nullptr
         };
 
-        // QueueFamilyIndices indices = _pDevice.findQueueFamilies(_pDevice.getDevice());
-        // uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
-        // uint32_t queueFamilyIndices[] = {graphicsFamily, presentFamily};
+        uint32_t gIndex = _lDevice->graphicsIndex;
+        uint32_t pIndex = _lDevice->presentIndex;
+        uint32_t queueFamilyIndices[] = { gIndex, pIndex };
 
-        // if (indices.graphicsFamily != indices.presentFamily) {
-        //     swapChainCreateInfo.imageSharingMode = vk::SharingMode::eConcurrent;
-        //     swapChainCreateInfo.queueFamilyIndexCount = 2;
-        //     swapChainCreateInfo.pQueueFamilyIndices = queueFamilyIndices;
-        // } else {
-        //     swapChainCreateInfo.imageSharingMode = vk::SharingMode::eExclusive;
-        //     swapChainCreateInfo.queueFamilyIndexCount = 0; // Optional
-        //     swapChainCreateInfo.pQueueFamilyIndices = nullptr; // Optional
-        // }
+        if (gIndex != pIndex) {
+            swapChainCreateInfo.imageSharingMode = vk::SharingMode::eConcurrent;
+            swapChainCreateInfo.queueFamilyIndexCount = 2;
+            swapChainCreateInfo.pQueueFamilyIndices = queueFamilyIndices;
+            printf("swapchain concurrent mode\n");
+        } else {
+            swapChainCreateInfo.imageSharingMode = vk::SharingMode::eExclusive;
+            swapChainCreateInfo.queueFamilyIndexCount = 0; // Optional
+            swapChainCreateInfo.pQueueFamilyIndices = nullptr; // Optional
+            printf("swapchain exclusif mode\n");
+        }
 
         swapChain = vk::raii::SwapchainKHR( _lDevice->getDevice(), swapChainCreateInfo );
         swapChainImages = swapChain.getImages();
