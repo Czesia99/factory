@@ -64,6 +64,17 @@ namespace sigel
         swapChainImages = swapChain.getImages();
     }
 
+    void Swapchain::createImageViews()
+    {
+        swapChainImageViews.clear();
+        vk::ImageViewCreateInfo imageViewCreateInfo{.viewType = vk::ImageViewType::e2D, .format = swapChainSurfaceFormat.format, .subresourceRange = {vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1}};
+		for (auto& image : swapChainImages)
+		{
+			imageViewCreateInfo.image = image;
+			swapChainImageViews.emplace_back(_lDevice->getDevice(), imageViewCreateInfo);
+		}
+    }
+
     vk::SurfaceFormatKHR Swapchain::chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats)
     {
         for (const auto& availableFormat : availableFormats) {

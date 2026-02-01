@@ -34,6 +34,8 @@ namespace sigel
         swapchain.init(&physicalDevice, &logicalDevice, &surface, window);
         swapchain.createSwapChain();
         printf("swapchain created\n");
+        swapchain.createImageViews();
+        printf("image views created\n");
 
     }
 

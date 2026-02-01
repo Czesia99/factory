@@ -17,6 +17,7 @@ namespace sigel
             vk::SurfaceFormatKHR swapChainSurfaceFormat;
             vk::Extent2D swapChainExtent;
             std::vector<vk::raii::ImageView> swapChainImageViews;
+
         private:
             PhysicalDevice *_pDevice = nullptr;
             LogicalDevice *_lDevice = nullptr;
@@ -27,6 +28,7 @@ namespace sigel
             Swapchain() = default;
             void init(PhysicalDevice *pDevice, LogicalDevice *lDevice, WindowSurface *surface, GLFWwindow *window);
             void createSwapChain();
+            void createImageViews();
         private:
             vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats);
             vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes);
