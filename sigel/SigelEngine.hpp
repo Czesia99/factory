@@ -9,8 +9,8 @@
 
 namespace sigel
 {
-    constexpr uint32_t WIDTH = 800;
-    constexpr uint32_t HEIGHT = 600;
+    constexpr uint32_t WIDTH = 1920;
+    constexpr uint32_t HEIGHT = 1080;
 
     class SigelEngine {
         public:

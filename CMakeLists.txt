@@ -37,6 +37,7 @@ set(SRC
     sigel/LogicalDevice.cpp
     sigel/WindowSurface.cpp
     sigel/Swapchain.cpp
+    sigel/Pipeline.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SRC})
