@@ -32,10 +32,19 @@ namespace sigel
         logicalDevice.createLogicalDevice(physicalDevice.getDevice(), surface.getSurface());
         printf("logical device created\n");
         swapchain.init(&physicalDevice, &logicalDevice, &surface, window);
+        printf("swapchain initialisation\n");
         swapchain.createSwapChain();
         printf("swapchain created\n");
         swapchain.createImageViews();
         printf("image views created\n");
+
+        shaderManager.init(&logicalDevice);
+        auto shaderCode = readFile("../sigel/shaders/slang.spv");
+        printf("readfile on shader\n");
+
+        pipeline.init(&shaderManager);
+
+
 
     }
 

@@ -6,6 +6,9 @@
 #include "PhysicalDevice.hpp"
 #include "LogicalDevice.hpp"
 #include "Swapchain.hpp"
+#include "Pipeline.hpp"
+#include "ShaderManager.hpp"
+#include "Utils.hpp"
 
 namespace sigel
 {
@@ -20,6 +23,8 @@ namespace sigel
             PhysicalDevice physicalDevice;
             LogicalDevice logicalDevice;
             Swapchain swapchain;
+            ShaderManager shaderManager;
+            Pipeline pipeline;
         public:
             SigelEngine() = default;
             void run();
