@@ -3,13 +3,10 @@
 
 namespace sigel
 {
-    void Pipeline::init(ShaderManager *shaderManager)
+    void Pipeline::createGraphicsPipeline(vk::raii::ShaderModule &shaderModule)
     {
-        _shaderManager = shaderManager;
-    }
-
-    void Pipeline::createGraphicsPipeline(const std::vector<char> &shaderCode)
-    {
-        vk::raii::ShaderModule shaderModule = _shaderManager->createShaderModule(shaderCode);
+        vk::PipelineShaderStageCreateInfo vertShaderStageInfo{ .stage = vk::ShaderStageFlagBits::eVertex, .module = shaderModule,  .pName = "vertMain" };
+        vk::PipelineShaderStageCreateInfo fragShaderStageInfo{ .stage = vk::ShaderStageFlagBits::eFragment, .module = shaderModule, .pName = "fragMain" };
+        vk::PipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
     }
 }

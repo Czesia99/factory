@@ -39,10 +39,9 @@ namespace sigel
         printf("image views created\n");
 
         shaderManager.init(&logicalDevice);
+        printf("shader manager initialisation\n");
         auto shaderCode = readFile("../sigel/shaders/slang.spv");
         printf("readfile on shader\n");
-
-        pipeline.init(&shaderManager);
 
 
 

@@ -9,11 +9,9 @@ namespace sigel
     {
         public:
             Pipeline() = default;
-            void init(ShaderManager *shaderManager);
         private:
-            ShaderManager *_shaderManager;
         public:
             // void createGraphicsPipeline();
-            void createGraphicsPipeline(const std::vector<char> &shaderCode);
+            void createGraphicsPipeline(vk::raii::ShaderModule &shaderModule);
     };
 }
