@@ -47,8 +47,9 @@ namespace sigel
             throw std::runtime_error( "Could not find a queue for graphics or present -> terminating" );
         }
 
-		vk::StructureChain<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceVulkan13Features, vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT> featureChain = {
-		    {},                                   // vk::PhysicalDeviceFeatures2
+		vk::StructureChain<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceVulkan11Features, vk::PhysicalDeviceVulkan13Features, vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT> featureChain = {
+		    {},
+            {.shaderDrawParameters = vk::True},
 		    {.dynamicRendering = true},           // vk::PhysicalDeviceVulkan13Features
 		    {.extendedDynamicState = true}        // vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT
 		};
