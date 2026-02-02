@@ -42,6 +42,11 @@ namespace sigel
         printf("shader manager initialisation\n");
         auto shaderCode = readFile("../sigel/shaders/slang.spv");
         printf("readfile on shader\n");
+        auto shaderModule = shaderManager.createShaderModule(shaderCode);
+
+        pipeline.init(&swapchain, &logicalDevice);
+        pipeline.createGraphicsPipeline(shaderModule);
+        printf("graphics pipeline created\n");
 
 
 
