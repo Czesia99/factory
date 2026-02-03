@@ -1,4 +1,5 @@
 #include "PhysicalDevice.hpp"
+#include "Utils.hpp"
 
 namespace sigel
 {
@@ -47,8 +48,10 @@ namespace sigel
     void PhysicalDevice::printDeviceInfo()
     {
         vk::PhysicalDeviceProperties props = physicalDevice.getProperties();
-        printf("Selected GPU: %s\n", props.deviceName.data());
-        printf("Type: %s\n", vk::to_string(props.deviceType).c_str());
+        std::string gpuName = "Selected GPU: " + std::string(props.deviceName.data());
+        std::string gpuType = "Type: " + vk::to_string(props.deviceType);
+        status("GPU", gpuName);
+        status("GPU", gpuType);
         printf("Vulkan API Version: %d.%d.%d\n", 
             VK_API_VERSION_MAJOR(props.apiVersion),
             VK_API_VERSION_MINOR(props.apiVersion),

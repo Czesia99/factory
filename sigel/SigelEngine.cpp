@@ -23,31 +23,38 @@ namespace sigel
     void SigelEngine::initVulkan()
     {
         instance.init();
-        printf("instance created\n");
+        status("CORE", "Vulkan Instance initialized");
+
         surface.createSurface(instance.getInstance(), window);
-        printf("surface created\n");
+        status("SURFACE", "GLFW Window Surface created");
+
         physicalDevice.pickPhysicalDevice(instance.getInstance());
-        printf("physical device selected\n");
+        status("GPU", "Hardware selection complete");
+
         physicalDevice.printDeviceInfo();
         logicalDevice.createLogicalDevice(physicalDevice.getDevice(), surface.getSurface());
-        printf("logical device created\n");
+        status("DEVICE", "Logical Device and Queues ready");
+
         swapchain.init(&physicalDevice, &logicalDevice, &surface, window);
-        printf("swapchain initialisation\n");
         swapchain.createSwapChain();
-        printf("swapchain created\n");
         swapchain.createImageViews();
-        printf("image views created\n");
+        status("SWAPCHAIN", "Swapchain images allocated");
 
         shaderManager.init(&logicalDevice);
-        printf("shader manager initialisation\n");
+        status("SHADER MANAGER", "Initialized");
+
         auto shaderCode = readFile("../sigel/shaders/slang.spv");
-        printf("readfile on shader\n");
         auto shaderModule = shaderManager.createShaderModule(shaderCode);
+        status("SHADER MANAGER", "Slang SPIR-V binary loaded");
 
         pipeline.init(&swapchain, &logicalDevice);
         pipeline.createGraphicsPipeline(shaderModule);
-        printf("graphics pipeline created\n");
+        status("PIPELINE", "Graphics Pipeline created");
 
+        renderer.createCommandPool(logicalDevice);
+        status("RENDERER", "Command Pool allocated");
+        renderer.createCommandBuffer(logicalDevice);
+        status("RENDERER", "Command Buffer allocated");
 
 
     }

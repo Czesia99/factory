@@ -8,6 +8,7 @@
 #include "Swapchain.hpp"
 #include "Pipeline.hpp"
 #include "ShaderManager.hpp"
+#include "Renderer.hpp"
 #include "Utils.hpp"
 
 namespace sigel
@@ -25,6 +26,7 @@ namespace sigel
             Swapchain swapchain;
             ShaderManager shaderManager;
             Pipeline pipeline;
+            Renderer renderer;
         public:
             SigelEngine() = default;
             void run();

@@ -1,8 +1,11 @@
 #include "Swapchain.hpp"
+
 #include <vector>
 #include <cstdint>
 #include <limits>
 #include <algorithm>
+
+#include "Utils.hpp"
 
 namespace sigel
 {
@@ -52,12 +55,12 @@ namespace sigel
             swapChainCreateInfo.imageSharingMode = vk::SharingMode::eConcurrent;
             swapChainCreateInfo.queueFamilyIndexCount = 2;
             swapChainCreateInfo.pQueueFamilyIndices = queueFamilyIndices;
-            printf("swapchain concurrent mode\n");
+            status("SWAPCHAIN", "queue family concurrent mode");
         } else {
             swapChainCreateInfo.imageSharingMode = vk::SharingMode::eExclusive;
             swapChainCreateInfo.queueFamilyIndexCount = 0; // Optional
             swapChainCreateInfo.pQueueFamilyIndices = nullptr; // Optional
-            printf("swapchain exclusif mode\n");
+            status("SWAPCHAIN", "queue family exclusif mode");
         }
 
         swapChain = vk::raii::SwapchainKHR( _lDevice->getDevice(), swapChainCreateInfo );

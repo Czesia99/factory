@@ -39,6 +39,7 @@ set(SRC
     sigel/Swapchain.cpp
     sigel/Pipeline.cpp
     sigel/ShaderManager.cpp
+    sigel/Renderer.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SRC})

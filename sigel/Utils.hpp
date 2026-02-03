@@ -5,6 +5,11 @@
 
 namespace sigel
 {
+    inline void status(const std::string &module, const std::string &msg) 
+    {
+        printf("[ %-8s ] > %s\n", module.c_str(), msg.c_str());
+    }
+
     static std::vector<char> readFile(const std::string& filename) 
     {
         std::ifstream file(filename, std::ios::ate | std::ios::binary);
