@@ -35,9 +35,9 @@ namespace sigel
             .lineWidth = 1.0f 
         };
 
-        vk::PipelineMultisampleStateCreateInfo multisampling{.rasterizationSamples = vk::SampleCountFlagBits::e1, .sampleShadingEnable = vk::False};
+        vk::PipelineMultisampleStateCreateInfo multisampling {.rasterizationSamples = vk::SampleCountFlagBits::e1, .sampleShadingEnable = vk::False};
 
-        vk::PipelineColorBlendAttachmentState colorBlendAttachment{
+        vk::PipelineColorBlendAttachmentState colorBlendAttachment {
             .blendEnable    = vk::False,
             .colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA
         };
@@ -59,9 +59,20 @@ namespace sigel
         };
 
         vk::PipelineDynamicStateCreateInfo dynamicState{.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size()), .pDynamicStates = dynamicStates.data()};
-        
+
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo{  .setLayoutCount = 0, .pushConstantRangeCount = 0 };
 
         pipelineLayout = vk::raii::PipelineLayout( _lDevice->getDevice(), pipelineLayoutInfo );
+
+        vk::PipelineRenderingCreateInfo pipelineRenderingCreateInfo{ .colorAttachmentCount = 1, .pColorAttachmentFormats = &(_swapchain->swapChainSurfaceFormat.format) };
+
+        vk::GraphicsPipelineCreateInfo pipelineInfo { 
+            .pNext = &pipelineRenderingCreateInfo,
+            .stageCount = 2, .pStages = shaderStages,
+            .pVertexInputState = &vertexInputInfo, .pInputAssemblyState = &inputAssembly,
+            .pViewportState = &viewportState, .pRasterizationState = &rasterizer,
+            .pMultisampleState = &multisampling, .pColorBlendState = &colorBlending,
+            .pDynamicState = &dynamicState, .layout = pipelineLayout, .renderPass = nullptr 
+        };
     }
 }
