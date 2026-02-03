@@ -11,6 +11,7 @@ namespace sigel
     class Pipeline
     {
         public:
+            vk::raii::Pipeline graphicsPipeline = nullptr;
             vk::raii::PipelineLayout pipelineLayout = nullptr;
         private:
             Swapchain *_swapchain;

@@ -74,5 +74,10 @@ namespace sigel
             .pMultisampleState = &multisampling, .pColorBlendState = &colorBlending,
             .pDynamicState = &dynamicState, .layout = pipelineLayout, .renderPass = nullptr 
         };
+
+        pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
+        pipelineInfo.basePipelineIndex = -1; // Optional
+
+        graphicsPipeline = vk::raii::Pipeline(_lDevice->getDevice(), nullptr, pipelineInfo);
     }
 }
