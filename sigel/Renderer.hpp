@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LogicalDevice.hpp"
+#include "Swapchain.hpp"
 
 namespace sigel
 {
@@ -10,12 +11,19 @@ namespace sigel
             vk::raii::CommandPool commandPool = nullptr;
             vk::raii::CommandBuffer commandBuffer = nullptr;
         private:
+            LogicalDevice *_lDevice;
+            Swapchain *_swapchain;
 
         public:
             Renderer() = default;
-            void createCommandPool(LogicalDevice &lDevice);
-            void createCommandBuffer(LogicalDevice &lDevice);
-            // void recordCommandBuffer(uint32_t imageIndex);
+            void init(LogicalDevice *lDevice, Swapchain *swapchain);
+            void createCommandPool();
+            void createCommandBuffer();
+            void recordCommandBuffer(uint32_t imageIndex);
+            void transition_image_layout(uint32_t imageIndex, vk::ImageLayout oldLayout,
+                vk::ImageLayout newLayout, vk::AccessFlags2 srcAccessMask,
+                vk::AccessFlags2 dstAccessMask, vk::PipelineStageFlags2 srcStageMask,
+                vk::PipelineStageFlags2 dstStageMask);
         private:
     };
 }
