@@ -51,7 +51,7 @@ namespace sigel
         pipeline.createGraphicsPipeline(shaderModule);
         status("PIPELINE", "Graphics Pipeline created");
 
-        renderer.init(&logicalDevice, &swapchain);
+        renderer.init(&logicalDevice, &swapchain, &pipeline);
         status("RENDERER", "Initialization..");
         renderer.createCommandPool();
         status("RENDERER", "Command Pool allocated");

@@ -2,10 +2,11 @@
 
 namespace sigel
 {
-    void Renderer::init(LogicalDevice *lDevice, Swapchain *swapchain)
+    void Renderer::init(LogicalDevice *lDevice, Swapchain *swapchain, Pipeline *pipeline)
     {
         _lDevice = lDevice;
         _swapchain = swapchain;
+        _pipeline = pipeline;
     }
 
     void Renderer::createCommandPool()
@@ -41,6 +42,33 @@ namespace sigel
             .storeOp = vk::AttachmentStoreOp::eStore,
             .clearValue = clearColor
         };
+
+        vk::RenderingInfo renderingInfo = {
+            .renderArea = { .offset = { 0, 0 }, .extent = _swapchain->swapChainExtent },
+            .layerCount = 1,
+            .colorAttachmentCount = 1,
+            .pColorAttachments = &attachmentInfo
+        };
+
+        commandBuffer.beginRendering(renderingInfo);
+        commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipeline->graphicsPipeline);
+        commandBuffer.setViewport(0, vk::Viewport(0.0f, 0.0f, static_cast<float>(_swapchain->swapChainExtent.width), static_cast<float>(_swapchain->swapChainExtent.height), 0.0f, 1.0f));
+        commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _swapchain->swapChainExtent));
+
+        commandBuffer.draw(3, 1, 0, 0);
+        commandBuffer.endRendering();
+
+        transition_image_layout(
+            imageIndex,
+            vk::ImageLayout::eColorAttachmentOptimal,
+            vk::ImageLayout::ePresentSrcKHR,
+            vk::AccessFlagBits2::eColorAttachmentWrite,             // srcAccessMask
+            {},                                                     // dstAccessMask
+            vk::PipelineStageFlagBits2::eColorAttachmentOutput,     // srcStage
+            vk::PipelineStageFlagBits2::eBottomOfPipe               // dstStage
+        );
+
+        commandBuffer.end();
     }
 
     void Renderer::transition_image_layout(

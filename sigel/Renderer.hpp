@@ -2,6 +2,7 @@
 
 #include "LogicalDevice.hpp"
 #include "Swapchain.hpp"
+#include "Pipeline.hpp"
 
 namespace sigel
 {
@@ -13,10 +14,11 @@ namespace sigel
         private:
             LogicalDevice *_lDevice;
             Swapchain *_swapchain;
+            Pipeline *_pipeline;
 
         public:
             Renderer() = default;
-            void init(LogicalDevice *lDevice, Swapchain *swapchain);
+            void init(LogicalDevice *lDevice, Swapchain *swapchain, Pipeline *pipeline);
             void createCommandPool();
             void createCommandBuffer();
             void recordCommandBuffer(uint32_t imageIndex);
