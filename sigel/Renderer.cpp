@@ -9,6 +9,53 @@ namespace sigel
         _pipeline = pipeline;
     }
 
+    void Renderer::drawFrame()
+    {
+        auto fenceResult = _lDevice->getDevice().waitForFences(*drawFence, vk::True, UINT64_MAX);
+        auto [result, imageIndex] = _swapchain->swapChain.acquireNextImage(UINT64_MAX, *presentCompleteSemaphore, nullptr);
+
+        recordCommandBuffer(imageIndex);
+        _lDevice->getDevice().resetFences(*drawFence);
+
+        vk::PipelineStageFlags waitDestinationStageMask( vk::PipelineStageFlagBits::eColorAttachmentOutput );
+        const vk::SubmitInfo submitInfo{
+            .waitSemaphoreCount = 1,
+            .pWaitSemaphores = &*presentCompleteSemaphore,
+            .pWaitDstStageMask = &waitDestinationStageMask,
+            .commandBufferCount = 1,
+            .pCommandBuffers = &*commandBuffer,
+            .signalSemaphoreCount = 1,
+            .pSignalSemaphores = &*renderFinishedSemaphore};
+        
+        _lDevice->graphicsQueue.submit(submitInfo, *drawFence);
+        vk::SubpassDependency dependency(VK_SUBPASS_EXTERNAL, {},
+        vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::PipelineStageFlagBits::eColorAttachmentOutput,
+        {}, vk::AccessFlagBits::eColorAttachmentWrite);
+
+        // renderPassInfo.dependencyCount = 1;
+        // renderPassInfo.pDependencies = &dependency;
+
+        const vk::PresentInfoKHR presentInfoKHR{
+            .waitSemaphoreCount = 1,
+            .pWaitSemaphores = &*renderFinishedSemaphore,
+            .swapchainCount = 1,
+            .pSwapchains = &*_swapchain->swapChain,
+            .pImageIndices = &imageIndex,
+            .pResults = nullptr
+        };
+
+        result = _lDevice->presentQueue.presentKHR(presentInfoKHR);
+
+            
+    }
+
+    void Renderer::createSyncObjects()
+    {
+        presentCompleteSemaphore = vk::raii::Semaphore(_lDevice->getDevice(), vk::SemaphoreCreateInfo());
+        renderFinishedSemaphore = vk::raii::Semaphore(_lDevice->getDevice(), vk::SemaphoreCreateInfo());
+        drawFence = vk::raii::Fence(_lDevice->getDevice(), {.flags = vk::FenceCreateFlagBits::eSignaled});
+    }
+
     void Renderer::createCommandPool()
     {
         vk::CommandPoolCreateInfo poolInfo{.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer, .queueFamilyIndex = _lDevice->graphicsIndex};

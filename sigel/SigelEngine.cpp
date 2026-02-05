@@ -57,6 +57,8 @@ namespace sigel
         status("RENDERER", "Command Pool allocated");
         renderer.createCommandBuffer();
         status("RENDERER", "Command Buffer allocated");
+        renderer.createSyncObjects();
+        status("RENDERER", "Sync Objects created");
 
 
     }
@@ -65,7 +67,10 @@ namespace sigel
     {
         while (!glfwWindowShouldClose(window)) {
             glfwPollEvents();
+            renderer.drawFrame();
         }
+
+        logicalDevice.getDevice().waitIdle();
     }
 
     void SigelEngine::cleanup()
