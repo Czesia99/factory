@@ -67,6 +67,22 @@ namespace sigel
         swapChainImages = swapChain.getImages();
     }
 
+    void Swapchain::recreateSwapChain()
+    {
+        int width = 0, height = 0;
+        glfwGetFramebufferSize(_window, &width, &height);
+        while (width == 0 || height == 0) {
+            glfwGetFramebufferSize(_window, &width, &height);
+            glfwWaitEvents();
+        }
+        _lDevice->getDevice().waitIdle();
+        
+        cleanupSwapChain();
+
+        createSwapChain();
+        createImageViews();
+    }
+
     void Swapchain::createImageViews()
     {
         swapChainImageViews.clear();
@@ -76,6 +92,12 @@ namespace sigel
 			imageViewCreateInfo.image = image;
 			swapChainImageViews.emplace_back(_lDevice->getDevice(), imageViewCreateInfo);
 		}
+    }
+
+    void Swapchain::cleanupSwapChain()
+    {
+        swapChainImageViews.clear();
+        swapChain = nullptr;
     }
 
     vk::SurfaceFormatKHR Swapchain::chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats)

@@ -28,7 +28,9 @@ namespace sigel
             Swapchain() = default;
             void init(PhysicalDevice *pDevice, LogicalDevice *lDevice, WindowSurface *surface, GLFWwindow *window);
             void createSwapChain();
+            void recreateSwapChain();
             void createImageViews();
+            void cleanupSwapChain();
         private:
             vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats);
             vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes);

@@ -19,6 +19,7 @@ namespace sigel
             std::vector<vk::raii::Semaphore> renderFinishedSemaphores;
 
             uint32_t frameIndex = 0;
+            bool framebufferResized = false;
 
 
         private:

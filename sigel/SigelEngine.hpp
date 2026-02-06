@@ -35,5 +35,7 @@ namespace sigel
             void initVulkan();
             void mainLoop();
             void cleanup();
+
+            static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
     };
 }

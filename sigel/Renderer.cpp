@@ -17,10 +17,21 @@ namespace sigel
 		{
 			throw std::runtime_error("failed to wait for fence!");
 		}
-		_lDevice->getDevice().resetFences(*inFlightFences[frameIndex]);
         
 		auto [result, imageIndex] = _swapchain->swapChain.acquireNextImage(UINT64_MAX, *presentCompleteSemaphores[frameIndex], nullptr);
+
+        if (result == vk::Result::eErrorOutOfDateKHR)
+        {
+            _swapchain->recreateSwapChain();
+            return;
+        }
+        if (result != vk::Result::eSuccess && result != vk::Result::eSuboptimalKHR)
+        {
+            assert(result == vk::Result::eTimeout || result == vk::Result::eNotReady);
+            throw std::runtime_error("failed to acquire swap chain image!");
+        }
         
+        _lDevice->getDevice().resetFences(*inFlightFences[frameIndex]);
         auto &cmd = commandBuffers[frameIndex];
         // commandBuffers[frameIndex].reset();
         cmd.reset();
@@ -52,16 +63,19 @@ namespace sigel
 		                                        .pImageIndices      = &imageIndex};
         
         result = _lDevice->presentQueue.presentKHR(presentInfoKHR);
-		switch (result)
-		{
-			case vk::Result::eSuccess:
-				break;
-			case vk::Result::eSuboptimalKHR:
-				std::cout << "vk::Queue::presentKHR returned vk::Result::eSuboptimalKHR !\n";
-				break;
-			default:
-				break;        // an unexpected result is returned!
-		}
+
+        if ((result == vk::Result::eSuboptimalKHR) || (result == vk::Result::eErrorOutOfDateKHR))
+        {
+            framebufferResized = false;
+            _swapchain->recreateSwapChain();
+        }
+        else
+        {
+            // There are no other success codes than eSuccess; on any error code, presentKHR already threw an exception.
+            assert(result == vk::Result::eSuccess);
+        }
+
+
         frameIndex = (frameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 

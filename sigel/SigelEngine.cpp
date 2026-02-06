@@ -15,9 +15,11 @@ namespace sigel
         glfwInit();
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
         window = glfwCreateWindow(WIDTH, HEIGHT, "FACTORY", nullptr, nullptr);
+
+        glfwSetWindowUserPointer(window, this);
+        glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
     }
 
     void SigelEngine::initVulkan()
@@ -75,8 +77,15 @@ namespace sigel
 
     void SigelEngine::cleanup()
     {
-        glfwDestroyWindow(window);
+        swapchain.cleanupSwapChain();
 
+        glfwDestroyWindow(window);
         glfwTerminate();
+    }
+
+    void SigelEngine::framebufferResizeCallback(GLFWwindow* window, int width, int height) 
+    {
+        auto app = reinterpret_cast<SigelEngine*>(glfwGetWindowUserPointer(window));
+        app->renderer.framebufferResized = true;
     }
 }
