@@ -11,16 +11,12 @@ namespace sigel
     {
         public:
             vk::raii::CommandPool commandPool = nullptr;
-            vk::raii::CommandBuffer commandBuffer = nullptr;
-
             std::vector<vk::raii::CommandBuffer> commandBuffers;
 
             std::vector<vk::raii::Fence> inFlightFences;
 
             std::vector<vk::raii::Semaphore> presentCompleteSemaphores;
             std::vector<vk::raii::Semaphore> renderFinishedSemaphores;
-
-            vk::raii::Fence drawFence = nullptr;
 
             uint32_t frameIndex = 0;
 

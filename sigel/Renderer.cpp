@@ -21,7 +21,10 @@ namespace sigel
         
 		auto [result, imageIndex] = _swapchain->swapChain.acquireNextImage(UINT64_MAX, *presentCompleteSemaphores[frameIndex], nullptr);
         
-        commandBuffers[frameIndex].reset();
+        auto &cmd = commandBuffers[frameIndex];
+        // commandBuffers[frameIndex].reset();
+        cmd.reset();
+
         recordCommandBuffer(imageIndex);
 
         vk::PipelineStageFlags waitDestinationStageMask( vk::PipelineStageFlagBits::eColorAttachmentOutput );
@@ -181,6 +184,6 @@ namespace sigel
             .pImageMemoryBarriers = &barrier
         };
 
-        commandBuffer.pipelineBarrier2(dependencyInfo);
+        commandBuffers[frameIndex].pipelineBarrier2(dependencyInfo);
     }
 }

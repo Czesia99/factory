@@ -50,7 +50,7 @@ namespace sigel
 		vk::StructureChain<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceVulkan11Features, vk::PhysicalDeviceVulkan13Features, vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT> featureChain = {
 		    {},
             {.shaderDrawParameters = vk::True},
-		    {.dynamicRendering = true},           // vk::PhysicalDeviceVulkan13Features
+		    {.synchronization2 = true, .dynamicRendering = true},           // vk::PhysicalDeviceVulkan13Features
 		    {.extendedDynamicState = true}        // vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT
 		};
 
