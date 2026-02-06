@@ -55,7 +55,7 @@ namespace sigel
         status("RENDERER", "Initialization..");
         renderer.createCommandPool();
         status("RENDERER", "Command Pool allocated");
-        renderer.createCommandBuffer();
+        renderer.createCommandBuffers();
         status("RENDERER", "Command Buffer allocated");
         renderer.createSyncObjects();
         status("RENDERER", "Sync Objects created");

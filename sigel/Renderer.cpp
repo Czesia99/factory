@@ -1,4 +1,5 @@
 #include "Renderer.hpp"
+#include <iostream>
 
 namespace sigel
 {
@@ -11,49 +12,70 @@ namespace sigel
 
     void Renderer::drawFrame()
     {
-        auto fenceResult = _lDevice->getDevice().waitForFences(*drawFence, vk::True, UINT64_MAX);
-        auto [result, imageIndex] = _swapchain->swapChain.acquireNextImage(UINT64_MAX, *presentCompleteSemaphore, nullptr);
-
+		auto fenceResult = _lDevice->getDevice().waitForFences(*inFlightFences[frameIndex], vk::True, UINT64_MAX);        
+		if (fenceResult != vk::Result::eSuccess)
+		{
+			throw std::runtime_error("failed to wait for fence!");
+		}
+		_lDevice->getDevice().resetFences(*inFlightFences[frameIndex]);
+        
+		auto [result, imageIndex] = _swapchain->swapChain.acquireNextImage(UINT64_MAX, *presentCompleteSemaphores[frameIndex], nullptr);
+        
+        commandBuffers[frameIndex].reset();
         recordCommandBuffer(imageIndex);
-        _lDevice->getDevice().resetFences(*drawFence);
 
         vk::PipelineStageFlags waitDestinationStageMask( vk::PipelineStageFlagBits::eColorAttachmentOutput );
-        const vk::SubmitInfo submitInfo{
-            .waitSemaphoreCount = 1,
-            .pWaitSemaphores = &*presentCompleteSemaphore,
-            .pWaitDstStageMask = &waitDestinationStageMask,
-            .commandBufferCount = 1,
-            .pCommandBuffers = &*commandBuffer,
-            .signalSemaphoreCount = 1,
-            .pSignalSemaphores = &*renderFinishedSemaphore};
+		const vk::SubmitInfo submitInfo{.waitSemaphoreCount   = 1,
+                                        .pWaitSemaphores      = &*presentCompleteSemaphores[frameIndex],
+                                        .pWaitDstStageMask    = &waitDestinationStageMask,
+                                        .commandBufferCount   = 1,
+                                        .pCommandBuffers      = &*commandBuffers[frameIndex],
+                                        .signalSemaphoreCount = 1,
+                                        .pSignalSemaphores    = &*renderFinishedSemaphores[imageIndex]};
         
-        _lDevice->graphicsQueue.submit(submitInfo, *drawFence);
-        vk::SubpassDependency dependency(VK_SUBPASS_EXTERNAL, {},
-        vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::PipelineStageFlagBits::eColorAttachmentOutput,
-        {}, vk::AccessFlagBits::eColorAttachmentWrite);
+        _lDevice->graphicsQueue.submit(submitInfo, *inFlightFences[frameIndex]);
 
+        // vk::SubpassDependency dependency(VK_SUBPASS_EXTERNAL, {},
+        // vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::PipelineStageFlagBits::eColorAttachmentOutput,
+        // {}, vk::AccessFlagBits::eColorAttachmentWrite);
+        
         // renderPassInfo.dependencyCount = 1;
         // renderPassInfo.pDependencies = &dependency;
-
-        const vk::PresentInfoKHR presentInfoKHR{
-            .waitSemaphoreCount = 1,
-            .pWaitSemaphores = &*renderFinishedSemaphore,
-            .swapchainCount = 1,
-            .pSwapchains = &*_swapchain->swapChain,
-            .pImageIndices = &imageIndex,
-            .pResults = nullptr
-        };
-
+        
+		const vk::PresentInfoKHR presentInfoKHR{.waitSemaphoreCount = 1,
+		                                        .pWaitSemaphores    = &*renderFinishedSemaphores[imageIndex],
+		                                        .swapchainCount     = 1,
+		                                        .pSwapchains        = &*_swapchain->swapChain,
+		                                        .pImageIndices      = &imageIndex};
+        
         result = _lDevice->presentQueue.presentKHR(presentInfoKHR);
-
-            
+		switch (result)
+		{
+			case vk::Result::eSuccess:
+				break;
+			case vk::Result::eSuboptimalKHR:
+				std::cout << "vk::Queue::presentKHR returned vk::Result::eSuboptimalKHR !\n";
+				break;
+			default:
+				break;        // an unexpected result is returned!
+		}
+        frameIndex = (frameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 
     void Renderer::createSyncObjects()
     {
-        presentCompleteSemaphore = vk::raii::Semaphore(_lDevice->getDevice(), vk::SemaphoreCreateInfo());
-        renderFinishedSemaphore = vk::raii::Semaphore(_lDevice->getDevice(), vk::SemaphoreCreateInfo());
-        drawFence = vk::raii::Fence(_lDevice->getDevice(), {.flags = vk::FenceCreateFlagBits::eSignaled});
+        assert(presentCompleteSemaphores.empty() && renderFinishedSemaphores.empty() && inFlightFences.empty());
+
+		for (size_t i = 0; i < _swapchain->swapChainImages.size(); i++)
+		{
+			renderFinishedSemaphores.emplace_back(_lDevice->getDevice(), vk::SemaphoreCreateInfo());
+		}
+
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			presentCompleteSemaphores.emplace_back(_lDevice->getDevice(), vk::SemaphoreCreateInfo());
+			inFlightFences.emplace_back(_lDevice->getDevice(), vk::FenceCreateInfo{.flags = vk::FenceCreateFlagBits::eSignaled});
+		}
     }
 
     void Renderer::createCommandPool()
@@ -62,14 +84,22 @@ namespace sigel
         commandPool = vk::raii::CommandPool(_lDevice->getDevice(), poolInfo);
     }
 
-    void Renderer::createCommandBuffer()
+    // void Renderer::createCommandBuffer()
+    // {
+    //     vk::CommandBufferAllocateInfo allocInfo{ .commandPool = commandPool, .level = vk::CommandBufferLevel::ePrimary, .commandBufferCount = 1 };
+    //     commandBuffer = std::move(vk::raii::CommandBuffers(_lDevice->getDevice(), allocInfo).front());
+    // }
+
+    void Renderer::createCommandBuffers()
     {
-        vk::CommandBufferAllocateInfo allocInfo{ .commandPool = commandPool, .level = vk::CommandBufferLevel::ePrimary, .commandBufferCount = 1 };
-        commandBuffer = std::move(vk::raii::CommandBuffers(_lDevice->getDevice(), allocInfo).front());
+        commandBuffers.clear();
+        vk::CommandBufferAllocateInfo allocInfo{.commandPool = commandPool, .level = vk::CommandBufferLevel::ePrimary, .commandBufferCount = MAX_FRAMES_IN_FLIGHT};
+        commandBuffers = vk::raii::CommandBuffers(_lDevice->getDevice(), allocInfo);
     }
 
     void Renderer::recordCommandBuffer(uint32_t imageIndex)
     {
+        auto &commandBuffer = commandBuffers[frameIndex];
         commandBuffer.begin({});
         transition_image_layout(
             imageIndex,

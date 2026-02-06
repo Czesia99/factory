@@ -6,15 +6,24 @@
 
 namespace sigel
 {
+    constexpr int MAX_FRAMES_IN_FLIGHT = 2;
     class Renderer
     {
         public:
             vk::raii::CommandPool commandPool = nullptr;
             vk::raii::CommandBuffer commandBuffer = nullptr;
 
-            vk::raii::Semaphore presentCompleteSemaphore = nullptr;
-            vk::raii::Semaphore renderFinishedSemaphore = nullptr;
+            std::vector<vk::raii::CommandBuffer> commandBuffers;
+
+            std::vector<vk::raii::Fence> inFlightFences;
+
+            std::vector<vk::raii::Semaphore> presentCompleteSemaphores;
+            std::vector<vk::raii::Semaphore> renderFinishedSemaphores;
+
             vk::raii::Fence drawFence = nullptr;
+
+            uint32_t frameIndex = 0;
+
 
         private:
             LogicalDevice *_lDevice;
@@ -26,7 +35,8 @@ namespace sigel
             void init(LogicalDevice *lDevice, Swapchain *swapchain, Pipeline *pipeline);
             void drawFrame();
             void createCommandPool();
-            void createCommandBuffer();
+            // void createCommandBuffer();
+            void createCommandBuffers();
             void recordCommandBuffer(uint32_t imageIndex);
             void createSyncObjects();
         private:
