@@ -23,7 +23,7 @@ namespace sigel
 
         vk::PipelineVertexInputStateCreateInfo vertexInputInfo{ .vertexBindingDescriptionCount   = 1,
                                                                 .pVertexBindingDescriptions      = &bindingDescription,
-                                                                .vertexAttributeDescriptionCount = static_cast<uint32_t>( attributeDescriptions.size() ),
+                                                                .vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size()),
                                                                 .pVertexAttributeDescriptions    = attributeDescriptions.data() };
         
         //
