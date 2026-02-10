@@ -1,6 +1,8 @@
 #include "Pipeline.hpp"
 #include "Utils.hpp"
 
+#include "Vertex.hpp"
+
 namespace sigel
 {
     void Pipeline::init(Swapchain *swapchain, LogicalDevice *lDevice)
@@ -15,7 +17,16 @@ namespace sigel
         vk::PipelineShaderStageCreateInfo fragShaderStageInfo{.stage = vk::ShaderStageFlagBits::eFragment, .module = shaderModule, .pName = "fragMain"};
         vk::PipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
 
-        vk::PipelineVertexInputStateCreateInfo vertexInputInfo;
+        //pipeline vertex input
+        auto bindingDescription = Vertex::getBindingDescription();
+        auto attributeDescriptions = Vertex::getAttributeDescriptions();
+
+        vk::PipelineVertexInputStateCreateInfo vertexInputInfo{ .vertexBindingDescriptionCount   = 1,
+                                                                .pVertexBindingDescriptions      = &bindingDescription,
+                                                                .vertexAttributeDescriptionCount = static_cast<uint32_t>( attributeDescriptions.size() ),
+                                                                .pVertexAttributeDescriptions    = attributeDescriptions.data() };
+        
+        //
         vk::PipelineInputAssemblyStateCreateInfo inputAssembly {.topology = vk::PrimitiveTopology::eTriangleList};
         
         vk::Viewport{ 0.0f, 0.0f, static_cast<float>(_swapchain->swapChainExtent.width), static_cast<float>(_swapchain->swapChainExtent.height), 0.0f, 1.0f };
