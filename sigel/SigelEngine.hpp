@@ -25,6 +25,7 @@ namespace sigel
             LogicalDevice logicalDevice;
             Swapchain swapchain;
             ShaderManager shaderManager;
+            VertexManager vertexManager;
             Pipeline pipeline;
             Renderer renderer;
         public:

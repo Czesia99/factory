@@ -14,6 +14,7 @@ namespace sigel
         vertexBuffer = vk::raii::Buffer(_lDevice->getDevice(), bufferInfo);
         vk::MemoryRequirements memRequirements = vertexBuffer.getMemoryRequirements();
         vk::MemoryAllocateInfo memoryAllocateInfo{.allocationSize = memRequirements.size, .memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent)};
+        vertexBufferMemory = vk::raii::DeviceMemory( _lDevice->getDevice(), memoryAllocateInfo );
         vertexBuffer.bindMemory(*vertexBufferMemory, 0);
         void* data = vertexBufferMemory.mapMemory(0, bufferInfo.size);
         memcpy(data, vertices.data(), bufferInfo.size);
@@ -30,8 +31,7 @@ namespace sigel
             {
                 return i;
             }
-
-            throw std::runtime_error("failed to find suitable memory type!");
         }
+        throw std::runtime_error("failed to find suitable memory type!");
     }
 }

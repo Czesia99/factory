@@ -23,13 +23,15 @@ namespace sigel
 
 
         private:
-            LogicalDevice *_lDevice;
-            Swapchain *_swapchain;
-            Pipeline *_pipeline;
+            LogicalDevice *_lDevice = nullptr;;
+            Swapchain *_swapchain = nullptr;;
+            Pipeline *_pipeline = nullptr;;
+            VertexManager *_vManager = nullptr;
+
 
         public:
             Renderer() = default;
-            void init(LogicalDevice *lDevice, Swapchain *swapchain, Pipeline *pipeline);
+            void init(LogicalDevice *lDevice, Swapchain *swapchain, Pipeline *pipeline, VertexManager *vManager);
             void drawFrame();
             void createCommandPool();
             // void createCommandBuffer();

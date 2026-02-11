@@ -49,11 +49,15 @@ namespace sigel
         auto shaderModule = shaderManager.createShaderModule(shaderCode);
         status("SHADER MANAGER", "Slang SPIR-V binary loaded");
 
+        vertexManager.init(&logicalDevice, &physicalDevice);
+        vertexManager.createVertexBuffer(triangle_vertices);
+        
         pipeline.init(&swapchain, &logicalDevice);
         pipeline.createGraphicsPipeline(shaderModule);
         status("PIPELINE", "Graphics Pipeline created");
+        
 
-        renderer.init(&logicalDevice, &swapchain, &pipeline);
+        renderer.init(&logicalDevice, &swapchain, &pipeline, &vertexManager);
         status("RENDERER", "Initialization..");
         renderer.createCommandPool();
         status("RENDERER", "Command Pool allocated");

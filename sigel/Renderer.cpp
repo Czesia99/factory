@@ -3,11 +3,12 @@
 
 namespace sigel
 {
-    void Renderer::init(LogicalDevice *lDevice, Swapchain *swapchain, Pipeline *pipeline)
+    void Renderer::init(LogicalDevice *lDevice, Swapchain *swapchain, Pipeline *pipeline, VertexManager *vManager)
     {
         _lDevice = lDevice;
         _swapchain = swapchain;
         _pipeline = pipeline;
+        _vManager = vManager;
     }
 
     void Renderer::drawFrame()
@@ -145,11 +146,14 @@ namespace sigel
         };
 
         commandBuffer.beginRendering(renderingInfo);
-        commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipeline->graphicsPipeline);
+        // commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipeline->graphicsPipeline);
+        commandBuffers[frameIndex].bindPipeline(vk::PipelineBindPoint::eGraphics, *_pipeline->graphicsPipeline);
+        commandBuffers[frameIndex].bindVertexBuffers(0, *_vManager->vertexBuffer, {0});
         commandBuffer.setViewport(0, vk::Viewport(0.0f, 0.0f, static_cast<float>(_swapchain->swapChainExtent.width), static_cast<float>(_swapchain->swapChainExtent.height), 0.0f, 1.0f));
         commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _swapchain->swapChainExtent));
 
-        commandBuffer.draw(3, 1, 0, 0);
+        // commandBuffer.draw(3, 1, 0, 0);
+        commandBuffers[frameIndex].draw(3, 1, 0, 0);
         commandBuffer.endRendering();
 
         transition_image_layout(

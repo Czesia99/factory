@@ -4,6 +4,7 @@
 #include "ShaderManager.hpp"
 #include "Swapchain.hpp"
 #include "LogicalDevice.hpp"
+#include "VertexManager.hpp"
 #include <vector>
 
 namespace sigel
@@ -14,8 +15,8 @@ namespace sigel
             vk::raii::Pipeline graphicsPipeline = nullptr;
             vk::raii::PipelineLayout pipelineLayout = nullptr;
         private:
-            Swapchain *_swapchain;
-            LogicalDevice *_lDevice;
+            Swapchain *_swapchain = nullptr;
+            LogicalDevice *_lDevice = nullptr;
         public:
             Pipeline() = default;
             // void createGraphicsPipeline();
