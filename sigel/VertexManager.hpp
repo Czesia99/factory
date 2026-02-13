@@ -21,8 +21,10 @@ namespace sigel
 
         public:
             void init(LogicalDevice *lDevice, PhysicalDevice *pDevice);
-            void createVertexBuffer(std::vector<Vertex> vertices);
+            void createVertexBuffer(std::vector<Vertex> vertices, vk::raii::CommandPool& pool);
+            void createBuffer(std::vector<Vertex> vertices, vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::raii::Buffer& buffer, vk::raii::DeviceMemory& bufferMemory);
         private:
             uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
+            void copyBuffer(vk::raii::CommandPool &pool, vk::raii::Buffer &srcBuffer, vk::raii::Buffer &dstBuffer, vk::DeviceSize size);
     };
 }

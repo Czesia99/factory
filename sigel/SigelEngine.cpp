@@ -50,13 +50,11 @@ namespace sigel
         status("SHADER MANAGER", "Slang SPIR-V binary loaded");
 
         vertexManager.init(&logicalDevice, &physicalDevice);
-        vertexManager.createVertexBuffer(triangle_vertices);
         
         pipeline.init(&swapchain, &logicalDevice);
         pipeline.createGraphicsPipeline(shaderModule);
         status("PIPELINE", "Graphics Pipeline created");
         
-
         renderer.init(&logicalDevice, &swapchain, &pipeline, &vertexManager);
         status("RENDERER", "Initialization..");
         renderer.createCommandPool();
@@ -65,6 +63,8 @@ namespace sigel
         status("RENDERER", "Command Buffer allocated");
         renderer.createSyncObjects();
         status("RENDERER", "Sync Objects created");
+
+        vertexManager.createVertexBuffer(triangle_vertices, renderer.commandPool);
 
 
     }
