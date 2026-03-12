@@ -15,7 +15,7 @@ namespace sigel
 
     const std::vector<char const*> validationLayers = {
         "VK_LAYER_KHRONOS_validation",
-        "VK_LAYER_KHRONOS_profiles",
+        // "VK_LAYER_KHRONOS_profiles",
         // "VK_LAYER_KHRONOS_timeline_semaphore",
         // "VK_LAYER_KHRONOS_shader_object",
         // "VK_LAYER_KHRONOS_synchronization2"
