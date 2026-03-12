@@ -22,6 +22,5 @@ namespace sigel
             uint32_t findQueueFamilies(vk::raii::PhysicalDevice physicalDevice);
         private:
             bool isDeviceSuitable(vk::raii::PhysicalDevice physicalDevice);
-
     };
 }

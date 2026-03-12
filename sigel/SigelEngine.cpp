@@ -65,8 +65,7 @@ namespace sigel
         status("RENDERER", "Sync Objects created");
 
         vertexManager.createVertexBuffer(triangle_vertices, renderer.commandPool);
-
-
+        vertexManager.createIndexBuffer(triangle_indices, renderer.commandPool);
     }
 
     void SigelEngine::mainLoop()

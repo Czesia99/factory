@@ -1,5 +1,6 @@
 #include "Renderer.hpp"
 #include <iostream>
+#include "Vertex.hpp"
 
 namespace sigel
 {
@@ -149,11 +150,14 @@ namespace sigel
         // commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipeline->graphicsPipeline);
         commandBuffers[frameIndex].bindPipeline(vk::PipelineBindPoint::eGraphics, *_pipeline->graphicsPipeline);
         commandBuffers[frameIndex].bindVertexBuffers(0, *_vManager->vertexBuffer, {0});
+        commandBuffers[frameIndex].bindIndexBuffer( *_vManager->indexBuffer, 0, vk::IndexType::eUint16 );
         commandBuffer.setViewport(0, vk::Viewport(0.0f, 0.0f, static_cast<float>(_swapchain->swapChainExtent.width), static_cast<float>(_swapchain->swapChainExtent.height), 0.0f, 1.0f));
         commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _swapchain->swapChainExtent));
 
         // commandBuffer.draw(3, 1, 0, 0);
-        commandBuffers[frameIndex].draw(3, 1, 0, 0);
+        // commandBuffers[frameIndex].draw(3, 1, 0, 0);
+        commandBuffers[frameIndex].drawIndexed(triangle_indices.size(), 1, 0, 0, 0);
+ 
         commandBuffer.endRendering();
 
         transition_image_layout(

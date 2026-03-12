@@ -84,17 +84,15 @@ namespace sigel
 		    {.extendedDynamicState = true}        // vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT
 		};
 
-        std::vector extensions = { vk::KHRSwapchainExtensionName };
-
         float queuePriority = 0.5f;
 		vk::DeviceQueueCreateInfo deviceQueueCreateInfo{.queueFamilyIndex = graphicsIndex, .queueCount = 1, .pQueuePriorities = &queuePriority};
 		vk::DeviceCreateInfo deviceCreateInfo { .pNext                   = &featureChain.get<vk::PhysicalDeviceFeatures2>(),
                                                 .queueCreateInfoCount    = 1,
                                                 .pQueueCreateInfos       = &deviceQueueCreateInfo,
-                                                .enabledExtensionCount   = static_cast<uint32_t>(extensions.size()),
-                                                .ppEnabledExtensionNames = extensions.data()};
+                                                .enabledExtensionCount   = static_cast<uint32_t>(deviceExtensions.size()),
+                                                .ppEnabledExtensionNames = deviceExtensions.data()};
 
-		logicalDevice = vk::raii::Device(physicalDevice, deviceCreateInfo);
+		logicalDevice = vk::raii::Device(physicalDevice, deviceCreateInfo); 
 		graphicsQueue = vk::raii::Queue(logicalDevice, graphicsIndex, 0);
         presentQueue = vk::raii::Queue(logicalDevice, presentIndex, 0);
     }

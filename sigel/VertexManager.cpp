@@ -1,5 +1,5 @@
 #include "VertexManager.hpp"
-
+#include <iostream>
 namespace sigel
 {
     void VertexManager::init(Device *device)
@@ -35,14 +35,33 @@ namespace sigel
         copyBuffer(pool, stagingBuffer, vertexBuffer, stagingInfo.size);
     }
 
-    void VertexManager::createBuffer(std::vector<Vertex> vertices, vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::raii::Buffer& buffer, vk::raii::DeviceMemory& bufferMemory)
+
+	void VertexManager::createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::raii::Buffer &buffer, vk::raii::DeviceMemory &bufferMemory)
+	{
+		vk::BufferCreateInfo bufferInfo{.size = size, .usage = usage, .sharingMode = vk::SharingMode::eExclusive};
+		buffer                                 = vk::raii::Buffer(_device->logicalDevice, bufferInfo);
+		vk::MemoryRequirements memRequirements = buffer.getMemoryRequirements();
+		vk::MemoryAllocateInfo allocInfo{.allocationSize = memRequirements.size, .memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties)};
+		bufferMemory = vk::raii::DeviceMemory(_device->logicalDevice, allocInfo);
+		buffer.bindMemory(bufferMemory, 0);
+	}
+
+    void VertexManager::createIndexBuffer(std::vector<uint16_t> indices, vk::raii::CommandPool &pool) 
     {
-        vk::BufferCreateInfo bufferInfo{ .size = sizeof(vertices[0]) * vertices.size(), .usage = vk::BufferUsageFlagBits::eVertexBuffer, .sharingMode = vk::SharingMode::eExclusive };
-        vertexBuffer = vk::raii::Buffer(_device->logicalDevice, bufferInfo);
-        vk::MemoryRequirements memRequirements = vertexBuffer.getMemoryRequirements();
-        vk::MemoryAllocateInfo memoryAllocateInfo{.allocationSize = memRequirements.size, .memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent)};
-        vertexBufferMemory = vk::raii::DeviceMemory( _device->logicalDevice, memoryAllocateInfo );
-        vertexBuffer.bindMemory(*vertexBufferMemory, 0);
+        vk::DeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+        vk::raii::Buffer stagingBuffer({});
+        vk::raii::DeviceMemory stagingBufferMemory({});
+        createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, stagingBuffer, stagingBufferMemory);
+        
+
+        void* data = stagingBufferMemory.mapMemory(0, bufferSize);
+        std::cout << "create index buffer" << std::endl;
+        memcpy(data, indices.data(), (size_t) bufferSize);
+        stagingBufferMemory.unmapMemory();
+
+        createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer, vk::MemoryPropertyFlagBits::eDeviceLocal, indexBuffer, indexBufferMemory);
+
+        copyBuffer(pool, stagingBuffer, indexBuffer, bufferSize);
     }
 
     uint32_t VertexManager::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)
