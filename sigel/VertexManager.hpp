@@ -4,8 +4,7 @@
 #include <glm/glm.hpp>
 
 #include "Vertex.hpp"
-#include "LogicalDevice.hpp"
-#include "PhysicalDevice.hpp"
+#include "Device.hpp"
 
 namespace sigel
 {
@@ -16,11 +15,10 @@ namespace sigel
             vk::raii::DeviceMemory vertexBufferMemory = nullptr;
 
         private:
-            LogicalDevice *_lDevice = nullptr;
-            PhysicalDevice *_pDevice = nullptr;
+            Device *_device = nullptr;
 
         public:
-            void init(LogicalDevice *lDevice, PhysicalDevice *pDevice);
+            void init(Device *device);
             void createVertexBuffer(std::vector<Vertex> vertices, vk::raii::CommandPool& pool);
             void createBuffer(std::vector<Vertex> vertices, vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::raii::Buffer& buffer, vk::raii::DeviceMemory& bufferMemory);
         private:

@@ -3,8 +3,7 @@
 #define NOMINMAX
 #include <vulkan/vulkan_raii.hpp>
 
-#include "PhysicalDevice.hpp"
-#include "LogicalDevice.hpp"
+#include "Device.hpp"
 #include "WindowSurface.hpp"
 
 namespace sigel
@@ -19,14 +18,13 @@ namespace sigel
             std::vector<vk::raii::ImageView> swapChainImageViews;
 
         private:
-            PhysicalDevice *_pDevice = nullptr;
-            LogicalDevice *_lDevice = nullptr;
+            Device *_device = nullptr;
             WindowSurface *_surface = nullptr;
             GLFWwindow *_window = nullptr;
 
         public:
             Swapchain() = default;
-            void init(PhysicalDevice *pDevice, LogicalDevice *lDevice, WindowSurface *surface, GLFWwindow *window);
+            void init(Device *device, WindowSurface *surface, GLFWwindow *window);
             void createSwapChain();
             void recreateSwapChain();
             void createImageViews();

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LogicalDevice.hpp"
+#include "Device.hpp"
 
 namespace sigel
 {
@@ -9,10 +9,10 @@ namespace sigel
 
         public:
         private:
-            LogicalDevice *_lDevice = nullptr;
+            Device *_device = nullptr;
         public:
             ShaderManager() = default;
-            void init(LogicalDevice *_lDevice);
+            void init(Device *device);
 
             [[nodiscard]] vk::raii::ShaderModule createShaderModule(const std::vector<char>& code) const;
 

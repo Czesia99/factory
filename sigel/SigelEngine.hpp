@@ -3,8 +3,7 @@
 #include <GLFW/glfw3.h>
 #include "Instance.hpp"
 #include "WindowSurface.hpp"
-#include "PhysicalDevice.hpp"
-#include "LogicalDevice.hpp"
+#include "Device.hpp"
 #include "Swapchain.hpp"
 #include "Pipeline.hpp"
 #include "ShaderManager.hpp"
@@ -21,8 +20,7 @@ namespace sigel
             GLFWwindow *window;
             Instance instance;
             WindowSurface surface;
-            PhysicalDevice physicalDevice;
-            LogicalDevice logicalDevice;
+            Device device;
             Swapchain swapchain;
             ShaderManager shaderManager;
             VertexManager vertexManager;

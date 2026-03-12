@@ -3,9 +3,9 @@
 
 namespace sigel
 {
-    void Renderer::init(LogicalDevice *lDevice, Swapchain *swapchain, Pipeline *pipeline, VertexManager *vManager)
+    void Renderer::init(Device *device, Swapchain *swapchain, Pipeline *pipeline, VertexManager *vManager)
     {
-        _lDevice = lDevice;
+        _device = device;
         _swapchain = swapchain;
         _pipeline = pipeline;
         _vManager = vManager;
@@ -13,7 +13,7 @@ namespace sigel
 
     void Renderer::drawFrame()
     {
-		auto fenceResult = _lDevice->getDevice().waitForFences(*inFlightFences[frameIndex], vk::True, UINT64_MAX);        
+		auto fenceResult = _device->logicalDevice.waitForFences(*inFlightFences[frameIndex], vk::True, UINT64_MAX);        
 		if (fenceResult != vk::Result::eSuccess)
 		{
 			throw std::runtime_error("failed to wait for fence!");
@@ -32,7 +32,7 @@ namespace sigel
             throw std::runtime_error("failed to acquire swap chain image!");
         }
         
-        _lDevice->getDevice().resetFences(*inFlightFences[frameIndex]);
+        _device->logicalDevice.resetFences(*inFlightFences[frameIndex]);
         auto &cmd = commandBuffers[frameIndex];
         // commandBuffers[frameIndex].reset();
         cmd.reset();
@@ -48,7 +48,7 @@ namespace sigel
                                         .signalSemaphoreCount = 1,
                                         .pSignalSemaphores    = &*renderFinishedSemaphores[imageIndex]};
         
-        _lDevice->graphicsQueue.submit(submitInfo, *inFlightFences[frameIndex]);
+        _device->graphicsQueue.submit(submitInfo, *inFlightFences[frameIndex]);
 
         // vk::SubpassDependency dependency(VK_SUBPASS_EXTERNAL, {},
         // vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::PipelineStageFlagBits::eColorAttachmentOutput,
@@ -63,7 +63,7 @@ namespace sigel
 		                                        .pSwapchains        = &*_swapchain->swapChain,
 		                                        .pImageIndices      = &imageIndex};
         
-        result = _lDevice->presentQueue.presentKHR(presentInfoKHR);
+        result = _device->presentQueue.presentKHR(presentInfoKHR);
 
         if ((result == vk::Result::eSuboptimalKHR) || (result == vk::Result::eErrorOutOfDateKHR))
         {
@@ -86,33 +86,33 @@ namespace sigel
 
 		for (size_t i = 0; i < _swapchain->swapChainImages.size(); i++)
 		{
-			renderFinishedSemaphores.emplace_back(_lDevice->getDevice(), vk::SemaphoreCreateInfo());
+			renderFinishedSemaphores.emplace_back(_device->logicalDevice, vk::SemaphoreCreateInfo());
 		}
 
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			presentCompleteSemaphores.emplace_back(_lDevice->getDevice(), vk::SemaphoreCreateInfo());
-			inFlightFences.emplace_back(_lDevice->getDevice(), vk::FenceCreateInfo{.flags = vk::FenceCreateFlagBits::eSignaled});
+			presentCompleteSemaphores.emplace_back(_device->logicalDevice, vk::SemaphoreCreateInfo());
+			inFlightFences.emplace_back(_device->logicalDevice, vk::FenceCreateInfo{.flags = vk::FenceCreateFlagBits::eSignaled});
 		}
     }
 
     void Renderer::createCommandPool()
     {
-        vk::CommandPoolCreateInfo poolInfo{.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer, .queueFamilyIndex = _lDevice->graphicsIndex};
-        commandPool = vk::raii::CommandPool(_lDevice->getDevice(), poolInfo);
+        vk::CommandPoolCreateInfo poolInfo{.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer, .queueFamilyIndex = _device->graphicsIndex};
+        commandPool = vk::raii::CommandPool(_device->logicalDevice, poolInfo);
     }
 
     // void Renderer::createCommandBuffer()
     // {
     //     vk::CommandBufferAllocateInfo allocInfo{ .commandPool = commandPool, .level = vk::CommandBufferLevel::ePrimary, .commandBufferCount = 1 };
-    //     commandBuffer = std::move(vk::raii::CommandBuffers(_lDevice->getDevice(), allocInfo).front());
+    //     commandBuffer = std::move(vk::raii::CommandBuffers(_device->logicalDevice, allocInfo).front());
     // }
 
     void Renderer::createCommandBuffers()
     {
         commandBuffers.clear();
         vk::CommandBufferAllocateInfo allocInfo{.commandPool = commandPool, .level = vk::CommandBufferLevel::ePrimary, .commandBufferCount = MAX_FRAMES_IN_FLIGHT};
-        commandBuffers = vk::raii::CommandBuffers(_lDevice->getDevice(), allocInfo);
+        commandBuffers = vk::raii::CommandBuffers(_device->logicalDevice, allocInfo);
     }
 
     void Renderer::recordCommandBuffer(uint32_t imageIndex)

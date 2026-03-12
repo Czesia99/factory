@@ -5,10 +5,10 @@
 
 namespace sigel
 {
-    void Pipeline::init(Swapchain *swapchain, LogicalDevice *lDevice)
+    void Pipeline::init(Swapchain *swapchain, Device *device)
     {
         _swapchain = swapchain;
-        _lDevice = lDevice;
+        _device = device;
     }
 
     void Pipeline::createGraphicsPipeline(vk::raii::ShaderModule &shaderModule)
@@ -73,7 +73,7 @@ namespace sigel
 
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo{  .setLayoutCount = 0, .pushConstantRangeCount = 0 };
 
-        pipelineLayout = vk::raii::PipelineLayout( _lDevice->getDevice(), pipelineLayoutInfo );
+        pipelineLayout = vk::raii::PipelineLayout(_device->logicalDevice, pipelineLayoutInfo );
 
         vk::PipelineRenderingCreateInfo pipelineRenderingCreateInfo{ .colorAttachmentCount = 1, .pColorAttachmentFormats = &(_swapchain->swapChainSurfaceFormat.format) };
 
@@ -89,6 +89,6 @@ namespace sigel
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
         pipelineInfo.basePipelineIndex = -1; // Optional
 
-        graphicsPipeline = vk::raii::Pipeline(_lDevice->getDevice(), nullptr, pipelineInfo);
+        graphicsPipeline = vk::raii::Pipeline(_device->logicalDevice, nullptr, pipelineInfo);
     }
 }

@@ -30,32 +30,32 @@ namespace sigel
         surface.createSurface(instance.getInstance(), window);
         status("SURFACE", "GLFW Window Surface created");
 
-        physicalDevice.pickPhysicalDevice(instance.getInstance());
+        device.pickPhysicalDevice(instance.getInstance());
         status("GPU", "Hardware selection complete");
 
-        physicalDevice.printDeviceInfo();
-        logicalDevice.createLogicalDevice(physicalDevice.getDevice(), surface.getSurface());
+        device.printDeviceInfo();
+        device.createLogicalDevice(surface.getSurface());
         status("DEVICE", "Logical Device and Queues ready");
 
-        swapchain.init(&physicalDevice, &logicalDevice, &surface, window);
+        swapchain.init(&device, &surface, window);
         swapchain.createSwapChain();
         swapchain.createImageViews();
         status("SWAPCHAIN", "Swapchain images allocated");
 
-        shaderManager.init(&logicalDevice);
+        shaderManager.init(&device);
         status("SHADER MANAGER", "Initialized");
 
         auto shaderCode = readFile("../sigel/shaders/slang.spv");
         auto shaderModule = shaderManager.createShaderModule(shaderCode);
         status("SHADER MANAGER", "Slang SPIR-V binary loaded");
 
-        vertexManager.init(&logicalDevice, &physicalDevice);
+        vertexManager.init(&device);
         
-        pipeline.init(&swapchain, &logicalDevice);
+        pipeline.init(&swapchain, &device);
         pipeline.createGraphicsPipeline(shaderModule);
         status("PIPELINE", "Graphics Pipeline created");
         
-        renderer.init(&logicalDevice, &swapchain, &pipeline, &vertexManager);
+        renderer.init(&device, &swapchain, &pipeline, &vertexManager);
         status("RENDERER", "Initialization..");
         renderer.createCommandPool();
         status("RENDERER", "Command Pool allocated");
@@ -76,7 +76,7 @@ namespace sigel
             renderer.drawFrame();
         }
 
-        logicalDevice.getDevice().waitIdle();
+        device.logicalDevice.waitIdle();
     }
 
     void SigelEngine::cleanup()

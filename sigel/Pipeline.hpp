@@ -3,7 +3,7 @@
 #include <vulkan/vulkan_raii.hpp>
 #include "ShaderManager.hpp"
 #include "Swapchain.hpp"
-#include "LogicalDevice.hpp"
+#include "Device.hpp"
 #include "VertexManager.hpp"
 #include <vector>
 
@@ -16,11 +16,11 @@ namespace sigel
             vk::raii::PipelineLayout pipelineLayout = nullptr;
         private:
             Swapchain *_swapchain = nullptr;
-            LogicalDevice *_lDevice = nullptr;
+            Device *_device = nullptr;
         public:
             Pipeline() = default;
             // void createGraphicsPipeline();
-            void init(Swapchain *swapchain, LogicalDevice *lDevice);
+            void init(Swapchain *swapchain, Device *device);
             void createGraphicsPipeline(vk::raii::ShaderModule &shaderModule);
     };
 }

@@ -33,8 +33,7 @@ set(SRC
     src/main.cpp
     sigel/SigelEngine.cpp
     sigel/Instance.cpp
-    sigel/PhysicalDevice.cpp
-    sigel/LogicalDevice.cpp
+    sigel/Device.cpp
     sigel/WindowSurface.cpp
     sigel/Swapchain.cpp
     sigel/Pipeline.cpp

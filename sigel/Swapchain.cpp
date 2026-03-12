@@ -9,18 +9,17 @@
 
 namespace sigel
 {
-    void Swapchain::init(PhysicalDevice *pDevice, LogicalDevice *lDevice, WindowSurface *surface, GLFWwindow *window)
+    void Swapchain::init(Device *device, WindowSurface *surface, GLFWwindow *window)
     {
-        _pDevice = pDevice;
-        _lDevice = lDevice;
+        _device = device;
         _surface = surface;
         _window = window;
     }
 
     void Swapchain::createSwapChain()
     {
-        auto surfaceCapabilities = _pDevice->getDevice().getSurfaceCapabilitiesKHR(*_surface->getSurface());
-        swapChainSurfaceFormat = chooseSwapSurfaceFormat(_pDevice->getDevice().getSurfaceFormatsKHR(*_surface->getSurface()));
+        auto surfaceCapabilities = _device->physicalDevice.getSurfaceCapabilitiesKHR(*_surface->getSurface());
+        swapChainSurfaceFormat = chooseSwapSurfaceFormat(_device->physicalDevice.getSurfaceFormatsKHR(*_surface->getSurface()));
         swapChainExtent = chooseSwapExtent(surfaceCapabilities);
         auto minImageCount = std::max(3u, surfaceCapabilities.minImageCount);
         minImageCount = ( surfaceCapabilities.maxImageCount > 0 && minImageCount > surfaceCapabilities.maxImageCount ) ? surfaceCapabilities.maxImageCount : minImageCount;
@@ -42,13 +41,13 @@ namespace sigel
             .imageSharingMode = vk::SharingMode::eExclusive,
             .preTransform = surfaceCapabilities.currentTransform,
             .compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
-            .presentMode = chooseSwapPresentMode(_pDevice->getDevice().getSurfacePresentModesKHR(*_surface->getSurface())), 
+            .presentMode = chooseSwapPresentMode(_device->physicalDevice.getSurfacePresentModesKHR(*_surface->getSurface())), 
             .clipped = true,
             .oldSwapchain = nullptr
         };
 
-        uint32_t gIndex = _lDevice->graphicsIndex;
-        uint32_t pIndex = _lDevice->presentIndex;
+        uint32_t gIndex = _device->graphicsIndex;
+        uint32_t pIndex = _device->presentIndex;
         uint32_t queueFamilyIndices[] = { gIndex, pIndex };
 
         if (gIndex != pIndex) {
@@ -63,7 +62,7 @@ namespace sigel
             status("SWAPCHAIN", "queue family exclusif mode");
         }
 
-        swapChain = vk::raii::SwapchainKHR( _lDevice->getDevice(), swapChainCreateInfo );
+        swapChain = vk::raii::SwapchainKHR(_device->logicalDevice, swapChainCreateInfo );
         swapChainImages = swapChain.getImages();
     }
 
@@ -75,7 +74,7 @@ namespace sigel
             glfwGetFramebufferSize(_window, &width, &height);
             glfwWaitEvents();
         }
-        _lDevice->getDevice().waitIdle();
+        _device->logicalDevice.waitIdle();
         
         cleanupSwapChain();
 
@@ -90,7 +89,7 @@ namespace sigel
 		for (auto& image : swapChainImages)
 		{
 			imageViewCreateInfo.image = image;
-			swapChainImageViews.emplace_back(_lDevice->getDevice(), imageViewCreateInfo);
+			swapChainImageViews.emplace_back(_device->logicalDevice, imageViewCreateInfo);
 		}
     }
 

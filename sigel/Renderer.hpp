@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LogicalDevice.hpp"
+#include "Device.hpp"
 #include "Swapchain.hpp"
 #include "Pipeline.hpp"
 
@@ -23,15 +23,15 @@ namespace sigel
 
 
         private:
-            LogicalDevice *_lDevice = nullptr;;
-            Swapchain *_swapchain = nullptr;;
-            Pipeline *_pipeline = nullptr;;
+            Device *_device = nullptr;
+            Swapchain *_swapchain = nullptr;
+            Pipeline *_pipeline = nullptr;
             VertexManager *_vManager = nullptr;
 
 
         public:
             Renderer() = default;
-            void init(LogicalDevice *lDevice, Swapchain *swapchain, Pipeline *pipeline, VertexManager *vManager);
+            void init(Device *device, Swapchain *swapchain, Pipeline *pipeline, VertexManager *vManager);
             void drawFrame();
             void createCommandPool();
             // void createCommandBuffer();
