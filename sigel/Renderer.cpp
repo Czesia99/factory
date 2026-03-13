@@ -1,6 +1,10 @@
 #include "Renderer.hpp"
 #include <iostream>
 #include "Vertex.hpp"
+#include "frames.h"
+#include <glm/gtc/matrix_transform.hpp>
+
+#include <chrono>
 
 namespace sigel
 {
@@ -38,6 +42,7 @@ namespace sigel
         // commandBuffers[frameIndex].reset();
         cmd.reset();
 
+        updateUniformBuffer(frameIndex);
         recordCommandBuffer(imageIndex);
 
         vk::PipelineStageFlags waitDestinationStageMask( vk::PipelineStageFlagBits::eColorAttachmentOutput );
@@ -103,6 +108,27 @@ namespace sigel
         commandPool = vk::raii::CommandPool(_device->logicalDevice, poolInfo);
     }
 
+    void Renderer::createDescriptorPool()
+    {
+        vk::DescriptorPoolSize poolSize(vk::DescriptorType::eUniformBuffer, MAX_FRAMES_IN_FLIGHT);
+        vk::DescriptorPoolCreateInfo poolInfo{ .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet, .maxSets = MAX_FRAMES_IN_FLIGHT, .poolSizeCount = 1, .pPoolSizes = &poolSize };
+        descriptorPool = vk::raii::DescriptorPool(_device->logicalDevice, poolInfo);
+    }
+
+    void Renderer::createDescriptorSets()
+    {
+        std::vector<vk::DescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, *_pipeline->descriptorSetLayout);
+        vk::DescriptorSetAllocateInfo allocInfo{ .descriptorPool = descriptorPool, .descriptorSetCount = static_cast<uint32_t>(layouts.size()), .pSetLayouts = layouts.data() };
+        descriptorSets.clear();
+        descriptorSets = _device->logicalDevice.allocateDescriptorSets(allocInfo);
+
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			vk::DescriptorBufferInfo bufferInfo{.buffer = _vManager->uniformBuffers[i], .offset = 0, .range = sizeof(UniformBufferObject)};
+			vk::WriteDescriptorSet descriptorWrite{.dstSet = descriptorSets[i], .dstBinding = 0, .dstArrayElement = 0, .descriptorCount = 1, .descriptorType = vk::DescriptorType::eUniformBuffer, .pBufferInfo = &bufferInfo};
+			_device->logicalDevice.updateDescriptorSets(descriptorWrite, {});
+		}
+    }
     // void Renderer::createCommandBuffer()
     // {
     //     vk::CommandBufferAllocateInfo allocInfo{ .commandPool = commandPool, .level = vk::CommandBufferLevel::ePrimary, .commandBufferCount = 1 };
@@ -114,6 +140,20 @@ namespace sigel
         commandBuffers.clear();
         vk::CommandBufferAllocateInfo allocInfo{.commandPool = commandPool, .level = vk::CommandBufferLevel::ePrimary, .commandBufferCount = MAX_FRAMES_IN_FLIGHT};
         commandBuffers = vk::raii::CommandBuffers(_device->logicalDevice, allocInfo);
+    }
+
+    void Renderer::updateUniformBuffer(uint32_t currentImage) {
+        static auto startTime = std::chrono::high_resolution_clock::now();
+
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+        UniformBufferObject ubo{};
+        ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        ubo.view = lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        ubo.proj = glm::perspective(glm::radians(45.0f), static_cast<float>(_swapchain->swapChainExtent.width) / static_cast<float>(_swapchain->swapChainExtent.height), 0.1f, 10.0f);
+        ubo.proj[1][1] *= -1;
+        memcpy(_vManager->uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
     }
 
     void Renderer::recordCommandBuffer(uint32_t imageIndex)
@@ -151,13 +191,13 @@ namespace sigel
         commandBuffers[frameIndex].bindPipeline(vk::PipelineBindPoint::eGraphics, *_pipeline->graphicsPipeline);
         commandBuffers[frameIndex].bindVertexBuffers(0, *_vManager->vertexBuffer, {0});
         commandBuffers[frameIndex].bindIndexBuffer( *_vManager->indexBuffer, 0, vk::IndexType::eUint16 );
+        commandBuffers[frameIndex].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipeline->pipelineLayout, 0, *descriptorSets[frameIndex], nullptr);
+        
         commandBuffer.setViewport(0, vk::Viewport(0.0f, 0.0f, static_cast<float>(_swapchain->swapChainExtent.width), static_cast<float>(_swapchain->swapChainExtent.height), 0.0f, 1.0f));
         commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _swapchain->swapChainExtent));
-
         // commandBuffer.draw(3, 1, 0, 0);
         // commandBuffers[frameIndex].draw(3, 1, 0, 0);
         commandBuffers[frameIndex].drawIndexed(triangle_indices.size(), 1, 0, 0, 0);
- 
         commandBuffer.endRendering();
 
         transition_image_layout(

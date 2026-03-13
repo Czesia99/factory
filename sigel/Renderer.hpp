@@ -3,14 +3,16 @@
 #include "Device.hpp"
 #include "Swapchain.hpp"
 #include "Pipeline.hpp"
+#include "VertexManager.hpp"
 
 namespace sigel
 {
-    constexpr int MAX_FRAMES_IN_FLIGHT = 2;
     class Renderer
     {
         public:
             vk::raii::CommandPool commandPool = nullptr;
+            vk::raii::DescriptorPool descriptorPool = nullptr;
+            std::vector<vk::raii::DescriptorSet> descriptorSets;
             std::vector<vk::raii::CommandBuffer> commandBuffers;
 
             std::vector<vk::raii::Fence> inFlightFences;
@@ -20,7 +22,6 @@ namespace sigel
 
             uint32_t frameIndex = 0;
             bool framebufferResized = false;
-
 
         private:
             Device *_device = nullptr;
@@ -34,10 +35,13 @@ namespace sigel
             void init(Device *device, Swapchain *swapchain, Pipeline *pipeline, VertexManager *vManager);
             void drawFrame();
             void createCommandPool();
+            void createDescriptorPool();
+            void createDescriptorSets();
             // void createCommandBuffer();
             void createCommandBuffers();
             void recordCommandBuffer(uint32_t imageIndex);
             void createSyncObjects();
+            void updateUniformBuffer(uint32_t currentImage);
         private:
             void transition_image_layout(uint32_t imageIndex, vk::ImageLayout oldLayout,
                 vk::ImageLayout newLayout, vk::AccessFlags2 srcAccessMask,

@@ -13,6 +13,7 @@ namespace sigel
     {
         public:
             vk::raii::Pipeline graphicsPipeline = nullptr;
+            vk::raii::DescriptorSetLayout descriptorSetLayout = nullptr;
             vk::raii::PipelineLayout pipelineLayout = nullptr;
         private:
             Swapchain *_swapchain = nullptr;
@@ -22,5 +23,6 @@ namespace sigel
             // void createGraphicsPipeline();
             void init(Swapchain *swapchain, Device *device);
             void createGraphicsPipeline(vk::raii::ShaderModule &shaderModule);
+            void createDescriptorSetLayout();
     };
 }

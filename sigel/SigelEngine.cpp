@@ -45,13 +45,14 @@ namespace sigel
         shaderManager.init(&device);
         status("SHADER MANAGER", "Initialized");
 
-        auto shaderCode = readFile("../sigel/shaders/slang.spv");
+        auto shaderCode = readFile("../sigel/shaders/slang2.spv");
         auto shaderModule = shaderManager.createShaderModule(shaderCode);
         status("SHADER MANAGER", "Slang SPIR-V binary loaded");
 
         vertexManager.init(&device);
         
         pipeline.init(&swapchain, &device);
+        pipeline.createDescriptorSetLayout();
         pipeline.createGraphicsPipeline(shaderModule);
         status("PIPELINE", "Graphics Pipeline created");
         
@@ -59,13 +60,20 @@ namespace sigel
         status("RENDERER", "Initialization..");
         renderer.createCommandPool();
         status("RENDERER", "Command Pool allocated");
+
+        vertexManager.createVertexBuffer(triangle_vertices, renderer.commandPool);
+        vertexManager.createIndexBuffer(triangle_indices, renderer.commandPool);
+        vertexManager.createUniformBuffers();
+
+        renderer.createDescriptorPool();
+        status("RENDERER", "Descriptor Pool allocated");
+        renderer.createDescriptorSets();
+        status("RENDERER", "Descriptor Sets allocated");
+
         renderer.createCommandBuffers();
         status("RENDERER", "Command Buffer allocated");
         renderer.createSyncObjects();
         status("RENDERER", "Sync Objects created");
-
-        vertexManager.createVertexBuffer(triangle_vertices, renderer.commandPool);
-        vertexManager.createIndexBuffer(triangle_indices, renderer.commandPool);
     }
 
     void SigelEngine::mainLoop()

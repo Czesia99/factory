@@ -38,9 +38,9 @@ namespace sigel
         vk::PipelineRasterizationStateCreateInfo rasterizer {
             .depthClampEnable = vk::False, 
             .rasterizerDiscardEnable = vk::False,
-            .polygonMode = vk::PolygonMode::eFill, 
+            .polygonMode = vk::PolygonMode::eFill,
             .cullMode = vk::CullModeFlagBits::eBack,
-            .frontFace = vk::FrontFace::eClockwise, 
+            .frontFace = vk::FrontFace::eCounterClockwise,
             .depthBiasEnable = vk::False,
             .depthBiasSlopeFactor = 1.0f, 
             .lineWidth = 1.0f 
@@ -71,9 +71,9 @@ namespace sigel
 
         vk::PipelineDynamicStateCreateInfo dynamicState{.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size()), .pDynamicStates = dynamicStates.data()};
 
-        vk::PipelineLayoutCreateInfo pipelineLayoutInfo{  .setLayoutCount = 0, .pushConstantRangeCount = 0 };
+        vk::PipelineLayoutCreateInfo pipelineLayoutInfo{.setLayoutCount = 1, .pSetLayouts = &*descriptorSetLayout, .pushConstantRangeCount = 0};
 
-        pipelineLayout = vk::raii::PipelineLayout(_device->logicalDevice, pipelineLayoutInfo );
+        pipelineLayout = vk::raii::PipelineLayout(_device->logicalDevice, pipelineLayoutInfo);
 
         vk::PipelineRenderingCreateInfo pipelineRenderingCreateInfo{ .colorAttachmentCount = 1, .pColorAttachmentFormats = &(_swapchain->swapChainSurfaceFormat.format) };
 
@@ -90,5 +90,12 @@ namespace sigel
         pipelineInfo.basePipelineIndex = -1; // Optional
 
         graphicsPipeline = vk::raii::Pipeline(_device->logicalDevice, nullptr, pipelineInfo);
+    }
+
+    void Pipeline::createDescriptorSetLayout()
+    {
+        vk::DescriptorSetLayoutBinding uboLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eVertex, nullptr);
+        vk::DescriptorSetLayoutCreateInfo layoutInfo{.bindingCount = 1, .pBindings = &uboLayoutBinding};
+        descriptorSetLayout = vk::raii::DescriptorSetLayout(_device->logicalDevice, layoutInfo);
     }
 }

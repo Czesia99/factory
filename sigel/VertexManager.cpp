@@ -1,5 +1,6 @@
 #include "VertexManager.hpp"
-#include <iostream>
+#include "frames.h"
+
 namespace sigel
 {
     void VertexManager::init(Device *device)
@@ -55,13 +56,29 @@ namespace sigel
         
 
         void* data = stagingBufferMemory.mapMemory(0, bufferSize);
-        std::cout << "create index buffer" << std::endl;
         memcpy(data, indices.data(), (size_t) bufferSize);
         stagingBufferMemory.unmapMemory();
 
         createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer, vk::MemoryPropertyFlagBits::eDeviceLocal, indexBuffer, indexBufferMemory);
 
         copyBuffer(pool, stagingBuffer, indexBuffer, bufferSize);
+    }
+
+    void VertexManager::createUniformBuffers() 
+    {
+        uniformBuffers.clear();
+        uniformBuffersMemory.clear();
+        uniformBuffersMapped.clear();
+
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
+            vk::raii::Buffer buffer({});
+            vk::raii::DeviceMemory bufferMem({});
+            createBuffer(bufferSize, vk::BufferUsageFlagBits::eUniformBuffer, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, buffer, bufferMem);
+            uniformBuffers.emplace_back(std::move(buffer));
+            uniformBuffersMemory.emplace_back(std::move(bufferMem));
+            uniformBuffersMapped.emplace_back( uniformBuffersMemory[i].mapMemory(0, bufferSize));
+        }
     }
 
     uint32_t VertexManager::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)
