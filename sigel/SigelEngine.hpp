@@ -23,7 +23,6 @@ namespace sigel
             Device device;
             Swapchain swapchain;
             ShaderManager shaderManager;
-            VertexManager vertexManager;
             Pipeline pipeline;
             Renderer renderer;
         public:

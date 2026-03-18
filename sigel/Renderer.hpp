@@ -3,7 +3,7 @@
 #include "Device.hpp"
 #include "Swapchain.hpp"
 #include "Pipeline.hpp"
-#include "VertexManager.hpp"
+#include "GameObject.hpp"
 
 namespace sigel
 {
@@ -23,16 +23,16 @@ namespace sigel
             uint32_t frameIndex = 0;
             bool framebufferResized = false;
 
+            std::vector<GameObject> loadedObjects;
+
         private:
             Device *_device = nullptr;
             Swapchain *_swapchain = nullptr;
             Pipeline *_pipeline = nullptr;
-            VertexManager *_vManager = nullptr;
-
 
         public:
             Renderer() = default;
-            void init(Device *device, Swapchain *swapchain, Pipeline *pipeline, VertexManager *vManager);
+            void init(Device *device, Swapchain *swapchain, Pipeline *pipeline);
             void drawFrame();
             void createCommandPool();
             void createDescriptorPool();
@@ -42,6 +42,8 @@ namespace sigel
             void recordCommandBuffer(uint32_t imageIndex);
             void createSyncObjects();
             void updateUniformBuffer(uint32_t currentImage);
+
+            void loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices); //create GameObject and store in map
         private:
             void transition_image_layout(uint32_t imageIndex, vk::ImageLayout oldLayout,
                 vk::ImageLayout newLayout, vk::AccessFlags2 srcAccessMask,

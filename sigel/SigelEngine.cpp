@@ -49,24 +49,21 @@ namespace sigel
         auto shaderModule = shaderManager.createShaderModule(shaderCode);
         status("SHADER MANAGER", "Slang SPIR-V binary loaded");
 
-        vertexManager.init(&device);
-        
         pipeline.init(&swapchain, &device);
         pipeline.createDescriptorSetLayout();
         pipeline.createGraphicsPipeline(shaderModule);
         status("PIPELINE", "Graphics Pipeline created");
         
-        renderer.init(&device, &swapchain, &pipeline, &vertexManager);
+        renderer.init(&device, &swapchain, &pipeline);
         status("RENDERER", "Initialization..");
         renderer.createCommandPool();
         status("RENDERER", "Command Pool allocated");
 
-        vertexManager.createVertexBuffer(triangle_vertices, renderer.commandPool);
-        vertexManager.createIndexBuffer(triangle_indices, renderer.commandPool);
-        vertexManager.createUniformBuffers();
+        renderer.loadObject(cube_vertices, cube_indices);
 
         renderer.createDescriptorPool();
         status("RENDERER", "Descriptor Pool allocated");
+
         renderer.createDescriptorSets();
         status("RENDERER", "Descriptor Sets allocated");
 

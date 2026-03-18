@@ -1,11 +1,8 @@
 #pragma once
 
 #include <vulkan/vulkan_raii.hpp>
-#include "ShaderManager.hpp"
 #include "Swapchain.hpp"
 #include "Device.hpp"
-#include "VertexManager.hpp"
-#include <vector>
 
 namespace sigel
 {

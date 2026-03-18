@@ -69,6 +69,12 @@ namespace sigel
             vk::DynamicState::eScissor
         };
 
+        vk::PipelineDepthStencilStateCreateInfo depthStencil{
+            .depthTestEnable = vk::True,
+            .depthWriteEnable = vk::True,
+            .depthCompareOp = vk::CompareOp::eLess
+        };
+
         vk::PipelineDynamicStateCreateInfo dynamicState{.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size()), .pDynamicStates = dynamicStates.data()};
 
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo{.setLayoutCount = 1, .pSetLayouts = &*descriptorSetLayout, .pushConstantRangeCount = 0};
@@ -82,8 +88,8 @@ namespace sigel
             .stageCount = 2, .pStages = shaderStages,
             .pVertexInputState = &vertexInputInfo, .pInputAssemblyState = &inputAssembly,
             .pViewportState = &viewportState, .pRasterizationState = &rasterizer,
-            .pMultisampleState = &multisampling, .pColorBlendState = &colorBlending,
-            .pDynamicState = &dynamicState, .layout = pipelineLayout, .renderPass = nullptr 
+            .pMultisampleState = &multisampling, /*.pDepthStencilState = &depthStencil,*/ .pColorBlendState = &colorBlending,
+            .pDynamicState = &dynamicState, .layout = pipelineLayout, .renderPass = nullptr
         };
 
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional

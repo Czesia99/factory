@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.30)
 
 project(factory VERSION 1.0)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON) 
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -39,7 +40,7 @@ set(SRC
     sigel/Pipeline.cpp
     sigel/ShaderManager.cpp
     sigel/Renderer.cpp
-    sigel/VertexManager.cpp
+    sigel/GameObject.cpp
 )
 
 # file(GLOB SRC_SHADERS "${CMAKE_CURRENT_SOURCE_DIR}/sigel/shaders/*.slang")
