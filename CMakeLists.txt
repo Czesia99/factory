@@ -39,8 +39,8 @@ set(SRC
     sigel/Swapchain.cpp
     sigel/Pipeline.cpp
     sigel/ShaderManager.cpp
+    sigel/ResourceManager.cpp
     sigel/Renderer.cpp
-    sigel/GameObject.cpp
 )
 
 # file(GLOB SRC_SHADERS "${CMAKE_CURRENT_SOURCE_DIR}/sigel/shaders/*.slang")

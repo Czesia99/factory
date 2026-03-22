@@ -24,6 +24,7 @@ namespace sigel
             Swapchain swapchain;
             ShaderManager shaderManager;
             Pipeline pipeline;
+            ResourceManager resourceManager;
             Renderer renderer;
         public:
             SigelEngine() = default;

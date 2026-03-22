@@ -1,29 +1,25 @@
 #include "Renderer.hpp"
 #include "Vertex.hpp"
 #include <glm/gtc/matrix_transform.hpp>
-#include <iostream>
 #include <chrono>
 
 namespace sigel
 {
-    void Renderer::init(Device *device, Swapchain *swapchain, Pipeline *pipeline)
+    void Renderer::init(Device *device, Swapchain *swapchain, Pipeline *pipeline, ResourceManager *resourceManager)
     {
         _device = device;
         _swapchain = swapchain;
         _pipeline = pipeline;
+        _resourceManager = resourceManager;
     }
 
     void Renderer::loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices)
     {
         GameObject object;
-        //TODO: check if mesh is already loaded in cache
-        std::cout << "create object" << std::endl;
-        object.mesh.vertexBuffer = createVertexBuffer2(vertices, commandPool, _device);
-        std::cout << "create vertex buffer" << std::endl;
-        createIndexBuffer2(object.mesh.indexBuffer, indices, commandPool, _device);
-        std::cout << "create index buffer" << std::endl;
-        createUniformBuffers2(object.uniformBuffers, _device);
-        std::cout << "create unifrom buffers" << std::endl;
+        object.meshID = _resourceManager->loadMesh(vertices, indices);
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+            object.uniformBuffers.emplace_back(_resourceManager->createUniformBuffer(sizeof(UniformBufferObject)));
+
         loadedObjects.emplace_back(std::move(object));
     }
 
@@ -106,8 +102,17 @@ namespace sigel
 
     void Renderer::createDescriptorPool()
     {
-        vk::DescriptorPoolSize poolSize(vk::DescriptorType::eUniformBuffer, MAX_FRAMES_IN_FLIGHT);
-        vk::DescriptorPoolCreateInfo poolInfo{ .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet, .maxSets = MAX_FRAMES_IN_FLIGHT, .poolSizeCount = 1, .pPoolSizes = &poolSize };
+        // vk::DescriptorPoolSize poolSize(vk::DescriptorType::eUniformBuffer, MAX_FRAMES_IN_FLIGHT);
+        // vk::DescriptorPoolCreateInfo poolInfo{ .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet, .maxSets = MAX_FRAMES_IN_FLIGHT, .poolSizeCount = 1, .pPoolSizes = &poolSize };
+        // descriptorPool = vk::raii::DescriptorPool(_device->logicalDevice, poolInfo);
+        uint32_t maxSets = static_cast<uint32_t>(loadedObjects.size()) * MAX_FRAMES_IN_FLIGHT;
+        vk::DescriptorPoolSize poolSize(vk::DescriptorType::eUniformBuffer, maxSets);
+        vk::DescriptorPoolCreateInfo poolInfo{
+            .flags         = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
+            .maxSets       = maxSets,
+            .poolSizeCount = 1,
+            .pPoolSizes    = &poolSize
+        };
         descriptorPool = vk::raii::DescriptorPool(_device->logicalDevice, poolInfo);
     }
 
@@ -206,18 +211,22 @@ namespace sigel
         // commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipeline->graphicsPipeline);
         cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, *_pipeline->graphicsPipeline);
 
-        for (auto &obj : loadedObjects)
-        {
-            cmd.bindVertexBuffers(0, *obj.mesh.vertexBuffer.buffer, {0});
-            cmd.bindIndexBuffer(*obj.mesh.indexBuffer.buffer, 0, vk::IndexType::eUint32 );  
-            cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipeline->pipelineLayout, 0, *obj.descriptorSets[frameIndex], nullptr);
-        }
-        
         cmd.setViewport(0, vk::Viewport(0.0f, 0.0f, static_cast<float>(_swapchain->swapChainExtent.width), static_cast<float>(_swapchain->swapChainExtent.height), 0.0f, 1.0f));
         cmd.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _swapchain->swapChainExtent));
+
+        for (int i = 0; i < loadedObjects.size(); i++)
+        {
+            const Mesh &mesh = _resourceManager->getMesh(loadedObjects[i].meshID);
+            cmd.bindVertexBuffers(0, *mesh.vertexBuffer.buffer, {0});
+            cmd.bindIndexBuffer(*mesh.indexBuffer.buffer, 0, vk::IndexType::eUint32 );  
+            cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipeline->pipelineLayout, 0, *loadedObjects[i].descriptorSets[frameIndex], nullptr);
+            cmd.drawIndexed(mesh.indexCount, 1, 0, 0, 0);
+        }
+        
         // commandBuffer.draw(3, 1, 0, 0);
         // commandBuffers[frameIndex].draw(3, 1, 0, 0);
-        cmd.drawIndexed(cube_indices.size(), 1, 0, 0, 0);
+        // const Mesh& mesh = _resourceManager->getMesh(loadedObjects[i].meshID);
+        // cmd.drawIndexed(cube_indices.size(), 1, 0, 0, 0);
         cmd.endRendering();
 
         transition_image_layout(

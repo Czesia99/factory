@@ -41,6 +41,8 @@ namespace sigel
         swapchain.createSwapChain();
         swapchain.createImageViews();
         status("SWAPCHAIN", "Swapchain images allocated");
+        
+        resourceManager.init(&device);
 
         shaderManager.init(&device);
         status("SHADER MANAGER", "Initialized");
@@ -54,8 +56,10 @@ namespace sigel
         pipeline.createGraphicsPipeline(shaderModule);
         status("PIPELINE", "Graphics Pipeline created");
         
-        renderer.init(&device, &swapchain, &pipeline);
+
+        renderer.init(&device, &swapchain, &pipeline, &resourceManager);
         status("RENDERER", "Initialization..");
+        
         renderer.createCommandPool();
         status("RENDERER", "Command Pool allocated");
 

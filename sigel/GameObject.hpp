@@ -30,12 +30,12 @@ namespace sigel
 
     struct GameObject
     {
-        Mesh mesh;
+        uint32_t meshID;
         std::vector<Buffer> uniformBuffers;
         std::vector<vk::raii::DescriptorSet> descriptorSets;
     };
 
-    Buffer createVertexBuffer2(const std::vector<Vertex> &vertices, vk::raii::CommandPool &pool, Device *device);
-    void createIndexBuffer2(Buffer &indexBuffer, std::vector<uint32_t> indices, vk::raii::CommandPool &pool, Device *device);
-    void createUniformBuffers2(std::vector<Buffer> &uniformBuffers, Device *device);
+    // Buffer createVertexBuffer2(const std::vector<Vertex> &vertices, vk::raii::CommandPool &pool, Device *device);
+    // void createIndexBuffer2(Buffer &indexBuffer, std::vector<uint32_t> indices, vk::raii::CommandPool &pool, Device *device);
+    // void createUniformBuffers2(std::vector<Buffer> &uniformBuffers, Device *device);
 }
