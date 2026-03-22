@@ -32,6 +32,7 @@ namespace sigel
             void initWindow();
             void initVulkan();
             void mainLoop();
+            void waitIdle();
             void cleanup();
 
             static void framebufferResizeCallback(GLFWwindow* window, int width, int height);

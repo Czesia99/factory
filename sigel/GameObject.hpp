@@ -25,6 +25,7 @@ namespace sigel
     {
         Buffer vertexBuffer;
         Buffer indexBuffer;
+        uint32_t indexCount = 0;
     };
 
     struct GameObject

@@ -63,14 +63,12 @@ namespace sigel
 
         renderer.createDescriptorPool();
         status("RENDERER", "Descriptor Pool allocated");
-
+        
         renderer.createDescriptorSets();
         status("RENDERER", "Descriptor Sets allocated");
 
-        renderer.createCommandBuffers();
-        status("RENDERER", "Command Buffer allocated");
-        renderer.createSyncObjects();
-        status("RENDERER", "Sync Objects created");
+        renderer.createFrameData();
+        status("RENDERER", "Frame Data created");
     }
 
     void SigelEngine::mainLoop()
@@ -79,7 +77,11 @@ namespace sigel
             glfwPollEvents();
             renderer.drawFrame();
         }
+        waitIdle();
+    }
 
+    void SigelEngine::waitIdle()
+    {
         device.logicalDevice.waitIdle();
     }
 

@@ -1,14 +1,12 @@
 #include "GameObject.hpp"
 #include "BufferUtils.hpp"
 #include "frames.h"
-#include <iostream>
 
 namespace sigel
 {
     Buffer createVertexBuffer2(const std::vector<Vertex> &vertices, vk::raii::CommandPool &pool, Device *device)
     {
         Buffer vb{};
-        std::cout << "in create vertex buffer2" << std::endl;
         vk::DeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
         vk::BufferCreateInfo stagingInfo{ .size = bufferSize, .usage = vk::BufferUsageFlagBits::eTransferSrc, .sharingMode = vk::SharingMode::eExclusive };
@@ -17,25 +15,20 @@ namespace sigel
         vk::MemoryAllocateInfo memoryAllocateInfoStaging{  .allocationSize = memRequirementsStaging.size, .memoryTypeIndex = findMemoryType(*device, memRequirementsStaging.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent) };
         vk::raii::DeviceMemory stagingBufferMemory(device->logicalDevice, memoryAllocateInfoStaging);
 
-        std::cout << "before copy" << std::endl;
         stagingBuffer.bindMemory(stagingBufferMemory, 0);
         void* dataStaging = stagingBufferMemory.mapMemory(0, stagingInfo.size);
         memcpy(dataStaging, vertices.data(), stagingInfo.size);
         stagingBufferMemory.unmapMemory();
-        std::cout << "after copy" << std::endl;
 
         vk::BufferCreateInfo bufferInfo{ .size = bufferSize,  .usage = vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, .sharingMode = vk::SharingMode::eExclusive };
         vb.buffer = vk::raii::Buffer(device->logicalDevice, bufferInfo);
 
-        std::cout << "caca copy" << std::endl;
         vk::MemoryRequirements memRequirements = vb.buffer.getMemoryRequirements();
         vk::MemoryAllocateInfo memoryAllocateInfo{  .allocationSize = memRequirements.size, .memoryTypeIndex = findMemoryType(*device, memRequirements.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal) };
         vb.memory = vk::raii::DeviceMemory(device->logicalDevice, memoryAllocateInfo);
-        std::cout << "caca copy 2" << std::endl;
         vb.buffer.bindMemory( *vb.memory, 0 );
 
         copyBuffer(*device, pool, stagingBuffer, vb.buffer, stagingInfo.size);
-        std::cout << "caca copy 3" << std::endl;
         return vb;
     }
 

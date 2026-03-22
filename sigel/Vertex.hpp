@@ -31,7 +31,7 @@ namespace sigel
     //     {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
     //     {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
     //     {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
-    // };
+    //
 
     const std::vector<Vertex> cube_vertices = {
         {{-1.0f, -1.0f,  1.0f}, {1.0f, 0.0f, 0.0f}},

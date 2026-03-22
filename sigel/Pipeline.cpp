@@ -32,7 +32,6 @@ namespace sigel
         vk::Viewport{ 0.0f, 0.0f, static_cast<float>(_swapchain->swapChainExtent.width), static_cast<float>(_swapchain->swapChainExtent.height), 0.0f, 1.0f };
         vk::Rect2D{vk::Offset2D{ 0, 0 }, _swapchain->swapChainExtent};
 
-        // vk::PipelineViewportStateCreateInfo viewportState({}, 1, {}, 1);
         vk::PipelineViewportStateCreateInfo viewportState{ .viewportCount = 1, .scissorCount = 1 };
 
         vk::PipelineRasterizationStateCreateInfo rasterizer {
@@ -74,21 +73,22 @@ namespace sigel
             .depthWriteEnable = vk::True,
             .depthCompareOp = vk::CompareOp::eLess
         };
-
+        
         vk::PipelineDynamicStateCreateInfo dynamicState{.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size()), .pDynamicStates = dynamicStates.data()};
-
+        
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo{.setLayoutCount = 1, .pSetLayouts = &*descriptorSetLayout, .pushConstantRangeCount = 0};
-
+        
         pipelineLayout = vk::raii::PipelineLayout(_device->logicalDevice, pipelineLayoutInfo);
-
-        vk::PipelineRenderingCreateInfo pipelineRenderingCreateInfo{ .colorAttachmentCount = 1, .pColorAttachmentFormats = &(_swapchain->swapChainSurfaceFormat.format) };
+        
+        vk::Format depthFormat = vk::Format::eD32Sfloat;
+        vk::PipelineRenderingCreateInfo pipelineRenderingCreateInfo{ .colorAttachmentCount = 1, .pColorAttachmentFormats = &(_swapchain->swapChainSurfaceFormat.format), .depthAttachmentFormat = depthFormat };
 
         vk::GraphicsPipelineCreateInfo pipelineInfo { 
             .pNext = &pipelineRenderingCreateInfo,
             .stageCount = 2, .pStages = shaderStages,
             .pVertexInputState = &vertexInputInfo, .pInputAssemblyState = &inputAssembly,
             .pViewportState = &viewportState, .pRasterizationState = &rasterizer,
-            .pMultisampleState = &multisampling, /*.pDepthStencilState = &depthStencil,*/ .pColorBlendState = &colorBlending,
+            .pMultisampleState = &multisampling, .pDepthStencilState = &depthStencil, .pColorBlendState = &colorBlending,
             .pDynamicState = &dynamicState, .layout = pipelineLayout, .renderPass = nullptr
         };
 
