@@ -2,15 +2,23 @@
 
 namespace sigel
 {
-    void ResourceManager::init(Device *device)
+    void ResourceManager::init(Device *device, Instance *instance)
     {
         _device = device;
+        _instance = instance;
 
+        VmaAllocatorCreateInfo allocatorInfo{
+            .physicalDevice = *_device->physicalDevice,
+            .device         = *_device->logicalDevice,
+            .instance       = *_instance->instance,
+        };
+
+    vmaCreateAllocator(&allocatorInfo, &allocator);
         vk::CommandPoolCreateInfo poolInfo{
             .flags            = vk::CommandPoolCreateFlagBits::eTransient,
             .queueFamilyIndex = _device->graphicsIndex
         };
-        _transferPool = vk::raii::CommandPool(_device->logicalDevice, poolInfo);
+        transferPool = vk::raii::CommandPool(_device->logicalDevice, poolInfo);
     }
 
     const Mesh& ResourceManager::getMesh(uint32_t index)
@@ -18,49 +26,72 @@ namespace sigel
         return meshes[index];
     }
 
-    uint32_t ResourceManager::loadMesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices)
+    uint32_t ResourceManager::loadMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
     {
         Mesh mesh;
- 
-        // vertex
-        vk::DeviceSize vertexSize = sizeof(vertices[0]) * vertices.size();
-        Buffer staging = createBuffer(
-            vertexSize,
-            vk::BufferUsageFlagBits::eTransferSrc,
-            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
-        );
-        void* data = staging.memory.mapMemory(0, vertexSize);
-        memcpy(data, vertices.data(), vertexSize);
-        staging.memory.unmapMemory();
- 
-        mesh.vertexBuffer = createBuffer(
-            vertexSize,
-            vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
-            vk::MemoryPropertyFlagBits::eDeviceLocal
-        );
-        copyBuffer(staging.buffer, mesh.vertexBuffer.buffer, vertexSize);
- 
-        // index
-        vk::DeviceSize indexSize = sizeof(indices[0]) * indices.size();
-        Buffer stagingIdx = createBuffer(
-            indexSize,
-            vk::BufferUsageFlagBits::eTransferSrc,
-            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
-        );
-        void* idxData = stagingIdx.memory.mapMemory(0, indexSize);
-        memcpy(idxData, indices.data(), indexSize);
-        stagingIdx.memory.unmapMemory();
- 
-        mesh.indexBuffer = createBuffer(
-            indexSize,
-            vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
-            vk::MemoryPropertyFlagBits::eDeviceLocal
-        );
 
-        copyBuffer(stagingIdx.buffer, mesh.indexBuffer.buffer, indexSize);
- 
+        vk::DeviceSize vertexSize = sizeof(vertices[0]) * vertices.size();
+
+        Buffer stagingV;
+        VkBufferCreateInfo stagingVInfo{
+            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .size  = vertexSize,
+            .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT
+        };
+        VmaAllocationCreateInfo stagingAllocInfo{
+            .flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT,
+            .usage = VMA_MEMORY_USAGE_AUTO
+        };
+        vmaCreateBuffer(allocator, &stagingVInfo, &stagingAllocInfo, &stagingV.buffer, &stagingV.allocation, nullptr);
+
+        void* vdata;
+        vmaMapMemory(allocator, stagingV.allocation, &vdata);
+        memcpy(vdata, vertices.data(), vertexSize);
+        vmaUnmapMemory(allocator, stagingV.allocation);
+
+        VkBufferCreateInfo vertexBufferInfo{
+            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .size  = vertexSize,
+            .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
+        };
+        VmaAllocationCreateInfo vertexAllocInfo{
+            .usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE
+        };
+        vmaCreateBuffer(allocator, &vertexBufferInfo, &vertexAllocInfo,
+            &mesh.vertexBuffer.buffer, &mesh.vertexBuffer.allocation, nullptr);
+
+        copyBuffer(stagingV.buffer, mesh.vertexBuffer.buffer, vertexSize);
+        vmaDestroyBuffer(allocator, stagingV.buffer, stagingV.allocation);
+
+        vk::DeviceSize indexSize = sizeof(indices[0]) * indices.size();
+
+        Buffer stagingI;
+        VkBufferCreateInfo stagingIInfo{
+            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .size  = indexSize,
+            .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT
+        };
+        vmaCreateBuffer(allocator, &stagingIInfo, &stagingAllocInfo, &stagingI.buffer, &stagingI.allocation, nullptr);
+
+        void* idata;
+        vmaMapMemory(allocator, stagingI.allocation, &idata);
+        memcpy(idata, indices.data(), indexSize);
+        vmaUnmapMemory(allocator, stagingI.allocation);
+
+        VkBufferCreateInfo indexBufferInfo{
+            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .size  = indexSize,
+            .usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
+        };
+        VmaAllocationCreateInfo indexAllocInfo{
+            .usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE
+        };
+        vmaCreateBuffer(allocator, &indexBufferInfo, &indexAllocInfo, &mesh.indexBuffer.buffer, &mesh.indexBuffer.allocation, nullptr);
+
+        copyBuffer(stagingI.buffer, mesh.indexBuffer.buffer, indexSize);
+        vmaDestroyBuffer(allocator, stagingI.buffer, stagingI.allocation);
+
         mesh.indexCount = static_cast<uint32_t>(indices.size());
-        
         uint32_t id = static_cast<uint32_t>(meshes.size());
         meshes.emplace_back(std::move(mesh));
         return id;
@@ -68,65 +99,79 @@ namespace sigel
 
     Buffer ResourceManager::createUniformBuffer(vk::DeviceSize size)
     {
-        Buffer buffer = createBuffer(
-            size,
-            vk::BufferUsageFlagBits::eUniformBuffer,
-            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
-        );
-
-        buffer.mapped = buffer.memory.mapMemory(0, size);
-        return buffer;
-    }
-
-    Buffer ResourceManager::createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties)
-    {
         Buffer result;
- 
-        vk::BufferCreateInfo bufferInfo{
-            .size        = size,
-            .usage       = usage,
-            .sharingMode = vk::SharingMode::eExclusive
+        VkBufferCreateInfo bufferInfo{
+            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .size  = size,
+            .usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT
         };
-        result.buffer = vk::raii::Buffer(_device->logicalDevice, bufferInfo);
- 
-        vk::MemoryRequirements memReqs = result.buffer.getMemoryRequirements();
-        vk::MemoryAllocateInfo allocInfo{
-            .allocationSize  = memReqs.size,
-            .memoryTypeIndex = findMemoryType(memReqs.memoryTypeBits, properties)
+        VmaAllocationCreateInfo allocInfo{
+            .flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT,
+            .usage = VMA_MEMORY_USAGE_AUTO
         };
-        result.memory = vk::raii::DeviceMemory(_device->logicalDevice, allocInfo);
-        result.buffer.bindMemory(*result.memory, 0);
- 
+        VmaAllocationInfo info{};
+        vmaCreateBuffer(allocator, &bufferInfo, &allocInfo, &result.buffer, &result.allocation, &info);
+
+        result.mapped = info.pMappedData;
         return result;
     }
 
-    void ResourceManager::copyBuffer(vk::raii::Buffer &src, vk::raii::Buffer &dst, vk::DeviceSize size)
+    Buffer ResourceManager::createBuffer(vk::DeviceSize size, VkBufferUsageFlags  usage, VmaMemoryUsage memoryUsage)
+    {
+        Buffer result;
+
+        VkBufferCreateInfo bufferInfo{
+            .sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .size        = size,
+            .usage       = usage,
+            .sharingMode = VK_SHARING_MODE_EXCLUSIVE
+        };
+
+        VmaAllocationCreateInfo allocInfo{
+            .usage = memoryUsage
+        };
+
+        vmaCreateBuffer(allocator, &bufferInfo, &allocInfo, &result.buffer, &result.allocation, nullptr);
+
+        return result;
+    }
+
+    Buffer ResourceManager::createStagingBuffer(vk::DeviceSize size)
+    {
+        Buffer result;
+        VkBufferCreateInfo bufferInfo{
+            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .size  = size,
+            .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT
+        };
+        VmaAllocationCreateInfo allocInfo{
+            .flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT,
+            .usage = VMA_MEMORY_USAGE_AUTO
+        };
+        vmaCreateBuffer(allocator, &bufferInfo, &allocInfo, &result.buffer, &result.allocation, nullptr);
+        return result;
+    }
+
+    void ResourceManager::destroyBuffer(Buffer& buffer)
+    {        
+        vmaDestroyBuffer(allocator, buffer.buffer, buffer.allocation);
+        buffer.buffer     = VK_NULL_HANDLE;
+        buffer.allocation = VK_NULL_HANDLE;
+        buffer.mapped     = nullptr;
+    }
+
+    void ResourceManager::copyBuffer(VkBuffer src, VkBuffer dst, vk::DeviceSize size)
     {
         immediateSubmit([&](vk::raii::CommandBuffer& cmd) {
             vk::BufferCopy copyRegion{ .size = size };
-            cmd.copyBuffer(*src, *dst, copyRegion);
+            cmd.copyBuffer(src, dst, copyRegion);
         });
-    }
-
-    uint32_t ResourceManager::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)
-    {
-        vk::PhysicalDeviceMemoryProperties memProperties = _device->physicalDevice.getMemoryProperties();
-        
-
-        for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) 
-        {
-            if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) 
-            {
-                return i;
-            }
-        }
-        throw std::runtime_error("failed to find suitable memory type!");
     }
 
     void ResourceManager::immediateSubmit(std::function<void(vk::raii::CommandBuffer&)> fn) 
     {
         vk::CommandBufferAllocateInfo allocInfo{
-            .commandPool        = *_transferPool,
+            .commandPool        = *transferPool,
             .level              = vk::CommandBufferLevel::ePrimary,
             .commandBufferCount = 1
         };
@@ -143,6 +188,17 @@ namespace sigel
             .pCommandBuffers    = &*cmd
         };
         _device->graphicsQueue.submit(submitInfo);
-        _device->graphicsQueue.waitIdle(); // safe for uploads — not for frame rendering
+        _device->graphicsQueue.waitIdle();
+    }
+
+    void ResourceManager::cleanup()
+    {
+        for (auto& mesh : meshes)
+        {
+            destroyBuffer(mesh.vertexBuffer);
+            destroyBuffer(mesh.indexBuffer);
+        }
+        meshes.clear();
+        vmaDestroyAllocator(allocator);
     }
 }

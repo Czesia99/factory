@@ -23,6 +23,16 @@ namespace sigel
         loadedObjects.emplace_back(std::move(object));
     }
 
+    void Renderer::cleanupObjects()
+    {
+        for (auto& obj : loadedObjects)
+        {
+            for (auto& ubo : obj.uniformBuffers)
+                _resourceManager->destroyBuffer(ubo);
+            obj.descriptorSets.clear();
+        }
+    }
+    
     void Renderer::drawFrame()
     {
         auto &frame = currentFrame();
@@ -130,7 +140,7 @@ namespace sigel
 
             for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
                 vk::DescriptorBufferInfo bufferInfo{
-                    .buffer = *obj.uniformBuffers[i].buffer, 
+                    .buffer = vk::Buffer(obj.uniformBuffers[i].buffer),
                     .offset = 0, 
                     .range = sizeof(UniformBufferObject)
                 };
@@ -214,11 +224,15 @@ namespace sigel
         cmd.setViewport(0, vk::Viewport(0.0f, 0.0f, static_cast<float>(_swapchain->swapChainExtent.width), static_cast<float>(_swapchain->swapChainExtent.height), 0.0f, 1.0f));
         cmd.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _swapchain->swapChainExtent));
 
+
+
         for (int i = 0; i < loadedObjects.size(); i++)
         {
             const Mesh &mesh = _resourceManager->getMesh(loadedObjects[i].meshID);
-            cmd.bindVertexBuffers(0, *mesh.vertexBuffer.buffer, {0});
-            cmd.bindIndexBuffer(*mesh.indexBuffer.buffer, 0, vk::IndexType::eUint32 );  
+            vk::Buffer vb = mesh.vertexBuffer.buffer;
+            vk::Buffer ib = mesh.indexBuffer.buffer;
+            cmd.bindVertexBuffers(0, vb, {0});
+            cmd.bindIndexBuffer(ib, 0, vk::IndexType::eUint32 );  
             cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipeline->pipelineLayout, 0, *loadedObjects[i].descriptorSets[frameIndex], nullptr);
             cmd.drawIndexed(mesh.indexCount, 1, 0, 0, 0);
         }

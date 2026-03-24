@@ -29,9 +29,13 @@ add_subdirectory(${LIB_DIR}/glfw-3.4)
 #GLM
 add_subdirectory(${LIB_DIR}/glm)
 
+#VMA
+add_subdirectory(${LIB_DIR}/vma)
+
 #SOURCES
 set(SRC
     src/main.cpp
+    sigel/vma.cpp
     sigel/SigelEngine.cpp
     sigel/Instance.cpp
     sigel/Device.cpp
@@ -77,6 +81,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     VulkanConfig
     glfw
     glm
+    GPUOpen::VulkanMemoryAllocator
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${LIB_DIR})

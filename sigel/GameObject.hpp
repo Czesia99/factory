@@ -2,6 +2,7 @@
 
 #include <vulkan/vulkan_raii.hpp>
 #include <glm/glm.hpp>
+#include <vma/vk_mem_alloc.h>
 
 #include "Vertex.hpp"
 #include "Device.hpp"
@@ -16,8 +17,8 @@ namespace sigel
 
     struct Buffer
     {
-        vk::raii::Buffer buffer = nullptr;
-        vk::raii::DeviceMemory memory = nullptr;
+        VkBuffer buffer = VK_NULL_HANDLE;
+        VmaAllocation allocation = VK_NULL_HANDLE;
         void *mapped = nullptr;
     };
 
@@ -34,8 +35,4 @@ namespace sigel
         std::vector<Buffer> uniformBuffers;
         std::vector<vk::raii::DescriptorSet> descriptorSets;
     };
-
-    // Buffer createVertexBuffer2(const std::vector<Vertex> &vertices, vk::raii::CommandPool &pool, Device *device);
-    // void createIndexBuffer2(Buffer &indexBuffer, std::vector<uint32_t> indices, vk::raii::CommandPool &pool, Device *device);
-    // void createUniformBuffers2(std::vector<Buffer> &uniformBuffers, Device *device);
 }

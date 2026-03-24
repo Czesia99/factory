@@ -42,7 +42,7 @@ namespace sigel
         swapchain.createImageViews();
         status("SWAPCHAIN", "Swapchain images allocated");
         
-        resourceManager.init(&device);
+        resourceManager.init(&device, &instance);
 
         shaderManager.init(&device);
         status("SHADER MANAGER", "Initialized");
@@ -91,6 +91,10 @@ namespace sigel
 
     void SigelEngine::cleanup()
     {
+        // for (auto& obj : renderer.loadedObjects)
+        //     obj.descriptorSets.clear();
+        renderer.cleanupObjects();
+        resourceManager.cleanup();
         swapchain.cleanupSwapChain();
 
         glfwDestroyWindow(window);
