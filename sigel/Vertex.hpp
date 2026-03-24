@@ -22,16 +22,17 @@ namespace sigel
         }
     };
 
-    // const std::vector<uint16_t> triangle_indices = {
-    //     0, 1, 2, 2, 3, 0
-    // };
-
     // const std::vector<Vertex> triangle_vertices = {
     //     {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
     //     {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
     //     {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
     //     {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
-    //
+    // };
+    
+
+    // const std::vector<uint16_t> triangle_indices = {
+    //     0, 1, 2, 2, 3, 0
+    // };
 
     const std::vector<Vertex> cube_vertices = {
         {{-1.0f, -1.0f,  1.0f}, {1.0f, 0.0f, 0.0f}},

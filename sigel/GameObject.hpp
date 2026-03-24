@@ -3,9 +3,7 @@
 #include <vulkan/vulkan_raii.hpp>
 #include <glm/glm.hpp>
 #include <vma/vk_mem_alloc.h>
-
 #include "Vertex.hpp"
-#include "Device.hpp"
 
 namespace sigel
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Instance.hpp"
+#include "VulkanContext.hpp"
 #include "GameObject.hpp"
 #include <vma/vk_mem_alloc.h>
 
@@ -9,15 +9,14 @@ namespace sigel
     class ResourceManager
     {
         private:
-            Device *_device = nullptr;
-            Instance *_instance = nullptr;
+            VulkanContext *_vctx = nullptr;
             std::vector<Mesh> meshes;
             vk::raii::CommandPool transferPool = nullptr;
             VmaAllocator allocator = VK_NULL_HANDLE;
 
         public:
             ResourceManager() = default;
-            void init(Device *device, Instance *instance);
+            void init(VulkanContext *vctx);
 
             const Mesh &getMesh(uint32_t index);
             uint32_t loadMesh(const std::vector<Vertex>&, const std::vector<uint32_t>&);
@@ -32,7 +31,5 @@ namespace sigel
             void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, vk::DeviceSize size);
             uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
             void immediateSubmit(std::function<void(vk::raii::CommandBuffer&)> fn);
-
-
     };
 }

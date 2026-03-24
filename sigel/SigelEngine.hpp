@@ -1,9 +1,7 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
-#include "Instance.hpp"
-#include "WindowSurface.hpp"
-#include "Device.hpp"
+#include "VulkanContext.hpp"
 #include "Swapchain.hpp"
 #include "Pipeline.hpp"
 #include "ShaderManager.hpp"
@@ -18,9 +16,7 @@ namespace sigel
     class SigelEngine {
         public:
             GLFWwindow *window;
-            Instance instance;
-            WindowSurface surface;
-            Device device;
+            VulkanContext vctx;
             Swapchain swapchain;
             ShaderManager shaderManager;
             Pipeline pipeline;

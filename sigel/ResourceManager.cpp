@@ -2,23 +2,22 @@
 
 namespace sigel
 {
-    void ResourceManager::init(Device *device, Instance *instance)
+    void ResourceManager::init(VulkanContext *vctx)
     {
-        _device = device;
-        _instance = instance;
+        _vctx = vctx;
 
         VmaAllocatorCreateInfo allocatorInfo{
-            .physicalDevice = *_device->physicalDevice,
-            .device         = *_device->logicalDevice,
-            .instance       = *_instance->instance,
+            .physicalDevice = *_vctx->device.physicalDevice,
+            .device         = *_vctx->device.logicalDevice,
+            .instance       = *_vctx->instance.instance,
         };
 
     vmaCreateAllocator(&allocatorInfo, &allocator);
         vk::CommandPoolCreateInfo poolInfo{
             .flags            = vk::CommandPoolCreateFlagBits::eTransient,
-            .queueFamilyIndex = _device->graphicsIndex
+            .queueFamilyIndex = _vctx->device.graphicsIndex
         };
-        transferPool = vk::raii::CommandPool(_device->logicalDevice, poolInfo);
+        transferPool = vk::raii::CommandPool(_vctx->device.logicalDevice, poolInfo);
     }
 
     const Mesh& ResourceManager::getMesh(uint32_t index)
@@ -65,18 +64,18 @@ namespace sigel
 
         vk::DeviceSize indexSize = sizeof(indices[0]) * indices.size();
 
-        Buffer stagingI;
-        VkBufferCreateInfo stagingIInfo{
+        Buffer stagingBuffer;
+        VkBufferCreateInfo stagingInfo{
             .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
             .size  = indexSize,
             .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT
         };
-        vmaCreateBuffer(allocator, &stagingIInfo, &stagingAllocInfo, &stagingI.buffer, &stagingI.allocation, nullptr);
+        vmaCreateBuffer(allocator, &stagingInfo, &stagingAllocInfo, &stagingBuffer.buffer, &stagingBuffer.allocation, nullptr);
 
         void* idata;
-        vmaMapMemory(allocator, stagingI.allocation, &idata);
+        vmaMapMemory(allocator, stagingBuffer.allocation, &idata);
         memcpy(idata, indices.data(), indexSize);
-        vmaUnmapMemory(allocator, stagingI.allocation);
+        vmaUnmapMemory(allocator, stagingBuffer.allocation);
 
         VkBufferCreateInfo indexBufferInfo{
             .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
@@ -88,8 +87,8 @@ namespace sigel
         };
         vmaCreateBuffer(allocator, &indexBufferInfo, &indexAllocInfo, &mesh.indexBuffer.buffer, &mesh.indexBuffer.allocation, nullptr);
 
-        copyBuffer(stagingI.buffer, mesh.indexBuffer.buffer, indexSize);
-        vmaDestroyBuffer(allocator, stagingI.buffer, stagingI.allocation);
+        copyBuffer(stagingBuffer.buffer, mesh.indexBuffer.buffer, indexSize);
+        vmaDestroyBuffer(allocator, stagingBuffer.buffer, stagingBuffer.allocation);
 
         mesh.indexCount = static_cast<uint32_t>(indices.size());
         uint32_t id = static_cast<uint32_t>(meshes.size());
@@ -176,7 +175,7 @@ namespace sigel
             .commandBufferCount = 1
         };
         auto cmd = std::move(
-            vk::raii::CommandBuffers(_device->logicalDevice, allocInfo).front()
+            vk::raii::CommandBuffers(_vctx->device.logicalDevice, allocInfo).front()
         );
  
         cmd.begin({ .flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
@@ -187,8 +186,8 @@ namespace sigel
             .commandBufferCount = 1,
             .pCommandBuffers    = &*cmd
         };
-        _device->graphicsQueue.submit(submitInfo);
-        _device->graphicsQueue.waitIdle();
+        _vctx->device.graphicsQueue.submit(submitInfo);
+        _vctx->device.graphicsQueue.waitIdle();
     }
 
     void ResourceManager::cleanup()

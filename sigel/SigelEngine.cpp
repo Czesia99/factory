@@ -24,40 +24,30 @@ namespace sigel
 
     void SigelEngine::initVulkan()
     {
-        instance.init();
-        status("CORE", "Vulkan Instance initialized");
+        vctx.init(window);
+        status("CORE", "Vulkan context ready");
 
-        surface.createSurface(instance.getInstance(), window);
-        status("SURFACE", "GLFW Window Surface created");
-
-        device.pickPhysicalDevice(instance.getInstance());
-        status("GPU", "Hardware selection complete");
-
-        device.printDeviceInfo();
-        device.createLogicalDevice(surface.getSurface());
-        status("DEVICE", "Logical Device and Queues ready");
-
-        swapchain.init(&device, &surface, window);
+        swapchain.init(&vctx, window);
         swapchain.createSwapChain();
         swapchain.createImageViews();
         status("SWAPCHAIN", "Swapchain images allocated");
         
-        resourceManager.init(&device, &instance);
+        resourceManager.init(&vctx);
 
-        shaderManager.init(&device);
+        shaderManager.init(&vctx.device);
         status("SHADER MANAGER", "Initialized");
 
         auto shaderCode = readFile("../sigel/shaders/slang2.spv");
         auto shaderModule = shaderManager.createShaderModule(shaderCode);
         status("SHADER MANAGER", "Slang SPIR-V binary loaded");
 
-        pipeline.init(&swapchain, &device);
+        pipeline.init(&swapchain, &vctx.device);
         pipeline.createDescriptorSetLayout();
         pipeline.createGraphicsPipeline(shaderModule);
         status("PIPELINE", "Graphics Pipeline created");
         
 
-        renderer.init(&device, &swapchain, &pipeline, &resourceManager);
+        renderer.init(&vctx.device, &swapchain, &pipeline, &resourceManager);
         status("RENDERER", "Initialization..");
         
         renderer.createCommandPool();
@@ -81,12 +71,7 @@ namespace sigel
             glfwPollEvents();
             renderer.drawFrame();
         }
-        waitIdle();
-    }
-
-    void SigelEngine::waitIdle()
-    {
-        device.logicalDevice.waitIdle();
+        vctx.waitIdle();
     }
 
     void SigelEngine::cleanup()
