@@ -30,9 +30,10 @@ namespace sigel
         allocator.init(&vctx.device, &vctx.instance);
         resourceManager.init(&allocator);
 
-        swapchain.init(&vctx, window);
+        swapchain.init(&vctx, window, &allocator);
         swapchain.createSwapChain();
         swapchain.createImageViews();
+        swapchain.createDepthResources();
         status("SWAPCHAIN", "Swapchain images allocated");
         
         shaderManager.init(&vctx.device);
@@ -79,6 +80,7 @@ namespace sigel
         //     obj.descriptorSets.clear();
         renderer.cleanupObjects();
         resourceManager.cleanup();
+        swapchain.cleanupDepthResources();
         allocator.cleanup();
         swapchain.cleanupSwapChain();
 

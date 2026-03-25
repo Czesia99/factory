@@ -89,6 +89,40 @@ namespace sigel
         buffer.mapped     = nullptr;
     }
 
+    AllocatedImage GpuAllocator::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage) 
+    {
+        AllocatedImage result;
+
+        VkImageCreateInfo imageInfo{
+            .sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+            .imageType     = VK_IMAGE_TYPE_2D,
+            .format        = format,
+            .extent        = { width, height, 1 },
+            .mipLevels     = 1,
+            .arrayLayers   = 1,
+            .samples       = VK_SAMPLE_COUNT_1_BIT,
+            .tiling        = VK_IMAGE_TILING_OPTIMAL,
+            .usage         = usage,
+            .sharingMode   = VK_SHARING_MODE_EXCLUSIVE,
+            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED
+        };
+
+        VmaAllocationCreateInfo allocInfo{
+            .usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE
+        };
+
+        vmaCreateImage(allocator, &imageInfo, &allocInfo, &result.image, &result.allocation, nullptr);
+
+        return result;
+    }
+
+    void GpuAllocator::destroyImage(AllocatedImage& image)
+    {
+        vmaDestroyImage(allocator, image.image, image.allocation);
+        image.image      = VK_NULL_HANDLE;
+        image.allocation = VK_NULL_HANDLE;
+    }
+
     void GpuAllocator::immediateSubmit(std::function<void(vk::raii::CommandBuffer&)> fn) 
     {
         vk::CommandBufferAllocateInfo allocInfo{

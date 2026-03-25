@@ -73,7 +73,7 @@ namespace sigel
 
     const std::vector<uint32_t> cube_indices = {
         // Front
-        0,  1,  2,   2,  3,  0,
+        0,  2,  1,   3,  2,  0,
         // Back
         5,  4,  7,   7,  6,  5,
         // Left
@@ -81,7 +81,7 @@ namespace sigel
         // Right
         12, 13, 14,  14, 15, 12,
         // Top
-        16, 17, 18,  18, 19, 16,
+        16, 18, 17,  18, 16, 19,
         // Bottom
         22, 23, 20,  20, 21, 22,
     };

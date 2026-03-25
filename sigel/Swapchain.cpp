@@ -9,10 +9,11 @@
 
 namespace sigel
 {
-    void Swapchain::init(VulkanContext *vctx, GLFWwindow *window)
+    void Swapchain::init(VulkanContext *vctx, GLFWwindow *window, GpuAllocator *allocator)
     {
         _vctx = vctx;
         _window = window;
+        _allocator = allocator;
     }
 
     void Swapchain::createSwapChain()
@@ -75,10 +76,12 @@ namespace sigel
         }
         _vctx->device.logicalDevice.waitIdle();
         
+        cleanupDepthResources();
         cleanupSwapChain();
 
         createSwapChain();
         createImageViews();
+        createDepthResources();
     }
 
     void Swapchain::createImageViews()
@@ -90,6 +93,36 @@ namespace sigel
 			imageViewCreateInfo.image = image;
 			swapChainImageViews.emplace_back(_vctx->device.logicalDevice, imageViewCreateInfo);
 		}
+    }
+
+    void Swapchain::createDepthResources()
+    {
+        depthImage = _allocator->createImage(
+            swapChainExtent.width,
+            swapChainExtent.height,
+            VK_FORMAT_D32_SFLOAT,
+            VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
+        );
+
+        vk::ImageViewCreateInfo viewInfo{
+            .image    = depthImage.image,
+            .viewType = vk::ImageViewType::e2D,
+            .format   = depthFormat,
+            .subresourceRange = {
+                .aspectMask     = vk::ImageAspectFlagBits::eDepth,
+                .baseMipLevel   = 0,
+                .levelCount     = 1,
+                .baseArrayLayer = 0,
+                .layerCount     = 1
+            }
+        };
+        depthImageView = vk::raii::ImageView(_vctx->device.logicalDevice, viewInfo);
+    }
+
+    void Swapchain::cleanupDepthResources()
+    {
+        depthImageView.clear();
+        _allocator->destroyImage(depthImage);
     }
 
     void Swapchain::cleanupSwapChain()

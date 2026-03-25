@@ -173,8 +173,7 @@ namespace sigel
         float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
         glm::mat4 view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        glm::mat4 proj = glm::perspective(glm::radians(45.0f), 
-            static_cast<float>(_swapchain->swapChainExtent.width) / _swapchain->swapChainExtent.height, 0.1f, 10.0f);
+        glm::mat4 proj = glm::perspective(glm::radians(45.0f), static_cast<float>(_swapchain->swapChainExtent.width) / _swapchain->swapChainExtent.height, 0.1f, 10.0f);
         proj[1][1] *= -1;
 
         for (size_t i = 0; i < loadedObjects.size(); i++)
@@ -212,11 +211,43 @@ namespace sigel
             .clearValue = clearColor
         };
 
+        // depth image transition — put it back
+        vk::ImageMemoryBarrier2 depthBarrier{
+            .srcStageMask        = vk::PipelineStageFlagBits2::eEarlyFragmentTests,
+            .srcAccessMask       = {},
+            .dstStageMask        = vk::PipelineStageFlagBits2::eEarlyFragmentTests,
+            .dstAccessMask       = vk::AccessFlagBits2::eDepthStencilAttachmentWrite,
+            .oldLayout           = vk::ImageLayout::eUndefined,
+            .newLayout           = vk::ImageLayout::eDepthAttachmentOptimal,
+            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .image               = _swapchain->depthImage.image,
+            .subresourceRange    = {
+                .aspectMask  = vk::ImageAspectFlagBits::eDepth,
+                .levelCount  = 1,
+                .layerCount  = 1
+            }
+        };
+        vk::DependencyInfo depthDep{
+            .imageMemoryBarrierCount = 1,
+            .pImageMemoryBarriers    = &depthBarrier
+        };
+        cmd.pipelineBarrier2(depthDep);
+
+        // keep eDepthAttachmentOptimal here — matches the barrier above
+        vk::RenderingAttachmentInfo depthAttachment{
+            .imageView   = *_swapchain->depthImageView,
+            .imageLayout = vk::ImageLayout::eDepthAttachmentOptimal,
+            .loadOp      = vk::AttachmentLoadOp::eClear,
+            .storeOp     = vk::AttachmentStoreOp::eDontCare,
+            .clearValue  = vk::ClearDepthStencilValue{ 1.0f, 0 }
+        };
         vk::RenderingInfo renderingInfo = {
             .renderArea = { .offset = { 0, 0 }, .extent = _swapchain->swapChainExtent },
             .layerCount = 1,
             .colorAttachmentCount = 1,
-            .pColorAttachments = &attachmentInfo
+            .pColorAttachments = &attachmentInfo,
+            .pDepthAttachment = &depthAttachment
         };
 
         cmd.beginRendering(renderingInfo);

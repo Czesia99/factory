@@ -7,6 +7,12 @@
 
 namespace sigel
 {
+    struct AllocatedImage 
+    {
+        VkImage       image      = VK_NULL_HANDLE;
+        VmaAllocation allocation = VK_NULL_HANDLE;
+    };
+
     class GpuAllocator
     {
         public:
@@ -15,6 +21,8 @@ namespace sigel
             Buffer createStagingBuffer(vk::DeviceSize size);
             Buffer createUniformBuffer(vk::DeviceSize size);
             void destroyBuffer(Buffer& buffer);
+            AllocatedImage createImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage);
+            void destroyImage(AllocatedImage& image);
             void immediateSubmit(std::function<void(vk::raii::CommandBuffer&)> fn);
             void cleanup();
         private:

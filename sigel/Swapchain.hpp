@@ -4,6 +4,7 @@
 #include <vulkan/vulkan_raii.hpp>
 
 #include "VulkanContext.hpp"
+#include "GpuAllocator.hpp"
 
 namespace sigel
 {
@@ -16,16 +17,23 @@ namespace sigel
             vk::Extent2D swapChainExtent;
             std::vector<vk::raii::ImageView> swapChainImageViews;
 
+            AllocatedImage      depthImage     = {};
+            vk::raii::ImageView depthImageView = nullptr;
+            vk::Format          depthFormat    = vk::Format::eD32Sfloat;
+
         private:
             VulkanContext *_vctx = nullptr;
             GLFWwindow *_window = nullptr;
+            GpuAllocator *_allocator = nullptr;
 
         public:
             Swapchain() = default;
-            void init(VulkanContext *vctx, GLFWwindow *window);
+            void init(VulkanContext *vctx, GLFWwindow *window, GpuAllocator *allocator);
             void createSwapChain();
             void recreateSwapChain();
             void createImageViews();
+            void createDepthResources();
+            void cleanupDepthResources();
             void cleanupSwapChain();
         private:
             vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats);
