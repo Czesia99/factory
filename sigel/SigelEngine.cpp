@@ -27,13 +27,14 @@ namespace sigel
         vctx.init(window);
         status("CORE", "Vulkan context ready");
 
+        allocator.init(&vctx.device, &vctx.instance);
+        resourceManager.init(&allocator);
+
         swapchain.init(&vctx, window);
         swapchain.createSwapChain();
         swapchain.createImageViews();
         status("SWAPCHAIN", "Swapchain images allocated");
         
-        resourceManager.init(&vctx);
-
         shaderManager.init(&vctx.device);
         status("SHADER MANAGER", "Initialized");
 
@@ -57,10 +58,8 @@ namespace sigel
 
         renderer.createDescriptorPool();
         status("RENDERER", "Descriptor Pool allocated");
-        
         renderer.createDescriptorSets();
         status("RENDERER", "Descriptor Sets allocated");
-
         renderer.createFrameData();
         status("RENDERER", "Frame Data created");
     }
@@ -80,6 +79,7 @@ namespace sigel
         //     obj.descriptorSets.clear();
         renderer.cleanupObjects();
         resourceManager.cleanup();
+        allocator.cleanup();
         swapchain.cleanupSwapChain();
 
         glfwDestroyWindow(window);

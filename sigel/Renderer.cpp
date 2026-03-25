@@ -18,7 +18,9 @@ namespace sigel
         GameObject object;
         object.meshID = _resourceManager->loadMesh(vertices, indices);
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        {
             object.uniformBuffers.emplace_back(_resourceManager->createUniformBuffer(sizeof(UniformBufferObject)));
+        }
 
         loadedObjects.emplace_back(std::move(object));
     }

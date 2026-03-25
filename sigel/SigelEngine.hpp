@@ -17,6 +17,7 @@ namespace sigel
         public:
             GLFWwindow *window;
             VulkanContext vctx;
+            GpuAllocator allocator;
             Swapchain swapchain;
             ShaderManager shaderManager;
             Pipeline pipeline;

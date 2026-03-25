@@ -39,6 +39,7 @@ set(SRC
     sigel/SigelEngine.cpp
     sigel/Instance.cpp
     sigel/Device.cpp
+    sigel/GpuAllocator.cpp
     sigel/WindowSurface.cpp
     sigel/Swapchain.cpp
     sigel/Pipeline.cpp

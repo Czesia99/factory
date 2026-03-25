@@ -1,0 +1,121 @@
+#include "GpuAllocator.hpp"
+
+namespace sigel
+{
+    void GpuAllocator::init(Device *device, Instance *instance)
+    {
+        _device = device;
+
+        VmaAllocatorCreateInfo allocatorInfo{
+            .physicalDevice = *device->physicalDevice,
+            .device         = *device->logicalDevice,
+            .instance       = *instance->instance,
+        };
+
+        vmaCreateAllocator(&allocatorInfo, &allocator);
+
+        vk::CommandPoolCreateInfo poolInfo{
+            .flags            = vk::CommandPoolCreateFlagBits::eTransient,
+            .queueFamilyIndex = device->graphicsIndex
+        };
+        transferPool = vk::raii::CommandPool(device->logicalDevice, poolInfo);
+    }
+
+    Buffer GpuAllocator::createBuffer(vk::DeviceSize size, VkBufferUsageFlags  usage, VmaMemoryUsage memoryUsage)
+    {
+        Buffer result;
+
+        VkBufferCreateInfo bufferInfo{
+            .sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .size        = size,
+            .usage       = usage,
+            .sharingMode = VK_SHARING_MODE_EXCLUSIVE
+        };
+
+        VmaAllocationCreateInfo allocInfo{
+            .usage = memoryUsage
+        };
+
+        vmaCreateBuffer(allocator, &bufferInfo, &allocInfo, &result.buffer, &result.allocation, nullptr);
+
+        return result;
+    }
+
+    Buffer GpuAllocator::createStagingBuffer(vk::DeviceSize size)
+    {
+        Buffer result;
+
+        VkBufferCreateInfo bufferInfo{
+            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .size  = size,
+            .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT
+        };
+        VmaAllocationCreateInfo allocInfo{
+            .flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT,
+            .usage = VMA_MEMORY_USAGE_AUTO
+        };
+        
+        VmaAllocationInfo info{};
+        vmaCreateBuffer(allocator, &bufferInfo, &allocInfo, &result.buffer, &result.allocation, &info);
+        result.mapped = info.pMappedData;
+        return result;
+    }
+
+    Buffer GpuAllocator::createUniformBuffer(vk::DeviceSize size)
+    {
+        Buffer result;
+
+        VkBufferCreateInfo bufferInfo{
+            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .size  = size,
+            .usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT
+        };
+        VmaAllocationCreateInfo allocInfo{
+            .flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT,
+            .usage = VMA_MEMORY_USAGE_AUTO
+        };
+
+        VmaAllocationInfo info{};
+        vmaCreateBuffer(allocator, &bufferInfo, &allocInfo, &result.buffer, &result.allocation, &info);
+        result.mapped = info.pMappedData;
+        return result;
+    }
+
+    void GpuAllocator::destroyBuffer(Buffer& buffer)
+    {        
+        vmaDestroyBuffer(allocator, buffer.buffer, buffer.allocation);
+        buffer.buffer     = VK_NULL_HANDLE;
+        buffer.allocation = VK_NULL_HANDLE;
+        buffer.mapped     = nullptr;
+    }
+
+    void GpuAllocator::immediateSubmit(std::function<void(vk::raii::CommandBuffer&)> fn) 
+    {
+        vk::CommandBufferAllocateInfo allocInfo{
+            .commandPool        = *transferPool,
+            .level              = vk::CommandBufferLevel::ePrimary,
+            .commandBufferCount = 1
+        };
+        auto cmd = std::move(
+            vk::raii::CommandBuffers(_device->logicalDevice, allocInfo).front()
+        );
+ 
+        cmd.begin({ .flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
+        fn(cmd);
+        cmd.end();
+ 
+        vk::SubmitInfo submitInfo{
+            .commandBufferCount = 1,
+            .pCommandBuffers    = &*cmd
+        };
+        _device->graphicsQueue.submit(submitInfo);
+        _device->graphicsQueue.waitIdle();
+    }
+
+    void GpuAllocator::cleanup()
+    {
+        transferPool.clear();
+        vmaDestroyAllocator(allocator);
+        allocator = VK_NULL_HANDLE;
+    }
+}
