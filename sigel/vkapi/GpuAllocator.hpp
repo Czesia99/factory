@@ -3,13 +3,13 @@
 #include <vma/vk_mem_alloc.h>
 #include "Instance.hpp"
 #include "Device.hpp"
-#include "GameObject.hpp"
+#include "../GameObject.hpp"
 
 namespace sigel
 {
     struct AllocatedImage 
     {
-        VkImage       image      = VK_NULL_HANDLE;
+        VkImage image = VK_NULL_HANDLE;
         VmaAllocation allocation = VK_NULL_HANDLE;
     };
 

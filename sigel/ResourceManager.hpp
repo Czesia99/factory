@@ -1,8 +1,8 @@
 #pragma once
 
-#include "VulkanContext.hpp"
+#include "vkapi/VulkanContext.hpp"
 #include "GameObject.hpp"
-#include "GpuAllocator.hpp"
+#include "vkapi/GpuAllocator.hpp"
 
 namespace sigel
 {
@@ -26,7 +26,5 @@ namespace sigel
 
             Buffer createUniformBuffer(vk::DeviceSize size);
             void destroyBuffer(Buffer& buffer);
-        private:
-            
     };
 }

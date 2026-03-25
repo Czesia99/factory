@@ -1,8 +1,7 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
-#include "VulkanContext.hpp"
-#include "Swapchain.hpp"
+#include "vkapi/VulkanContext.hpp"
 #include "Pipeline.hpp"
 #include "ShaderManager.hpp"
 #include "Renderer.hpp"
@@ -17,8 +16,6 @@ namespace sigel
         public:
             GLFWwindow *window;
             VulkanContext vctx;
-            GpuAllocator allocator;
-            Swapchain swapchain;
             ShaderManager shaderManager;
             Pipeline pipeline;
             ResourceManager resourceManager;

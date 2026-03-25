@@ -1,8 +1,8 @@
 #pragma once
 
 #include <vulkan/vulkan_raii.hpp>
-#include "Swapchain.hpp"
-#include "Device.hpp"
+#include "vkapi/Swapchain.hpp"
+#include "vkapi/Device.hpp"
 
 namespace sigel
 {

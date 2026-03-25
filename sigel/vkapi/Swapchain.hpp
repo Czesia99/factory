@@ -3,8 +3,9 @@
 #define NOMINMAX
 #include <vulkan/vulkan_raii.hpp>
 
-#include "VulkanContext.hpp"
+#include "Device.hpp"
 #include "GpuAllocator.hpp"
+#include "WindowSurface.hpp"
 
 namespace sigel
 {
@@ -22,13 +23,14 @@ namespace sigel
             vk::Format          depthFormat    = vk::Format::eD32Sfloat;
 
         private:
-            VulkanContext *_vctx = nullptr;
+            Device *_device = nullptr;
+            WindowSurface *_surface = nullptr;
             GLFWwindow *_window = nullptr;
             GpuAllocator *_allocator = nullptr;
 
         public:
             Swapchain() = default;
-            void init(VulkanContext *vctx, GLFWwindow *window, GpuAllocator *allocator);
+            void init(Device *device, WindowSurface *surface, GLFWwindow *window, GpuAllocator *allocator);
             void createSwapChain();
             void recreateSwapChain();
             void createImageViews();

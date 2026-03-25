@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Device.hpp"
+#include "vkapi/Device.hpp"
 
 namespace sigel
 {

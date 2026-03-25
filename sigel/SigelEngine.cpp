@@ -26,16 +26,8 @@ namespace sigel
     {
         vctx.init(window);
         status("CORE", "Vulkan context ready");
-
-        allocator.init(&vctx.device, &vctx.instance);
-        resourceManager.init(&allocator);
-
-        swapchain.init(&vctx, window, &allocator);
-        swapchain.createSwapChain();
-        swapchain.createImageViews();
-        swapchain.createDepthResources();
-        status("SWAPCHAIN", "Swapchain images allocated");
         
+        resourceManager.init(&vctx.allocator);
         shaderManager.init(&vctx.device);
         status("SHADER MANAGER", "Initialized");
 
@@ -43,13 +35,13 @@ namespace sigel
         auto shaderModule = shaderManager.createShaderModule(shaderCode);
         status("SHADER MANAGER", "Slang SPIR-V binary loaded");
 
-        pipeline.init(&swapchain, &vctx.device);
+        pipeline.init(&vctx.swapchain, &vctx.device);
         pipeline.createDescriptorSetLayout();
         pipeline.createGraphicsPipeline(shaderModule);
         status("PIPELINE", "Graphics Pipeline created");
         
 
-        renderer.init(&vctx.device, &swapchain, &pipeline, &resourceManager);
+        renderer.init(&vctx.device, &vctx.swapchain, &pipeline, &resourceManager);
         status("RENDERER", "Initialization..");
         
         renderer.createCommandPool();
@@ -76,13 +68,11 @@ namespace sigel
 
     void SigelEngine::cleanup()
     {
-        // for (auto& obj : renderer.loadedObjects)
-        //     obj.descriptorSets.clear();
         renderer.cleanupObjects();
         resourceManager.cleanup();
-        swapchain.cleanupDepthResources();
-        allocator.cleanup();
-        swapchain.cleanupSwapChain();
+        vctx.swapchain.cleanupDepthResources();
+        vctx.allocator.cleanup();
+        vctx.swapchain.cleanupSwapChain();
 
         glfwDestroyWindow(window);
         glfwTerminate();

@@ -1,5 +1,5 @@
 #include "Device.hpp"
-#include "Utils.hpp"
+#include "../Utils.hpp"
 
 namespace sigel
 {

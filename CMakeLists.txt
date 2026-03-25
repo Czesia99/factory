@@ -35,13 +35,13 @@ add_subdirectory(${LIB_DIR}/vma)
 #SOURCES
 set(SRC
     src/main.cpp
-    sigel/vma.cpp
+    sigel/vkapi/vma.cpp
     sigel/SigelEngine.cpp
-    sigel/Instance.cpp
-    sigel/Device.cpp
-    sigel/GpuAllocator.cpp
-    sigel/WindowSurface.cpp
-    sigel/Swapchain.cpp
+    sigel/vkapi/Instance.cpp
+    sigel/vkapi/Device.cpp
+    sigel/vkapi/GpuAllocator.cpp
+    sigel/vkapi/WindowSurface.cpp
+    sigel/vkapi/Swapchain.cpp
     sigel/Pipeline.cpp
     sigel/ShaderManager.cpp
     sigel/ResourceManager.cpp

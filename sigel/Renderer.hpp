@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Device.hpp"
-#include "Swapchain.hpp"
+#include "vkapi/Device.hpp"
+#include "vkapi/Swapchain.hpp"
 #include "Pipeline.hpp"
 #include "ResourceManager.hpp"
 #include "GameObject.hpp"
@@ -24,7 +24,6 @@ namespace sigel
 
         vk::raii::CommandPool commandPool = nullptr;
         vk::raii::DescriptorPool descriptorPool = nullptr;
-        
         
         uint32_t frameIndex = 0;
         std::array<FrameData, MAX_FRAMES_IN_FLIGHT> frames;

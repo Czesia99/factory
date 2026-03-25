@@ -114,9 +114,6 @@ namespace sigel
 
     void Renderer::createDescriptorPool()
     {
-        // vk::DescriptorPoolSize poolSize(vk::DescriptorType::eUniformBuffer, MAX_FRAMES_IN_FLIGHT);
-        // vk::DescriptorPoolCreateInfo poolInfo{ .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet, .maxSets = MAX_FRAMES_IN_FLIGHT, .poolSizeCount = 1, .pPoolSizes = &poolSize };
-        // descriptorPool = vk::raii::DescriptorPool(_device->logicalDevice, poolInfo);
         uint32_t maxSets = static_cast<uint32_t>(loadedObjects.size()) * MAX_FRAMES_IN_FLIGHT;
         vk::DescriptorPoolSize poolSize(vk::DescriptorType::eUniformBuffer, maxSets);
         vk::DescriptorPoolCreateInfo poolInfo{
@@ -211,7 +208,6 @@ namespace sigel
             .clearValue = clearColor
         };
 
-        // depth image transition — put it back
         vk::ImageMemoryBarrier2 depthBarrier{
             .srcStageMask        = vk::PipelineStageFlagBits2::eEarlyFragmentTests,
             .srcAccessMask       = {},
@@ -234,7 +230,6 @@ namespace sigel
         };
         cmd.pipelineBarrier2(depthDep);
 
-        // keep eDepthAttachmentOptimal here — matches the barrier above
         vk::RenderingAttachmentInfo depthAttachment{
             .imageView   = *_swapchain->depthImageView,
             .imageLayout = vk::ImageLayout::eDepthAttachmentOptimal,
@@ -242,6 +237,7 @@ namespace sigel
             .storeOp     = vk::AttachmentStoreOp::eDontCare,
             .clearValue  = vk::ClearDepthStencilValue{ 1.0f, 0 }
         };
+
         vk::RenderingInfo renderingInfo = {
             .renderArea = { .offset = { 0, 0 }, .extent = _swapchain->swapChainExtent },
             .layerCount = 1,
@@ -251,13 +247,10 @@ namespace sigel
         };
 
         cmd.beginRendering(renderingInfo);
-        // commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipeline->graphicsPipeline);
         cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, *_pipeline->graphicsPipeline);
 
         cmd.setViewport(0, vk::Viewport(0.0f, 0.0f, static_cast<float>(_swapchain->swapChainExtent.width), static_cast<float>(_swapchain->swapChainExtent.height), 0.0f, 1.0f));
         cmd.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _swapchain->swapChainExtent));
-
-
 
         for (int i = 0; i < loadedObjects.size(); i++)
         {
@@ -270,10 +263,6 @@ namespace sigel
             cmd.drawIndexed(mesh.indexCount, 1, 0, 0, 0);
         }
         
-        // commandBuffer.draw(3, 1, 0, 0);
-        // commandBuffers[frameIndex].draw(3, 1, 0, 0);
-        // const Mesh& mesh = _resourceManager->getMesh(loadedObjects[i].meshID);
-        // cmd.drawIndexed(cube_indices.size(), 1, 0, 0, 0);
         cmd.endRendering();
 
         transition_image_layout(
