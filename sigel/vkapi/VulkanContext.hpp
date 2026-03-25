@@ -29,9 +29,15 @@ namespace sigel
                 swapchain.createSwapChain();
                 swapchain.createImageViews();
                 swapchain.createDepthResources();
-                // status("SWAPCHAIN", "Swapchain images allocated");
             }
 
             void waitIdle() { device.logicalDevice.waitIdle(); }
+
+            void clean()
+            {
+                swapchain.cleanupDepthResources();
+                allocator.cleanup();
+                swapchain.cleanupSwapChain();
+            }
     };
 }

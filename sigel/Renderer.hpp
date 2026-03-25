@@ -12,21 +12,21 @@ namespace sigel
     class Renderer
     {
         public:
-        bool framebufferResized = false;
+            bool framebufferResized = false;
+            std::vector<GameObject> loadedObjects;
         
         private:
-        Device *_device = nullptr;
-        Swapchain *_swapchain = nullptr;
-        Pipeline *_pipeline = nullptr;
-        ResourceManager *_resourceManager  = nullptr;
-        
-        std::vector<GameObject> loadedObjects;
+            Device *_device = nullptr;
+            Swapchain *_swapchain = nullptr;
+            Pipeline *_pipeline = nullptr;
+            ResourceManager *_resourceManager  = nullptr;
+            
 
-        vk::raii::CommandPool commandPool = nullptr;
-        vk::raii::DescriptorPool descriptorPool = nullptr;
-        
-        uint32_t frameIndex = 0;
-        std::array<FrameData, MAX_FRAMES_IN_FLIGHT> frames;
+            vk::raii::CommandPool commandPool = nullptr;
+            vk::raii::DescriptorPool descriptorPool = nullptr;
+            
+            uint32_t frameIndex = 0;
+            std::array<FrameData, MAX_FRAMES_IN_FLIGHT> frames;
         std::vector<vk::raii::Semaphore> renderSemaphores;
 
         public:

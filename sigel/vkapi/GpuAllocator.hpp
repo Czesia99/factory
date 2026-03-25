@@ -24,6 +24,8 @@ namespace sigel
             AllocatedImage createImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage);
             void destroyImage(AllocatedImage& image);
             void immediateSubmit(std::function<void(vk::raii::CommandBuffer&)> fn);
+            void uploadVertex(const std::vector<Vertex> &vertices, Mesh &mesh);
+            void uploadIndices(const std::vector<uint32_t> &indices, Mesh &mesh);
             void cleanup();
         private:
             Device *_device = nullptr;

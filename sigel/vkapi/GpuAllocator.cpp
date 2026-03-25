@@ -142,8 +142,51 @@ namespace sigel
             .commandBufferCount = 1,
             .pCommandBuffers    = &*cmd
         };
+
         _device->graphicsQueue.submit(submitInfo);
         _device->graphicsQueue.waitIdle();
+    }
+
+    void GpuAllocator::uploadVertex(const std::vector<Vertex> &vertices, Mesh &mesh)
+    {
+        vk::DeviceSize size = sizeof(vertices[0]) * vertices.size();
+
+        Buffer staging = createStagingBuffer(size);
+        memcpy(staging.mapped, vertices.data(), size);
+
+        mesh.vertexBuffer = createBuffer(
+            size,
+            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE
+        );
+
+        immediateSubmit([&](vk::raii::CommandBuffer& cmd) {
+            vk::BufferCopy region{ .size = size };
+            cmd.copyBuffer(staging.buffer, mesh.vertexBuffer.buffer, region);
+        });
+
+        destroyBuffer(staging);
+    }
+
+    void GpuAllocator::uploadIndices(const std::vector<uint32_t> &indices, Mesh &mesh)
+    {
+        vk::DeviceSize size = sizeof(indices[0]) * indices.size();
+
+        Buffer staging = createStagingBuffer(size);
+        memcpy(staging.mapped, indices.data(), size);
+
+        mesh.indexBuffer = createBuffer(
+            size,
+            VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE
+        );
+
+        immediateSubmit([&](vk::raii::CommandBuffer& cmd) {
+            vk::BufferCopy region{ .size = size };
+            cmd.copyBuffer(staging.buffer, mesh.indexBuffer.buffer, region);
+        });
+
+        destroyBuffer(staging);
     }
 
     void GpuAllocator::cleanup()

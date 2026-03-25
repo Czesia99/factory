@@ -1,8 +1,8 @@
 #pragma once
 
 #include "vkapi/VulkanContext.hpp"
-#include "GameObject.hpp"
 #include "vkapi/GpuAllocator.hpp"
+#include "GameObject.hpp"
 
 namespace sigel
 {

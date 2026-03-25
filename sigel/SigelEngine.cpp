@@ -47,12 +47,15 @@ namespace sigel
         renderer.createCommandPool();
         status("RENDERER", "Command Pool allocated");
 
-        renderer.loadObject(cube_vertices, cube_indices);
+        // renderer.loadObject(cube_vertices, cube_indices);
 
-        renderer.createDescriptorPool();
-        status("RENDERER", "Descriptor Pool allocated");
-        renderer.createDescriptorSets();
-        status("RENDERER", "Descriptor Sets allocated");
+        if (renderer.loadedObjects.size() > 0)
+        {
+            renderer.createDescriptorPool();
+            status("RENDERER", "Descriptor Pool allocated");
+            renderer.createDescriptorSets();
+            status("RENDERER", "Descriptor Sets allocated");
+        }
         renderer.createFrameData();
         status("RENDERER", "Frame Data created");
     }
@@ -70,9 +73,7 @@ namespace sigel
     {
         renderer.cleanupObjects();
         resourceManager.cleanup();
-        vctx.swapchain.cleanupDepthResources();
-        vctx.allocator.cleanup();
-        vctx.swapchain.cleanupSwapChain();
+        vctx.clean();
 
         glfwDestroyWindow(window);
         glfwTerminate();
