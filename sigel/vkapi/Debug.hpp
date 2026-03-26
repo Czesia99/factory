@@ -3,7 +3,6 @@
 #include <vulkan/vulkan_raii.hpp>
 #include <iostream>
 #include <vector>
-#include <stdexcept>
 
 namespace sigel
 {

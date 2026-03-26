@@ -11,6 +11,8 @@ namespace sigel
         _swapchain = swapchain;
         _pipeline = pipeline;
         _resourceManager = resourceManager;
+
+        createCommandPool();
     }
 
     void Renderer::loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices)
@@ -21,6 +23,7 @@ namespace sigel
         {
             object.uniformBuffers.emplace_back(_resourceManager->createUniformBuffer(sizeof(UniformBufferObject)));
         }
+
 
         loadedObjects.emplace_back(std::move(object));
     }

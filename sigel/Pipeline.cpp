@@ -1,6 +1,4 @@
 #include "Pipeline.hpp"
-#include "Utils.hpp"
-
 #include "Vertex.hpp"
 
 namespace sigel
@@ -9,6 +7,7 @@ namespace sigel
     {
         _swapchain = swapchain;
         _device = device;
+        createDescriptorSetLayout();
     }
 
     void Pipeline::createGraphicsPipeline(vk::raii::ShaderModule &shaderModule)
@@ -26,7 +25,6 @@ namespace sigel
                                                                 .vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size()),
                                                                 .pVertexAttributeDescriptions    = attributeDescriptions.data() };
         
-        //
         vk::PipelineInputAssemblyStateCreateInfo inputAssembly {.topology = vk::PrimitiveTopology::eTriangleList};
         
         vk::Viewport{ 0.0f, 0.0f, static_cast<float>(_swapchain->swapChainExtent.width), static_cast<float>(_swapchain->swapChainExtent.height), 0.0f, 1.0f };

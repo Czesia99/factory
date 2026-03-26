@@ -27,7 +27,7 @@ namespace sigel
             
             uint32_t frameIndex = 0;
             std::array<FrameData, MAX_FRAMES_IN_FLIGHT> frames;
-        std::vector<vk::raii::Semaphore> renderSemaphores;
+            std::vector<vk::raii::Semaphore> renderSemaphores;
 
         public:
             void init(Device *device, Swapchain *swapchain, Pipeline *pipeline, ResourceManager *resourceManager);

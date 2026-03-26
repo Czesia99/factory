@@ -34,16 +34,12 @@ namespace sigel
         status("SHADER MANAGER", "Slang SPIR-V binary loaded");
 
         pipeline.init(&vctx.swapchain, &vctx.device);
-        pipeline.createDescriptorSetLayout();
         pipeline.createGraphicsPipeline(shaderModule);
         status("PIPELINE", "Graphics Pipeline created");
         
 
         renderer.init(&vctx.device, &vctx.swapchain, &pipeline, &resourceManager);
         status("RENDERER", "Initialization..");
-        
-        renderer.createCommandPool();
-        status("RENDERER", "Command Pool allocated");
 
         renderer.loadObject(cube_vertices, cube_indices);
 
@@ -54,6 +50,7 @@ namespace sigel
             renderer.createDescriptorSets();
             status("RENDERER", "Descriptor Sets allocated");
         }
+        
         renderer.createFrameData();
         status("RENDERER", "Frame Data created");
     }
