@@ -27,12 +27,10 @@ namespace sigel
         vctx.init(window);
         status("CORE", "Vulkan context ready");
         
-        resourceManager.init(&vctx.allocator);
-        shaderManager.init(&vctx.device);
-        status("SHADER MANAGER", "Initialized");
+        resourceManager.init(&vctx);
 
         auto shaderCode = readFile("../sigel/shaders/slang2.spv");
-        auto shaderModule = shaderManager.createShaderModule(shaderCode);
+        auto shaderModule = resourceManager.createShaderModule(shaderCode);
         status("SHADER MANAGER", "Slang SPIR-V binary loaded");
 
         pipeline.init(&vctx.swapchain, &vctx.device);
@@ -47,7 +45,7 @@ namespace sigel
         renderer.createCommandPool();
         status("RENDERER", "Command Pool allocated");
 
-        // renderer.loadObject(cube_vertices, cube_indices);
+        renderer.loadObject(cube_vertices, cube_indices);
 
         if (renderer.loadedObjects.size() > 0)
         {

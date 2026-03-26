@@ -2,9 +2,9 @@
 
 namespace sigel
 {
-    void ResourceManager::init(GpuAllocator *allocator)
+    void ResourceManager::init(VulkanContext *vctx)
     {
-        _allocator = allocator;
+        _vctx = vctx;
     }
 
     const Mesh& ResourceManager::getMesh(uint32_t index)
@@ -16,32 +16,39 @@ namespace sigel
     {
         Mesh mesh;
 
-        _allocator->uploadVertex(vertices, mesh);
-        _allocator->uploadIndices(indices, mesh);
+        _vctx->allocator.uploadVertex(vertices, mesh);
+        _vctx->allocator.uploadIndices(indices, mesh);
 
         mesh.indexCount = static_cast<uint32_t>(indices.size());
         uint32_t id = static_cast<uint32_t>(meshes.size());
         meshes.emplace_back(std::move(mesh));
-        
+
         return id;
+    }
+
+    vk::raii::ShaderModule ResourceManager::createShaderModule(const std::vector<char>& code) const
+    {
+        vk::ShaderModuleCreateInfo createInfo{ .codeSize = code.size() * sizeof(char), .pCode = reinterpret_cast<const uint32_t*>(code.data()) };
+        vk::raii::ShaderModule shaderModule{ _vctx->device.logicalDevice, createInfo };
+        return shaderModule;
     }
 
     Buffer ResourceManager::createUniformBuffer(vk::DeviceSize size)
     {
-        return _allocator->createUniformBuffer(size);
+        return _vctx->allocator.createUniformBuffer(size);
     }
 
     void ResourceManager::destroyBuffer(Buffer& buffer)
     {
-        _allocator->destroyBuffer(buffer);
+        _vctx->allocator.destroyBuffer(buffer);
     }
 
     void ResourceManager::cleanup()
     {
         for (auto& mesh : meshes)
         {
-            _allocator->destroyBuffer(mesh.vertexBuffer);
-            _allocator->destroyBuffer(mesh.indexBuffer);
+            _vctx->allocator.destroyBuffer(mesh.vertexBuffer);
+            _vctx->allocator.destroyBuffer(mesh.indexBuffer);
         }
         meshes.clear();
     }

@@ -9,21 +9,22 @@ namespace sigel
     class ResourceManager
     {
         public:
-            GpuAllocator *_allocator = nullptr;
+            std::vector<Mesh> meshes;
+            std::vector<vk::raii::ShaderModule> shaders;
         private:
             VulkanContext *_vctx = nullptr;
-            std::vector<Mesh> meshes;
             vk::raii::CommandPool transferPool = nullptr;
-
         public:
             ResourceManager() = default;
-            void init(GpuAllocator *allocator);
+            void init(VulkanContext *vctx);
 
             const Mesh &getMesh(uint32_t index);
             uint32_t loadMesh(const std::vector<Vertex>&, const std::vector<uint32_t>&);
 
+
             void cleanup();
 
+            vk::raii::ShaderModule createShaderModule(const std::vector<char>& code) const;
             Buffer createUniformBuffer(vk::DeviceSize size);
             void destroyBuffer(Buffer& buffer);
     };

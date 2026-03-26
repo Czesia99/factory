@@ -43,7 +43,6 @@ set(SRC
     sigel/vkapi/WindowSurface.cpp
     sigel/vkapi/Swapchain.cpp
     sigel/Pipeline.cpp
-    sigel/ShaderManager.cpp
     sigel/ResourceManager.cpp
     sigel/Renderer.cpp
 )

@@ -3,7 +3,6 @@
 #include <GLFW/glfw3.h>
 #include "vkapi/VulkanContext.hpp"
 #include "Pipeline.hpp"
-#include "ShaderManager.hpp"
 #include "Renderer.hpp"
 #include "Utils.hpp"
 
@@ -16,7 +15,6 @@ namespace sigel
         public:
             GLFWwindow *window;
             VulkanContext vctx;
-            ShaderManager shaderManager;
             Pipeline pipeline;
             ResourceManager resourceManager;
             Renderer renderer;
