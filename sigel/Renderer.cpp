@@ -5,20 +5,21 @@
 
 namespace sigel
 {
-    void Renderer::init(Device *device, Swapchain *swapchain, Pipeline *pipeline, ResourceManager *resourceManager)
+    void Renderer::init(Device *device, Swapchain *swapchain, PipelineManager *pm, ResourceManager *resourceManager)
     {
         _device = device;
         _swapchain = swapchain;
-        _pipeline = pipeline;
+        _pipelineManager = pm;
         _resourceManager = resourceManager;
 
         createCommandPool();
     }
 
-    void Renderer::loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices)
+    void Renderer::loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t pipelineID)
     {
         GameObject object;
         object.meshID = _resourceManager->loadMesh(vertices, indices);
+        object.pipelineID = pipelineID;
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {
             object.uniformBuffers.emplace_back(_resourceManager->createUniformBuffer(sizeof(UniformBufferObject)));
@@ -131,7 +132,8 @@ namespace sigel
     void Renderer::createDescriptorSets() {
         for (auto &obj : loadedObjects) 
         {
-            std::vector<vk::DescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, *_pipeline->descriptorSetLayout);
+            const PipelineInstance& pipeline = _pipelineManager->getPipeline(obj.pipelineID);
+            std::vector<vk::DescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, *pipeline.descriptorSetLayout);
             vk::DescriptorSetAllocateInfo allocInfo{
                 .descriptorPool = *descriptorPool,
                 .descriptorSetCount = static_cast<uint32_t>(layouts.size()),
@@ -250,19 +252,20 @@ namespace sigel
         };
 
         cmd.beginRendering(renderingInfo);
-        cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, *_pipeline->graphicsPipeline);
-
+        
         cmd.setViewport(0, vk::Viewport(0.0f, 0.0f, static_cast<float>(_swapchain->swapChainExtent.width), static_cast<float>(_swapchain->swapChainExtent.height), 0.0f, 1.0f));
         cmd.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _swapchain->swapChainExtent));
-
+        
         for (int i = 0; i < loadedObjects.size(); i++)
         {
             const Mesh &mesh = _resourceManager->getMesh(loadedObjects[i].meshID);
+            const PipelineInstance &pipeline = _pipelineManager->getPipeline(loadedObjects[i].pipelineID);
             vk::Buffer vb = mesh.vertexBuffer.buffer;
             vk::Buffer ib = mesh.indexBuffer.buffer;
+            cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline.pipeline);
             cmd.bindVertexBuffers(0, vb, {0});
             cmd.bindIndexBuffer(ib, 0, vk::IndexType::eUint32 );  
-            cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipeline->pipelineLayout, 0, *loadedObjects[i].descriptorSets[frameIndex], nullptr);
+            cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelineLayout, 0, *loadedObjects[i].descriptorSets[frameIndex], nullptr);
             cmd.drawIndexed(mesh.indexCount, 1, 0, 0, 0);
         }
         

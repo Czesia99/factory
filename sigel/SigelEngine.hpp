@@ -15,7 +15,7 @@ namespace sigel
         public:
             GLFWwindow *window;
             VulkanContext vctx;
-            Pipeline pipeline;
+            PipelineManager pipelineManager;
             ResourceManager resourceManager;
             Renderer renderer;
         public:

@@ -3,41 +3,56 @@
 
 namespace sigel
 {
-    void Pipeline::init(Swapchain *swapchain, Device *device)
+    void PipelineManager::init(Swapchain *swapchain, Device *device)
     {
         _swapchain = swapchain;
         _device = device;
-        createDescriptorSetLayout();
     }
 
-    void Pipeline::createGraphicsPipeline(vk::raii::ShaderModule &shaderModule)
+    const PipelineInstance& PipelineManager::getPipeline(uint32_t id) const
     {
-        vk::PipelineShaderStageCreateInfo vertShaderStageInfo{.stage = vk::ShaderStageFlagBits::eVertex, .module = shaderModule,  .pName = "vertMain"};
-        vk::PipelineShaderStageCreateInfo fragShaderStageInfo{.stage = vk::ShaderStageFlagBits::eFragment, .module = shaderModule, .pName = "fragMain"};
-        vk::PipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
+        return pipelines[id];
+    }
+
+    uint32_t PipelineManager::createPipeline(PipelineConfig &config, ResourceManager *rm)
+    {
+        PipelineInstance instance;
+        instance.name = config.name;
+
+        instance.descriptorSetLayout = createDescriptorSetLayout2();
+
+        const auto &vertModule = rm->getShader(config.vshaderID);
+        const auto &fragModule = rm->getShader(config.fshaderID);
+
+        vk::PipelineShaderStageCreateInfo vertexStage{.stage = vk::ShaderStageFlagBits::eVertex, .module = *vertModule,  .pName = "vertMain"};
+        vk::PipelineShaderStageCreateInfo fragmentStage{.stage = vk::ShaderStageFlagBits::eFragment, .module = *fragModule, .pName = "fragMain"};
+        vk::PipelineShaderStageCreateInfo shaderStages[] = {vertexStage, fragmentStage};
 
         //pipeline vertex input
         auto bindingDescription = Vertex::getBindingDescription();
         auto attributeDescriptions = Vertex::getAttributeDescriptions();
 
-        vk::PipelineVertexInputStateCreateInfo vertexInputInfo{ .vertexBindingDescriptionCount   = 1,
+        vk::PipelineVertexInputStateCreateInfo vertexInput  {   .vertexBindingDescriptionCount   = 1,
                                                                 .pVertexBindingDescriptions      = &bindingDescription,
                                                                 .vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size()),
                                                                 .pVertexAttributeDescriptions    = attributeDescriptions.data() };
         
+        
         vk::PipelineInputAssemblyStateCreateInfo inputAssembly {.topology = vk::PrimitiveTopology::eTriangleList};
         
+        vk::PipelineViewportStateCreateInfo viewportState{ .viewportCount = 1, .scissorCount = 1 };
+        
+        //hey
         vk::Viewport{ 0.0f, 0.0f, static_cast<float>(_swapchain->swapChainExtent.width), static_cast<float>(_swapchain->swapChainExtent.height), 0.0f, 1.0f };
         vk::Rect2D{vk::Offset2D{ 0, 0 }, _swapchain->swapChainExtent};
 
-        vk::PipelineViewportStateCreateInfo viewportState{ .viewportCount = 1, .scissorCount = 1 };
 
         vk::PipelineRasterizationStateCreateInfo rasterizer {
             .depthClampEnable = vk::False, 
             .rasterizerDiscardEnable = vk::False,
-            .polygonMode = vk::PolygonMode::eFill,
-            .cullMode = vk::CullModeFlagBits::eFront,
-            .frontFace = vk::FrontFace::eCounterClockwise,
+            .polygonMode = config.polygonMode,
+            .cullMode = config.cullMode,
+            .frontFace = config.frontFace,
             .depthBiasEnable = vk::False,
             .depthBiasSlopeFactor = 1.0f, 
             .lineWidth = 1.0f 
@@ -50,58 +65,51 @@ namespace sigel
             .colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA
         };
 
-        // color blend
-        // colorBlendAttachment.blendEnable = vk::True;
-        // colorBlendAttachment.srcColorBlendFactor = vk::BlendFactor::eSrcAlpha;
-        // colorBlendAttachment.dstColorBlendFactor = vk::BlendFactor::eOneMinusSrcAlpha;
-        // colorBlendAttachment.colorBlendOp = vk::BlendOp::eAdd;
-        // colorBlendAttachment.srcAlphaBlendFactor = vk::BlendFactor::eOne;
-        // colorBlendAttachment.dstAlphaBlendFactor = vk::BlendFactor::eZero;
-        // colorBlendAttachment.alphaBlendOp = vk::BlendOp::eAdd;
-
         vk::PipelineColorBlendStateCreateInfo colorBlending{.logicOpEnable = vk::False, .logicOp =  vk::LogicOp::eCopy, .attachmentCount = 1, .pAttachments =  &colorBlendAttachment };
 
-        std::vector dynamicStates = {
-            vk::DynamicState::eViewport,
-            vk::DynamicState::eScissor
-        };
 
         vk::PipelineDepthStencilStateCreateInfo depthStencil{
-            .depthTestEnable       = vk::True,
-            .depthWriteEnable      = vk::True,
+            .depthTestEnable       = config.depthTest  ? vk::True : vk::False,
+            .depthWriteEnable      = config.depthWrite ? vk::True : vk::False,
             .depthCompareOp        = vk::CompareOp::eLess,
             .depthBoundsTestEnable = vk::False,
             .stencilTestEnable     = vk::False
         };
 
+        std::vector dynamicStates = {vk::DynamicState::eViewport, vk::DynamicState::eScissor};
         vk::PipelineDynamicStateCreateInfo dynamicState{.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size()), .pDynamicStates = dynamicStates.data()};
         
-        vk::PipelineLayoutCreateInfo pipelineLayoutInfo{.setLayoutCount = 1, .pSetLayouts = &*descriptorSetLayout, .pushConstantRangeCount = 0};
+        vk::PipelineLayoutCreateInfo pipelineLayoutInfo{.setLayoutCount = 1, .pSetLayouts = &*instance.descriptorSetLayout, .pushConstantRangeCount = 0};
+        instance.pipelineLayout = vk::raii::PipelineLayout(_device->logicalDevice, pipelineLayoutInfo);
         
-        pipelineLayout = vk::raii::PipelineLayout(_device->logicalDevice, pipelineLayoutInfo);
-        
-        vk::Format depthFormat = vk::Format::eD32Sfloat;
-        vk::PipelineRenderingCreateInfo pipelineRenderingCreateInfo{ .colorAttachmentCount = 1, .pColorAttachmentFormats = &(_swapchain->swapChainSurfaceFormat.format), .depthAttachmentFormat = depthFormat };
+        vk::PipelineRenderingCreateInfo renderingInfo{ .colorAttachmentCount = 1, .pColorAttachmentFormats = &(_swapchain->swapChainSurfaceFormat.format), .depthAttachmentFormat = config.depthFormat };
 
-        vk::GraphicsPipelineCreateInfo pipelineInfo { 
-            .pNext = &pipelineRenderingCreateInfo,
-            .stageCount = 2, .pStages = shaderStages,
-            .pVertexInputState = &vertexInputInfo, .pInputAssemblyState = &inputAssembly,
-            .pViewportState = &viewportState, .pRasterizationState = &rasterizer,
-            .pMultisampleState = &multisampling, .pDepthStencilState = &depthStencil, .pColorBlendState = &colorBlending,
-            .pDynamicState = &dynamicState, .layout = pipelineLayout, .renderPass = nullptr
+        vk::GraphicsPipelineCreateInfo pipelineInfo{
+            .pNext               = &renderingInfo,
+            .stageCount          = 2,
+            .pStages             = shaderStages,
+            .pVertexInputState   = &vertexInput,
+            .pInputAssemblyState = &inputAssembly,
+            .pViewportState      = &viewportState,
+            .pRasterizationState = &rasterizer,
+            .pMultisampleState   = &multisampling,
+            .pDepthStencilState  = &depthStencil,
+            .pColorBlendState    = &colorBlending,
+            .pDynamicState       = &dynamicState,
+            .layout              = *instance.pipelineLayout,
+            .renderPass          = nullptr
         };
 
-        pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
-        pipelineInfo.basePipelineIndex = -1; // Optional
-
-        graphicsPipeline = vk::raii::Pipeline(_device->logicalDevice, nullptr, pipelineInfo);
+        instance.pipeline = vk::raii::Pipeline(_device->logicalDevice, nullptr, pipelineInfo);
+        uint32_t id = static_cast<uint32_t>(pipelines.size());
+        pipelines.emplace_back(std::move(instance));
+        return id;
     }
 
-    void Pipeline::createDescriptorSetLayout()
+    vk::raii::DescriptorSetLayout PipelineManager::createDescriptorSetLayout2()
     {
         vk::DescriptorSetLayoutBinding uboLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eVertex, nullptr);
         vk::DescriptorSetLayoutCreateInfo layoutInfo{.bindingCount = 1, .pBindings = &uboLayoutBinding};
-        descriptorSetLayout = vk::raii::DescriptorSetLayout(_device->logicalDevice, layoutInfo);
+        return vk::raii::DescriptorSetLayout(_device->logicalDevice, layoutInfo);
     }
 }

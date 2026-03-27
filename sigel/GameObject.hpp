@@ -30,6 +30,7 @@ namespace sigel
     struct GameObject
     {
         uint32_t meshID;
+        uint32_t pipelineID;
         std::vector<Buffer> uniformBuffers;
         std::vector<vk::raii::DescriptorSet> descriptorSets;
     };

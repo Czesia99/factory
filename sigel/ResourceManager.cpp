@@ -1,4 +1,6 @@
 #include "ResourceManager.hpp"
+#include "vkapi/GpuAllocator.hpp"
+#include "Utils.hpp"
 
 namespace sigel
 {
@@ -24,6 +26,30 @@ namespace sigel
         meshes.emplace_back(std::move(mesh));
 
         return id;
+    }
+
+    const vk::raii::ShaderModule &ResourceManager::getShader(uint32_t index)
+    {
+        return shaders[index];
+    }
+
+    uint32_t ResourceManager::loadShader(const std::string &path)
+    {
+        auto code = readFile(path);
+
+        vk::ShaderModuleCreateInfo createInfo{
+            .codeSize = code.size(),
+            .pCode    = reinterpret_cast<const uint32_t*>(code.data())
+        };
+
+        uint32_t id = static_cast<uint32_t>(shaders.size());
+        shaders.emplace_back(_vctx->device.logicalDevice, createInfo);
+        return id;
+    }
+
+    void ResourceManager::unloadShader(uint32_t id)
+    {
+        shaders[id].clear();
     }
 
     vk::raii::ShaderModule ResourceManager::createShaderModule(const std::vector<char>& code) const

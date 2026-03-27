@@ -28,20 +28,25 @@ namespace sigel
         status("CORE", "Vulkan context ready");
         
         resourceManager.init(&vctx);
+        pipelineManager.init(&vctx.swapchain, &vctx.device);
 
-        auto shaderCode = readFile("../sigel/shaders/slang2.spv");
-        auto shaderModule = resourceManager.createShaderModule(shaderCode);
-        status("SHADER MANAGER", "Slang SPIR-V binary loaded");
+        uint32_t shader = resourceManager.loadShader("../sigel/shaders/slang2.spv");
 
-        pipeline.init(&vctx.swapchain, &vctx.device);
-        pipeline.createGraphicsPipeline(shaderModule);
+        PipelineConfig defaultConfig {
+            .name = "default",
+            .vshaderID = shader,
+            .fshaderID = shader
+        };
+
+        uint32_t pipelineID = pipelineManager.createPipeline(defaultConfig, &resourceManager);
         status("PIPELINE", "Graphics Pipeline created");
+        // resourceManager.unloadShader(shader);
         
 
-        renderer.init(&vctx.device, &vctx.swapchain, &pipeline, &resourceManager);
+        renderer.init(&vctx.device, &vctx.swapchain, &pipelineManager, &resourceManager);
         status("RENDERER", "Initialization..");
 
-        renderer.loadObject(cube_vertices, cube_indices);
+        renderer.loadObject(cube_vertices, cube_indices, pipelineID); //give pipeline
 
         if (renderer.loadedObjects.size() > 0)
         {
@@ -50,7 +55,7 @@ namespace sigel
             renderer.createDescriptorSets();
             status("RENDERER", "Descriptor Sets allocated");
         }
-        
+
         renderer.createFrameData();
         status("RENDERER", "Frame Data created");
     }
