@@ -13,6 +13,7 @@ namespace sigel
         _resourceManager = resourceManager;
 
         createCommandPool();
+        createFrameData();
     }
 
     void Renderer::loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t pipelineID)
@@ -132,7 +133,7 @@ namespace sigel
     void Renderer::createDescriptorSets() {
         for (auto &obj : loadedObjects) 
         {
-            const PipelineInstance& pipeline = _pipelineManager->getPipeline(obj.pipelineID);
+            const PipelineInstance &pipeline = _pipelineManager->getPipeline(obj.pipelineID);
             std::vector<vk::DescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, *pipeline.descriptorSetLayout);
             vk::DescriptorSetAllocateInfo allocInfo{
                 .descriptorPool = *descriptorPool,

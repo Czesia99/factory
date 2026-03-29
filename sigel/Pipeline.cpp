@@ -1,12 +1,14 @@
 #include "Pipeline.hpp"
 #include "Vertex.hpp"
-
+#include "Utils.hpp"
 namespace sigel
 {
     void PipelineManager::init(Swapchain *swapchain, Device *device)
     {
         _swapchain = swapchain;
         _device = device;
+
+        createPipeline();
     }
 
     const PipelineInstance& PipelineManager::getPipeline(uint32_t id) const
@@ -14,18 +16,23 @@ namespace sigel
         return pipelines[id];
     }
 
-    uint32_t PipelineManager::createPipeline(PipelineConfig &config, ResourceManager *rm)
+    uint32_t PipelineManager::createPipeline(PipelineConfig config)
     {
         PipelineInstance instance;
         instance.name = config.name;
 
-        instance.descriptorSetLayout = createDescriptorSetLayout2();
+        instance.descriptorSetLayout = createDescriptorSetLayout();
 
-        const auto &vertModule = rm->getShader(config.vshaderID);
-        const auto &fragModule = rm->getShader(config.fshaderID);
+        auto code = readFile(config.shaderPath);
 
-        vk::PipelineShaderStageCreateInfo vertexStage{.stage = vk::ShaderStageFlagBits::eVertex, .module = *vertModule,  .pName = "vertMain"};
-        vk::PipelineShaderStageCreateInfo fragmentStage{.stage = vk::ShaderStageFlagBits::eFragment, .module = *fragModule, .pName = "fragMain"};
+        vk::ShaderModuleCreateInfo createInfo{
+            .sType    = vk::StructureType::eShaderModuleCreateInfo,
+            .codeSize = code.size(),
+            .pCode    = reinterpret_cast<const uint32_t*>(code.data())
+        };
+
+        vk::PipelineShaderStageCreateInfo vertexStage{.pNext = &createInfo, .stage = vk::ShaderStageFlagBits::eVertex, .module = VK_NULL_HANDLE,  .pName = "vertMain"};
+        vk::PipelineShaderStageCreateInfo fragmentStage{.pNext = &createInfo, .stage = vk::ShaderStageFlagBits::eFragment, .module = VK_NULL_HANDLE, .pName = "fragMain"};
         vk::PipelineShaderStageCreateInfo shaderStages[] = {vertexStage, fragmentStage};
 
         //pipeline vertex input
@@ -106,7 +113,7 @@ namespace sigel
         return id;
     }
 
-    vk::raii::DescriptorSetLayout PipelineManager::createDescriptorSetLayout2()
+    vk::raii::DescriptorSetLayout PipelineManager::createDescriptorSetLayout()
     {
         vk::DescriptorSetLayoutBinding uboLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eVertex, nullptr);
         vk::DescriptorSetLayoutCreateInfo layoutInfo{.bindingCount = 1, .pBindings = &uboLayoutBinding};

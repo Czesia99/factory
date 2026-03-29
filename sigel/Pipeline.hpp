@@ -11,8 +11,7 @@ namespace sigel
     struct PipelineConfig
     {
         std::string name = "default";
-        uint32_t vshaderID;
-        uint32_t fshaderID;
+        std::string shaderPath = "../sigel/shaders/slang2.spv";
         vk::PolygonMode polygonMode = vk::PolygonMode::eFill;
         vk::CullModeFlags cullMode = vk::CullModeFlagBits::eFront;
         vk::FrontFace frontFace = vk::FrontFace::eCounterClockwise;
@@ -29,6 +28,11 @@ namespace sigel
         vk::raii::PipelineLayout pipelineLayout = nullptr;
     };
 
+    enum PipelineType
+    {
+        DEFAULT,
+    };
+
     class PipelineManager
     {
         public:
@@ -43,7 +47,8 @@ namespace sigel
             // void createGraphicsPipeline();
             void init(Swapchain *swapchain, Device *device);
             const PipelineInstance &getPipeline(uint32_t id) const;
-            uint32_t createPipeline(PipelineConfig &config, ResourceManager *rm);
-            vk::raii::DescriptorSetLayout createDescriptorSetLayout2();
+            uint32_t createPipeline(PipelineConfig config = {});
+            vk::raii::DescriptorSetLayout createDescriptorSetLayout();
+            PipelineConfig defaultConfig;
     };
 }

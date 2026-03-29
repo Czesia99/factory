@@ -77,12 +77,19 @@ namespace sigel
             throw std::runtime_error( "Could not find a queue for graphics or present -> terminating" );
         }
 
-		vk::StructureChain<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceVulkan11Features, vk::PhysicalDeviceVulkan13Features, vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT> featureChain = {
-		    {},
-            {.shaderDrawParameters = vk::True},
-		    {.synchronization2 = true, .dynamicRendering = true},           // vk::PhysicalDeviceVulkan13Features
-		    {.extendedDynamicState = true}        // vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT
-		};
+        vk::StructureChain<
+            vk::PhysicalDeviceFeatures2,
+            vk::PhysicalDeviceVulkan11Features,
+            vk::PhysicalDeviceVulkan13Features,
+            vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT,
+            vk::PhysicalDeviceVulkan14Features
+        > featureChain = {
+            {},
+            { .shaderDrawParameters = vk::True },
+            { .synchronization2 = true, .dynamicRendering = true },
+            { .extendedDynamicState = true },
+            { .maintenance5 = true }
+        };
 
         float queuePriority = 0.5f;
 		vk::DeviceQueueCreateInfo deviceQueueCreateInfo{.queueFamilyIndex = graphicsIndex, .queueCount = 1, .pQueuePriorities = &queuePriority};

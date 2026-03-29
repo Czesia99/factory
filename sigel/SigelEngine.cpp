@@ -29,24 +29,10 @@ namespace sigel
         
         resourceManager.init(&vctx);
         pipelineManager.init(&vctx.swapchain, &vctx.device);
-
-        uint32_t shader = resourceManager.loadShader("../sigel/shaders/slang2.spv");
-
-        PipelineConfig defaultConfig {
-            .name = "default",
-            .vshaderID = shader,
-            .fshaderID = shader
-        };
-
-        uint32_t pipelineID = pipelineManager.createPipeline(defaultConfig, &resourceManager);
-        status("PIPELINE", "Graphics Pipeline created");
-        // resourceManager.unloadShader(shader);
-        
-
         renderer.init(&vctx.device, &vctx.swapchain, &pipelineManager, &resourceManager);
         status("RENDERER", "Initialization..");
-
-        renderer.loadObject(cube_vertices, cube_indices, pipelineID); //give pipeline
+        
+        renderer.loadObject(cube_vertices, cube_indices, PipelineType::DEFAULT);
 
         if (renderer.loadedObjects.size() > 0)
         {
@@ -55,9 +41,6 @@ namespace sigel
             renderer.createDescriptorSets();
             status("RENDERER", "Descriptor Sets allocated");
         }
-
-        renderer.createFrameData();
-        status("RENDERER", "Frame Data created");
     }
 
     void SigelEngine::mainLoop()
