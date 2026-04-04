@@ -2,6 +2,8 @@
 #include "vkapi/GpuAllocator.hpp"
 #include "Utils.hpp"
 
+#include <stb_image.h>
+
 namespace sigel
 {
     void ResourceManager::init(VulkanContext *vctx)
@@ -25,6 +27,28 @@ namespace sigel
         uint32_t id = static_cast<uint32_t>(meshes.size());
         meshes.emplace_back(std::move(mesh));
 
+        return id;
+    }
+
+    uint32_t ResourceManager::createTextureImage(std::string path)
+    {
+        int width, height, channels;
+        stbi_uc *pixels = stbi_load(path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+        vk::DeviceSize imageSize = width * height * 4;
+
+        if (!pixels) {
+            throw std::runtime_error("failed to load texture image!");
+        }
+
+        Buffer imgBuffer = _vctx->allocator.createStagingBuffer(imageSize);
+        memcpy(imgBuffer.mapped, pixels, imageSize);
+        stbi_image_free(pixels);
+
+        auto texture = _vctx->allocator.createImageTexture(imgBuffer, width, height, VK_FORMAT_R8G8B8A8_SRGB);
+
+        _vctx->allocator.destroyBuffer(imgBuffer);
+        uint32_t id = static_cast<uint32_t>(textures.size());
+        textures.emplace_back(std::move(texture));
         return id;
     }
 
@@ -77,5 +101,11 @@ namespace sigel
             _vctx->allocator.destroyBuffer(mesh.indexBuffer);
         }
         meshes.clear();
+
+        for (auto &texture : textures)
+        {
+            _vctx->allocator.destroyImage(texture);
+        }
+        textures.clear();
     }
 }

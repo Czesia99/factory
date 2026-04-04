@@ -11,7 +11,7 @@ namespace sigel
     struct PipelineConfig
     {
         std::string name = "default";
-        std::string shaderPath = "../sigel/shaders/slang2.spv";
+        std::string shaderPath = "../../sigel/shaders/slang2.spv";
         vk::PolygonMode polygonMode = vk::PolygonMode::eFill;
         vk::CullModeFlags cullMode = vk::CullModeFlagBits::eFront;
         vk::FrontFace frontFace = vk::FrontFace::eCounterClockwise;

@@ -98,7 +98,7 @@ namespace sigel
 
     void Swapchain::createDepthResources()
     {
-        depthImage = _allocator->createImage(
+        depthImage = _allocator->createDepthImage(
             swapChainExtent.width,
             swapChainExtent.height,
             VK_FORMAT_D32_SFLOAT,

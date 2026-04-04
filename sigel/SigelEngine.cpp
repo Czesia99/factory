@@ -33,6 +33,8 @@ namespace sigel
         status("RENDERER", "Initialization..");
         
         renderer.loadObject(cube_vertices, cube_indices, PipelineType::DEFAULT);
+        // resourceManager.createTextureImage("../../texture.jpg");
+        status("CACA", "texture loaded");
 
         if (renderer.loadedObjects.size() > 0)
         {

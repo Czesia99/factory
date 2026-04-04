@@ -89,7 +89,7 @@ namespace sigel
         buffer.mapped     = nullptr;
     }
 
-    AllocatedImage GpuAllocator::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage) 
+    AllocatedImage GpuAllocator::createDepthImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage) 
     {
         AllocatedImage result;
 
@@ -112,6 +112,88 @@ namespace sigel
         };
 
         vmaCreateImage(allocator, &imageInfo, &allocInfo, &result.image, &result.allocation, nullptr);
+
+        return result;
+    }
+
+    AllocatedImage GpuAllocator::createImageTexture(Buffer &imgBuffer, uint32_t width, uint32_t height, VkFormat format) 
+    {
+        AllocatedImage result;
+
+        VkDeviceSize imageSize = width * height * 4;
+
+        VkImageCreateInfo imageInfo{
+            .sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+            .imageType     = VK_IMAGE_TYPE_2D,
+            .format        = format,
+            .extent        = { width, height, 1 },
+            .mipLevels     = 1,
+            .arrayLayers   = 1,
+            .samples       = VK_SAMPLE_COUNT_1_BIT,
+            .tiling        = VK_IMAGE_TILING_OPTIMAL,
+            .usage         = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+            .sharingMode   = VK_SHARING_MODE_EXCLUSIVE,
+            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED
+        };
+
+        VmaAllocationCreateInfo allocInfo{ .usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE };
+
+        vmaCreateImage(allocator, &imageInfo, &allocInfo, &result.image, &result.allocation, nullptr);
+
+        immediateSubmit([&](vk::raii::CommandBuffer& cmd) {
+            VkImageMemoryBarrier2 toTransfer{
+                .sType            = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+                .srcStageMask     = VK_PIPELINE_STAGE_2_NONE,
+                .srcAccessMask    = VK_ACCESS_2_NONE,
+                .dstStageMask     = VK_PIPELINE_STAGE_2_COPY_BIT,
+                .dstAccessMask    = VK_ACCESS_2_TRANSFER_WRITE_BIT,
+                .oldLayout        = VK_IMAGE_LAYOUT_UNDEFINED,
+                .newLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                .image            = result.image,
+                .subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 }
+            };
+            VkDependencyInfo dep1{ .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+                .imageMemoryBarrierCount = 1, .pImageMemoryBarriers = &toTransfer };
+            vkCmdPipelineBarrier2(*cmd, &dep1);
+
+            // copy buffer → image
+            VkBufferImageCopy region{
+                .bufferOffset      = 0,
+                .bufferRowLength   = 0,
+                .bufferImageHeight = 0,
+                .imageSubresource  = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 },
+                .imageOffset       = { 0, 0, 0 },
+                .imageExtent       = { (uint32_t)width, (uint32_t)height, 1 }
+            };
+            vkCmdCopyBufferToImage(*cmd, imgBuffer.buffer, result.image,
+                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+
+            // transfer dst → shader read
+            VkImageMemoryBarrier2 toShader{
+                .sType            = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+                .srcStageMask     = VK_PIPELINE_STAGE_2_COPY_BIT,
+                .srcAccessMask    = VK_ACCESS_2_TRANSFER_WRITE_BIT,
+                .dstStageMask     = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
+                .dstAccessMask    = VK_ACCESS_2_SHADER_READ_BIT,
+                .oldLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                .newLayout        = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                .image            = result.image,
+                .subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 }
+            };
+            VkDependencyInfo dep2{ .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+                .imageMemoryBarrierCount = 1, .pImageMemoryBarriers = &toShader };
+            vkCmdPipelineBarrier2(*cmd, &dep2);
+        });
+
+        VkImageViewCreateInfo imageViewInfo{
+            .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+            .image = result.image,
+            .viewType = VK_IMAGE_VIEW_TYPE_2D,
+            .format = imageInfo.format,
+            .subresourceRange = {.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT, .levelCount = 1, .layerCount = 1 }
+        };
+
+        vkCreateImageView(*_device->logicalDevice, &imageViewInfo, nullptr, &result.view);
 
         return result;
     }

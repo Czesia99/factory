@@ -11,6 +11,7 @@ namespace sigel
         public:
             std::vector<Mesh> meshes;
             std::vector<vk::raii::ShaderModule> shaders;
+            std::vector<AllocatedImage> textures;
             // std::unordered_map<std::string, uint32_t> shaderCache;
         private:
             VulkanContext *_vctx = nullptr;
@@ -26,6 +27,7 @@ namespace sigel
             uint32_t loadShader(const std::string &path);
             void unloadShader(uint32_t id);
 
+            uint32_t createTextureImage(std::string path);
             void cleanup();
 
             Buffer createUniformBuffer(vk::DeviceSize size);

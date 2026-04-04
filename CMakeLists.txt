@@ -8,6 +8,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(LIB_DIR ${CMAKE_SOURCE_DIR}/libs)
 
+include_directories(${LIB_DIR}/stb)
+
 #Vulkan
 find_package(Vulkan REQUIRED)
 
@@ -35,6 +37,7 @@ add_subdirectory(${LIB_DIR}/vma)
 #SOURCES
 set(SRC
     src/main.cpp
+    sigel/stb.cpp
     sigel/vkapi/vma.cpp
     sigel/SigelEngine.cpp
     sigel/vkapi/Instance.cpp
