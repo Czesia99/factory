@@ -31,6 +31,7 @@ namespace sigel
     {
         uint32_t meshID;
         uint32_t pipelineID;
+        uint32_t texture;
         std::vector<Buffer> uniformBuffers;
         std::vector<vk::raii::DescriptorSet> descriptorSets;
     };

@@ -29,12 +29,14 @@ namespace sigel
             std::array<FrameData, MAX_FRAMES_IN_FLIGHT> frames;
             std::vector<vk::raii::Semaphore> renderSemaphores;
 
+            // vk::raii::DescriptorSet texturesDescriptorSet;
         public:
             void init(Device *device, Swapchain *swapchain, PipelineManager *pm, ResourceManager *resourceManager);
             void drawFrame();
             void createCommandPool();
             void createDescriptorPool();
             void createDescriptorSets();
+            // void createTexturesDescriptorSet();
             void recordCommandBuffer(uint32_t imageIndex);
             void createFrameData();
             void updateUniformBuffer(uint32_t currentImage);

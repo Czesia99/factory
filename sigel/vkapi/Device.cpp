@@ -84,7 +84,7 @@ namespace sigel
             vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT,
             vk::PhysicalDeviceVulkan14Features
         > featureChain = {
-            {},
+            { .features = {.samplerAnisotropy = true } },
             { .shaderDrawParameters = vk::True },
             { .synchronization2 = true, .dynamicRendering = true },
             { .extendedDynamicState = true },

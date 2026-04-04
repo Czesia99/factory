@@ -120,13 +120,18 @@ namespace sigel
     void Renderer::createDescriptorPool()
     {
         uint32_t maxSets = static_cast<uint32_t>(loadedObjects.size()) * MAX_FRAMES_IN_FLIGHT;
-        vk::DescriptorPoolSize poolSize(vk::DescriptorType::eUniformBuffer, maxSets);
+        std::array poolSize {
+            vk::DescriptorPoolSize( vk::DescriptorType::eUniformBuffer, maxSets),
+            vk::DescriptorPoolSize( vk::DescriptorType::eCombinedImageSampler, MAX_FRAMES_IN_FLIGHT)
+        };
+
         vk::DescriptorPoolCreateInfo poolInfo{
             .flags         = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
             .maxSets       = maxSets,
-            .poolSizeCount = 1,
-            .pPoolSizes    = &poolSize
+            .poolSizeCount = poolSize.size(),
+            .pPoolSizes    = poolSize.data()
         };
+
         descriptorPool = vk::raii::DescriptorPool(_device->logicalDevice, poolInfo);
     }
 
@@ -162,7 +167,22 @@ namespace sigel
                 _device->logicalDevice.updateDescriptorSets(descriptorWrite, nullptr);
             }
         }
+
+        
     }
+
+    // void Renderer::createTexturesDescriptorSet()
+    // {
+    //     // const PipelineInstance &pipeline = _pipelineManager->getPipeline(obj.pipelineID);
+    //     // std::vector<vk::DescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, *pipeline.descriptorSetLayout);
+    //     // vk::DescriptorSetAllocateInfo allocInfo{
+    //     //     .descriptorPool = *descriptorPool,
+    //     //     .descriptorSetCount = static_cast<uint32_t>(layouts.size()),
+    //     //     .pSetLayouts = layouts.data()
+    //     // };
+
+        
+    // }
 
     FrameData& Renderer::currentFrame()
     {

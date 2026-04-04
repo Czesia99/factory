@@ -195,6 +195,17 @@ namespace sigel
 
         vkCreateImageView(*_device->logicalDevice, &imageViewInfo, nullptr, &result.view);
 
+        VkSamplerCreateInfo samplerInfo{
+            .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+            .magFilter = VK_FILTER_LINEAR,
+            .minFilter = VK_FILTER_LINEAR,
+            .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
+            .anisotropyEnable = VK_TRUE,
+            .maxAnisotropy = 8.0f,
+            .maxLod = 1.0f,
+        };
+
+        vkCreateSampler(*_device->logicalDevice, &samplerInfo, nullptr, &result.sampler);
         return result;
     }
 
