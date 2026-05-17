@@ -6,6 +6,7 @@
 #include "ResourceManager.hpp"
 #include "GameObject.hpp"
 #include "frames.h"
+#include "Scene.hpp"
 
 namespace sigel
 {
@@ -13,7 +14,6 @@ namespace sigel
     {
         public:
             bool framebufferResized = false;
-            std::vector<GameObject> loadedObjects;
         
         private:
             VulkanContext *_vctx = nullptr;
@@ -28,22 +28,23 @@ namespace sigel
             std::array<FrameData, MAX_FRAMES_IN_FLIGHT> frames;
             std::vector<vk::raii::Semaphore> renderSemaphores;
 
-            // vk::raii::DescriptorSet texturesDescriptorSet;
+            std::vector<RenderObject> renderObjects;
+
         public:
             void init(VulkanContext *vctx, ResourceManager *resourceManager, PipelineManager *pipelineManager);
-            void drawFrame();
+            void drawFrame(const IScene& scene);
             void createCommandPool();
             void createDescriptorPool();
             void createDescriptorSets();
-            // void createTexturesDescriptorSet();
             void recordCommandBuffer(uint32_t imageIndex);
             void createFrameData();
-            void updateUniformBuffer(uint32_t currentImage);
+            void updateUniformBuffer(uint32_t currentImage, const IScene& scene);
             void createUniformBuffers(std::vector<Buffer> &uniformBuffers);
             FrameData &currentFrame();
 
             void loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t pipelineID, uint32_t textureID);
-            void cleanupObjects();
+            void prepareScene(const IScene& scene);
+            void cleanupRenderObjects();
         
         private:
             void waitFence();

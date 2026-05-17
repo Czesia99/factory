@@ -27,7 +27,7 @@ namespace sigel
         uint32_t indexCount = 0;
     };
 
-    struct GameObject
+    struct RenderObject
     {
         uint32_t meshID;
         uint32_t pipelineID;

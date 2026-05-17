@@ -1,12 +1,14 @@
 #include "SigelEngine.hpp"
 #include <iostream>
+#include <chrono>
+
 namespace sigel
 {
     void SigelEngine::run()
     {
         initWindow();
         try {
-            initVulkan();
+            initEngine();
             mainLoop();
         } catch (const std::exception& e) {
             std::cerr << "Fatal: " << e.what() << "\n";
@@ -26,7 +28,7 @@ namespace sigel
         glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
     }
 
-    void SigelEngine::initVulkan()
+    void SigelEngine::initEngine()
     {
         vctx.init(window);
         status("CORE", "Vulkan context ready");
@@ -36,35 +38,41 @@ namespace sigel
         renderer.init(&vctx, &resourceManager, &pipelineManager);
         status("RENDERER", "Initialization..");
         
-        uint32_t texID = resourceManager.createTextureImage("../flo.jpg");
-        renderer.loadObject(cube_vertices, cube_indices, PipelineType::DEFAULT, texID);
-
-        if (renderer.loadedObjects.size() > 0)
-        {
-            renderer.createDescriptorPool();
-            status("RENDERER", "Descriptor Pool allocated");
-            renderer.createDescriptorSets();
-            status("RENDERER", "Descriptor Sets allocated");
-        }
+        loadScene(&defaultScene);
     }
 
     void SigelEngine::mainLoop()
     {
+        auto last = std::chrono::high_resolution_clock::now();
         while (!glfwWindowShouldClose(window)) {
             glfwPollEvents();
-            renderer.drawFrame();
+            auto   now = std::chrono::high_resolution_clock::now();
+            float  dt  = std::chrono::duration<float>(now - last).count();
+            last       = now;
+
+            if (activeScene) activeScene->onUpdate(dt);
+            renderer.drawFrame(*activeScene);
         }
         vctx.waitIdle();
     }
 
     void SigelEngine::cleanup()
     {
-        renderer.cleanupObjects();
+        renderer.cleanupRenderObjects();
         resourceManager.cleanup();
         vctx.clean();
 
         glfwDestroyWindow(window);
         glfwTerminate();
+    }
+
+    void SigelEngine::loadScene(IScene* scene)
+    {
+        vctx.waitIdle();
+        if (activeScene) activeScene->onExit(resourceManager, pipelineManager);
+        scene->onEnter(resourceManager, pipelineManager);
+        renderer.prepareScene(*scene);
+        activeScene = scene;
     }
 
     void SigelEngine::framebufferResizeCallback(GLFWwindow* window, int width, int height) 

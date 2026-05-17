@@ -5,6 +5,7 @@
 #include "Pipeline.hpp"
 #include "Renderer.hpp"
 #include "Utils.hpp"
+#include "Scene.hpp"
 
 namespace sigel
 {
@@ -18,12 +19,15 @@ namespace sigel
             PipelineManager pipelineManager;
             ResourceManager resourceManager;
             Renderer renderer;
+            DefaultScene defaultScene;
+            IScene* activeScene = nullptr;
         public:
             SigelEngine() = default;
             void run();
+            void loadScene(IScene* scene);
         private:
             void initWindow();
-            void initVulkan();
+            void initEngine();
             void mainLoop();
             void waitIdle();
             void cleanup();

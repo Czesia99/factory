@@ -55,12 +55,12 @@ namespace sigel
             swapChainCreateInfo.imageSharingMode = vk::SharingMode::eConcurrent;
             swapChainCreateInfo.queueFamilyIndexCount = 2;
             swapChainCreateInfo.pQueueFamilyIndices = queueFamilyIndices;
-            status("SWAPCHAIN", "queue family concurrent mode");
+            // status("SWAPCHAIN", "queue family concurrent mode");
         } else {
             swapChainCreateInfo.imageSharingMode = vk::SharingMode::eExclusive;
             swapChainCreateInfo.queueFamilyIndexCount = 0; // Optional
             swapChainCreateInfo.pQueueFamilyIndices = nullptr; // Optional
-            status("SWAPCHAIN", "queue family exclusif mode");
+            // status("SWAPCHAIN", "queue family exclusif mode");
         }
 
         swapChain = vk::raii::SwapchainKHR(_device->logicalDevice, swapChainCreateInfo );

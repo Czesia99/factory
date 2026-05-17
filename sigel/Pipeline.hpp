@@ -28,11 +28,6 @@ namespace sigel
         vk::raii::PipelineLayout pipelineLayout = nullptr;
     };
 
-    enum PipelineType
-    {
-        DEFAULT,
-    };
-
     class PipelineManager
     {
         public:
