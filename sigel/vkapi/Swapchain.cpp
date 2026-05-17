@@ -77,8 +77,7 @@ namespace sigel
         }
         _device->logicalDevice.waitIdle();
         
-        cleanupDepthResources();
-        cleanupSwapChain();
+        cleanup();
 
         createSwapChain();
         createImageViews();
@@ -120,13 +119,19 @@ namespace sigel
         depthImageView = vk::raii::ImageView(_device->logicalDevice, viewInfo);
     }
 
+    void Swapchain::cleanup()
+    {
+        cleanupDepthResources();
+        cleanupImageViews();
+    }
+
     void Swapchain::cleanupDepthResources()
     {
         depthImageView.clear();
         _allocator->destroyImage(depthImage);
     }
 
-    void Swapchain::cleanupSwapChain()
+    void Swapchain::cleanupImageViews()
     {
         swapChainImageViews.clear();
         swapChain = nullptr;

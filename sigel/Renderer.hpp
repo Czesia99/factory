@@ -16,10 +16,9 @@ namespace sigel
             std::vector<GameObject> loadedObjects;
         
         private:
-            Device *_device = nullptr;
-            Swapchain *_swapchain = nullptr;
+            VulkanContext *_vctx = nullptr;
+            ResourceManager *_resourceManager = nullptr;
             PipelineManager *_pipelineManager = nullptr;
-            ResourceManager *_resourceManager  = nullptr;
             
 
             vk::raii::CommandPool commandPool = nullptr;
@@ -31,7 +30,7 @@ namespace sigel
 
             // vk::raii::DescriptorSet texturesDescriptorSet;
         public:
-            void init(Device *device, Swapchain *swapchain, PipelineManager *pm, ResourceManager *resourceManager);
+            void init(VulkanContext *vctx, ResourceManager *resourceManager, PipelineManager *pipelineManager);
             void drawFrame();
             void createCommandPool();
             void createDescriptorPool();
@@ -43,7 +42,7 @@ namespace sigel
             void createUniformBuffers(std::vector<Buffer> &uniformBuffers);
             FrameData &currentFrame();
 
-            void loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t pipelineID);
+            void loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t pipelineID, uint32_t textureID);
             void cleanupObjects();
         
         private:

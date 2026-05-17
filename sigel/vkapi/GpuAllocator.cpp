@@ -112,6 +112,7 @@ namespace sigel
         };
 
         vmaCreateImage(allocator, &imageInfo, &allocInfo, &result.image, &result.allocation, nullptr);
+        printf("vmaCreateImage → image=%p\n", (void*)result.image);
 
         return result;
     }
@@ -139,6 +140,7 @@ namespace sigel
         VmaAllocationCreateInfo allocInfo{ .usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE };
 
         vmaCreateImage(allocator, &imageInfo, &allocInfo, &result.image, &result.allocation, nullptr);
+        printf("createImageTexture → image=%p\n", (void*)result.image);
 
         immediateSubmit([&](vk::raii::CommandBuffer& cmd) {
             VkImageMemoryBarrier2 toTransfer{

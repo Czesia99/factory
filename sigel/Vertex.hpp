@@ -8,7 +8,7 @@ namespace sigel
     struct Vertex
     {
         glm::vec3 pos;
-        glm::vec3 color;
+        glm::vec2 texCoord;
 
         static vk::VertexInputBindingDescription getBindingDescription() {
             return { 0, sizeof(Vertex), vk::VertexInputRate::eVertex };
@@ -17,7 +17,7 @@ namespace sigel
         static std::array<vk::VertexInputAttributeDescription, 2> getAttributeDescriptions() {
             return {
                 vk::VertexInputAttributeDescription({0, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, pos)}),
-                vk::VertexInputAttributeDescription({1, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, color)})
+                vk::VertexInputAttributeDescription({1, 0, vk::Format::eR32G32Sfloat, offsetof(Vertex, texCoord)})
             };
         }
     };
@@ -35,40 +35,36 @@ namespace sigel
     // };
 
     const std::vector<Vertex> cube_vertices = {
-        {{-1.0f, -1.0f,  1.0f}, {1.0f, 0.0f, 0.0f}},
-        {{ 1.0f, -1.0f,  1.0f}, {1.0f, 0.0f, 0.0f}},
-        {{ 1.0f,  1.0f,  1.0f}, {1.0f, 0.0f, 0.0f}},
-        {{-1.0f,  1.0f,  1.0f}, {1.0f, 0.0f, 0.0f}},
-
+        // Front
+        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f,  1.0f}, {1.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {1.0f, 1.0f}},
+        {{-1.0f,  1.0f,  1.0f}, {0.0f, 1.0f}},
         // Back
-        {{-1.0f, -1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}},
-        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}},
-        {{ 1.0f,  1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}},
-        {{-1.0f,  1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}},
-
+        {{-1.0f, -1.0f, -1.0f}, {1.0f, 0.0f}},
+        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f, -1.0f}, {0.0f, 1.0f}},
+        {{-1.0f,  1.0f, -1.0f}, {1.0f, 1.0f}},
         // Left
-        {{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, 1.0f}},
-        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f, 1.0f}},
-        {{-1.0f,  1.0f,  1.0f}, {0.0f, 0.0f, 1.0f}},
-        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f, 1.0f}},
-
+        {{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{-1.0f, -1.0f,  1.0f}, {1.0f, 0.0f}},
+        {{-1.0f,  1.0f,  1.0f}, {1.0f, 1.0f}},
+        {{-1.0f,  1.0f, -1.0f}, {0.0f, 1.0f}},
         // Right
-        {{ 1.0f, -1.0f, -1.0f}, {1.0f, 1.0f, 0.0f}},
-        {{ 1.0f, -1.0f,  1.0f}, {1.0f, 1.0f, 0.0f}},
-        {{ 1.0f,  1.0f,  1.0f}, {1.0f, 1.0f, 0.0f}},
-        {{ 1.0f,  1.0f, -1.0f}, {1.0f, 1.0f, 0.0f}},
-
+        {{ 1.0f, -1.0f, -1.0f}, {1.0f, 0.0f}},
+        {{ 1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 1.0f}},
+        {{ 1.0f,  1.0f, -1.0f}, {1.0f, 1.0f}},
         // Top
-        {{-1.0f,  1.0f,  1.0f}, {0.0f, 1.0f, 1.0f}},
-        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 1.0f, 1.0f}},
-        {{ 1.0f,  1.0f, -1.0f}, {0.0f, 1.0f, 1.0f}},
-        {{-1.0f,  1.0f, -1.0f}, {0.0f, 1.0f, 1.0f}},
-
+        {{-1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {1.0f, 0.0f}},
+        {{ 1.0f,  1.0f, -1.0f}, {1.0f, 1.0f}},
+        {{-1.0f,  1.0f, -1.0f}, {0.0f, 1.0f}},
         // Bottom
-        {{-1.0f, -1.0f,  1.0f}, {1.0f, 0.0f, 1.0f}},
-        {{ 1.0f, -1.0f,  1.0f}, {1.0f, 0.0f, 1.0f}},
-        {{ 1.0f, -1.0f, -1.0f}, {1.0f, 0.0f, 1.0f}},
-        {{-1.0f, -1.0f, -1.0f}, {1.0f, 0.0f, 1.0f}},
+        {{-1.0f, -1.0f,  1.0f}, {0.0f, 1.0f}},
+        {{ 1.0f, -1.0f,  1.0f}, {1.0f, 1.0f}},
+        {{ 1.0f, -1.0f, -1.0f}, {1.0f, 0.0f}},
+        {{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
     };
 
     const std::vector<uint32_t> cube_indices = {

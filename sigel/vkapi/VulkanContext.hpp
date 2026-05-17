@@ -36,8 +36,8 @@ namespace sigel
             void clean()
             {
                 swapchain.cleanupDepthResources();
+                swapchain.cleanupImageViews();
                 allocator.cleanup();
-                swapchain.cleanupSwapChain();
             }
     };
 }

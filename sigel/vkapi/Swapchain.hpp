@@ -35,8 +35,9 @@ namespace sigel
             void recreateSwapChain();
             void createImageViews();
             void createDepthResources();
+            void cleanup();
             void cleanupDepthResources();
-            void cleanupSwapChain();
+            void cleanupImageViews();
         private:
             vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats);
             vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes);

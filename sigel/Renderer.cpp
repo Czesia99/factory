@@ -5,22 +5,22 @@
 
 namespace sigel
 {
-    void Renderer::init(Device *device, Swapchain *swapchain, PipelineManager *pm, ResourceManager *resourceManager)
+    void Renderer::init(VulkanContext *vctx, ResourceManager *resourceManager, PipelineManager *pipelineManager)
     {
-        _device = device;
-        _swapchain = swapchain;
-        _pipelineManager = pm;
+        _vctx = vctx;
         _resourceManager = resourceManager;
+        _pipelineManager = pipelineManager;
 
         createCommandPool();
         createFrameData();
     }
 
-    void Renderer::loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t pipelineID)
+    void Renderer::loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t pipelineID, uint32_t textureID)
     {
         GameObject object;
         object.meshID = _resourceManager->loadMesh(vertices, indices);
         object.pipelineID = pipelineID;
+        object.textureID = textureID;
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {
             object.uniformBuffers.emplace_back(_resourceManager->createUniformBuffer(sizeof(UniformBufferObject)));
@@ -46,11 +46,11 @@ namespace sigel
 
         waitFence();
 
-		auto [result, imageIndex] = _swapchain->swapChain.acquireNextImage(UINT64_MAX, *frame.presentSemaphore, nullptr);
+		auto [result, imageIndex] = _vctx->swapchain.swapChain.acquireNextImage(UINT64_MAX, *frame.presentSemaphore, nullptr);
 
         checkImageResult(result);
         
-        _device->logicalDevice.resetFences(*frame.inFlightFence);
+        _vctx->device.logicalDevice.resetFences(*frame.inFlightFence);
         
         updateUniformBuffer(frameIndex);
         frame.commandBuffer.reset();
@@ -65,21 +65,21 @@ namespace sigel
                                         .signalSemaphoreCount = 1,
                                         .pSignalSemaphores    = &*renderSemaphores[imageIndex]};
         
-        _device->graphicsQueue.submit(submitInfo, *frame.inFlightFence);
+        _vctx->device.graphicsQueue.submit(submitInfo, *frame.inFlightFence);
 
         
 		const vk::PresentInfoKHR presentInfoKHR{.waitSemaphoreCount = 1,
 		                                        .pWaitSemaphores    = &*renderSemaphores[imageIndex],
 		                                        .swapchainCount     = 1,
-		                                        .pSwapchains        = &*_swapchain->swapChain,
+		                                        .pSwapchains        = &*_vctx->swapchain.swapChain,
 		                                        .pImageIndices      = &imageIndex};
         
-        result = _device->presentQueue.presentKHR(presentInfoKHR);
+        result = _vctx->device.presentQueue.presentKHR(presentInfoKHR);
 
         if ((result == vk::Result::eSuboptimalKHR) || (result == vk::Result::eErrorOutOfDateKHR))
         {
             framebufferResized = false;
-            _swapchain->recreateSwapChain();
+            _vctx->swapchain.recreateSwapChain();
         }
         else
         {
@@ -98,23 +98,23 @@ namespace sigel
             .level              = vk::CommandBufferLevel::ePrimary,
             .commandBufferCount = MAX_FRAMES_IN_FLIGHT
         };
-        auto commandBuffers = vk::raii::CommandBuffers(_device->logicalDevice, allocInfo);
+        auto commandBuffers = vk::raii::CommandBuffers(_vctx->device.logicalDevice, allocInfo);
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {
             frames[i].commandBuffer   = std::move(commandBuffers[i]);
-            frames[i].inFlightFence   = vk::raii::Fence(_device->logicalDevice, vk::FenceCreateInfo{ .flags = vk::FenceCreateFlagBits::eSignaled });
-            frames[i].presentSemaphore = vk::raii::Semaphore(_device->logicalDevice, vk::SemaphoreCreateInfo{});
+            frames[i].inFlightFence   = vk::raii::Fence(_vctx->device.logicalDevice, vk::FenceCreateInfo{ .flags = vk::FenceCreateFlagBits::eSignaled });
+            frames[i].presentSemaphore = vk::raii::Semaphore(_vctx->device.logicalDevice, vk::SemaphoreCreateInfo{});
         }
 
-        for (size_t i = 0; i < _swapchain->swapChainImages.size(); i++)
-            renderSemaphores.emplace_back(_device->logicalDevice, vk::SemaphoreCreateInfo{});
+        for (size_t i = 0; i < _vctx->swapchain.swapChainImages.size(); i++)
+            renderSemaphores.emplace_back(_vctx->device.logicalDevice, vk::SemaphoreCreateInfo{});
     }
 
     void Renderer::createCommandPool()
     {
-        vk::CommandPoolCreateInfo poolInfo{.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer, .queueFamilyIndex = _device->graphicsIndex};
-        commandPool = vk::raii::CommandPool(_device->logicalDevice, poolInfo);
+        vk::CommandPoolCreateInfo poolInfo{.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer, .queueFamilyIndex = _vctx->device.graphicsIndex};
+        commandPool = vk::raii::CommandPool(_vctx->device.logicalDevice, poolInfo);
     }
 
     void Renderer::createDescriptorPool()
@@ -132,7 +132,7 @@ namespace sigel
             .pPoolSizes    = poolSize.data()
         };
 
-        descriptorPool = vk::raii::DescriptorPool(_device->logicalDevice, poolInfo);
+        descriptorPool = vk::raii::DescriptorPool(_vctx->device.logicalDevice, poolInfo);
     }
 
     void Renderer::createDescriptorSets() {
@@ -146,7 +146,7 @@ namespace sigel
                 .pSetLayouts = layouts.data()
             };
 
-            obj.descriptorSets = _device->logicalDevice.allocateDescriptorSets(allocInfo);
+            obj.descriptorSets = _vctx->device.logicalDevice.allocateDescriptorSets(allocInfo);
 
             for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
                 vk::DescriptorBufferInfo bufferInfo{
@@ -154,17 +154,28 @@ namespace sigel
                     .offset = 0, 
                     .range = sizeof(UniformBufferObject)
                 };
-
-                vk::WriteDescriptorSet descriptorWrite{
-                    .dstSet = *obj.descriptorSets[i],
-                    .dstBinding = 0,
-                    .dstArrayElement = 0,
-                    .descriptorCount = 1,
-                    .descriptorType = vk::DescriptorType::eUniformBuffer,
-                    .pBufferInfo = &bufferInfo
+                vk::DescriptorImageInfo  imageInfo{
+                    .sampler = _resourceManager->textures[obj.textureID].sampler, 
+                    .imageView = _resourceManager->textures[obj.textureID].view, 
+                    .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal
                 };
 
-                _device->logicalDevice.updateDescriptorSets(descriptorWrite, nullptr);
+                std::array<vk::WriteDescriptorSet, 2> descriptorWrites{{{
+                    .dstSet          = *obj.descriptorSets[i],
+                    .dstBinding      = 0,
+                    .dstArrayElement = 0,
+                    .descriptorCount = 1,
+                    .descriptorType  = vk::DescriptorType::eUniformBuffer,
+                    .pBufferInfo     = &bufferInfo},
+                    {.dstSet          = *obj.descriptorSets[i],
+                    .dstBinding      = 1,
+                    .dstArrayElement = 0,
+                    .descriptorCount = 1,
+                    .descriptorType  = vk::DescriptorType::eCombinedImageSampler,
+                    .pImageInfo      = &imageInfo
+                }}};
+
+                _vctx->device.logicalDevice.updateDescriptorSets(descriptorWrites, nullptr);
             }
         }
 
@@ -196,7 +207,7 @@ namespace sigel
         float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
         glm::mat4 view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        glm::mat4 proj = glm::perspective(glm::radians(45.0f), static_cast<float>(_swapchain->swapChainExtent.width) / _swapchain->swapChainExtent.height, 0.1f, 10.0f);
+        glm::mat4 proj = glm::perspective(glm::radians(45.0f), static_cast<float>(_vctx->swapchain.swapChainExtent.width) / _vctx->swapchain.swapChainExtent.height, 0.1f, 10.0f);
         proj[1][1] *= -1;
 
         for (size_t i = 0; i < loadedObjects.size(); i++)
@@ -227,7 +238,7 @@ namespace sigel
 
         vk::ClearValue clearColor = vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f);
         vk::RenderingAttachmentInfo attachmentInfo = {
-            .imageView = _swapchain->swapChainImageViews[imageIndex],
+            .imageView = _vctx->swapchain.swapChainImageViews[imageIndex],
             .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
             .loadOp = vk::AttachmentLoadOp::eClear,
             .storeOp = vk::AttachmentStoreOp::eStore,
@@ -243,7 +254,7 @@ namespace sigel
             .newLayout           = vk::ImageLayout::eDepthAttachmentOptimal,
             .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
             .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .image               = _swapchain->depthImage.image,
+            .image               = _vctx->swapchain.depthImage.image,
             .subresourceRange    = {
                 .aspectMask  = vk::ImageAspectFlagBits::eDepth,
                 .levelCount  = 1,
@@ -257,7 +268,7 @@ namespace sigel
         cmd.pipelineBarrier2(depthDep);
 
         vk::RenderingAttachmentInfo depthAttachment{
-            .imageView   = *_swapchain->depthImageView,
+            .imageView   = *_vctx->swapchain.depthImageView,
             .imageLayout = vk::ImageLayout::eDepthAttachmentOptimal,
             .loadOp      = vk::AttachmentLoadOp::eClear,
             .storeOp     = vk::AttachmentStoreOp::eDontCare,
@@ -265,7 +276,7 @@ namespace sigel
         };
 
         vk::RenderingInfo renderingInfo = {
-            .renderArea = { .offset = { 0, 0 }, .extent = _swapchain->swapChainExtent },
+            .renderArea = { .offset = { 0, 0 }, .extent = _vctx->swapchain.swapChainExtent },
             .layerCount = 1,
             .colorAttachmentCount = 1,
             .pColorAttachments = &attachmentInfo,
@@ -274,8 +285,8 @@ namespace sigel
 
         cmd.beginRendering(renderingInfo);
         
-        cmd.setViewport(0, vk::Viewport(0.0f, 0.0f, static_cast<float>(_swapchain->swapChainExtent.width), static_cast<float>(_swapchain->swapChainExtent.height), 0.0f, 1.0f));
-        cmd.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _swapchain->swapChainExtent));
+        cmd.setViewport(0, vk::Viewport(0.0f, 0.0f, static_cast<float>(_vctx->swapchain.swapChainExtent.width), static_cast<float>(_vctx->swapchain.swapChainExtent.height), 0.0f, 1.0f));
+        cmd.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _vctx->swapchain.swapChainExtent));
         
         for (int i = 0; i < loadedObjects.size(); i++)
         {
@@ -309,7 +320,7 @@ namespace sigel
     void Renderer::waitFence()
     {
         auto &fence = currentFrame().inFlightFence;
-		auto fenceResult = _device->logicalDevice.waitForFences(*fence, vk::True, UINT64_MAX);        
+		auto fenceResult = _vctx->device.logicalDevice.waitForFences(*fence, vk::True, UINT64_MAX);        
 		if (fenceResult != vk::Result::eSuccess)
 		{
 			throw std::runtime_error("failed to wait for fence!");
@@ -320,7 +331,7 @@ namespace sigel
     {
         if (result == vk::Result::eErrorOutOfDateKHR)
         {
-            _swapchain->recreateSwapChain();
+            _vctx->swapchain.recreateSwapChain();
             return;
         }
         if (result != vk::Result::eSuccess && result != vk::Result::eSuboptimalKHR)
@@ -349,7 +360,7 @@ namespace sigel
             .newLayout = newLayout,
             .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
             .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .image = _swapchain->swapChainImages[imageIndex],
+            .image = _vctx->swapchain.swapChainImages[imageIndex],
             .subresourceRange = {
                 .aspectMask = vk::ImageAspectFlagBits::eColor,
                 .baseMipLevel = 0,

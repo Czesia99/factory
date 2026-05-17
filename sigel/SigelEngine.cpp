@@ -1,12 +1,16 @@
 #include "SigelEngine.hpp"
-
+#include <iostream>
 namespace sigel
 {
     void SigelEngine::run()
     {
         initWindow();
-        initVulkan();
-        mainLoop();
+        try {
+            initVulkan();
+            mainLoop();
+        } catch (const std::exception& e) {
+            std::cerr << "Fatal: " << e.what() << "\n";
+        }
         cleanup();
     }
 
@@ -29,11 +33,12 @@ namespace sigel
         
         resourceManager.init(&vctx);
         pipelineManager.init(&vctx.swapchain, &vctx.device);
-        renderer.init(&vctx.device, &vctx.swapchain, &pipelineManager, &resourceManager);
+        renderer.init(&vctx, &resourceManager, &pipelineManager);
         status("RENDERER", "Initialization..");
         
-        renderer.loadObject(cube_vertices, cube_indices, PipelineType::DEFAULT);
-        // resourceManager.createTextureImage("../../texture.jpg");
+        uint32_t texID = resourceManager.createTextureImage("../flo.jpg");
+        renderer.loadObject(cube_vertices, cube_indices, PipelineType::DEFAULT, texID);
+
         status("CACA", "texture loaded");
 
         if (renderer.loadedObjects.size() > 0)
