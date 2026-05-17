@@ -39,8 +39,6 @@ namespace sigel
         uint32_t texID = resourceManager.createTextureImage("../flo.jpg");
         renderer.loadObject(cube_vertices, cube_indices, PipelineType::DEFAULT, texID);
 
-        status("CACA", "texture loaded");
-
         if (renderer.loadedObjects.size() > 0)
         {
             renderer.createDescriptorPool();
