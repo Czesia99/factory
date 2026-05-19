@@ -16,6 +16,16 @@ namespace sigel
         return pipelines[id];
     }
 
+    const PipelineInstance& PipelineManager::getPipelineByName(std::string &name) const
+    {
+        return pipelines[nameIndex.at(name)];
+    }
+
+    const uint32_t PipelineManager::getPipelineID(const std::string &name) const
+    {
+        return nameIndex.at(name);
+    }
+
     uint32_t PipelineManager::createPipeline(PipelineConfig config)
     {
         PipelineInstance instance;
@@ -109,7 +119,10 @@ namespace sigel
 
         instance.pipeline = vk::raii::Pipeline(_device->logicalDevice, nullptr, pipelineInfo);
         uint32_t id = static_cast<uint32_t>(pipelines.size());
+
+        nameIndex.insert({instance.name, id});
         pipelines.emplace_back(std::move(instance));
+
         return id;
     }
 

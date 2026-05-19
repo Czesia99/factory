@@ -48,6 +48,7 @@ set(SRC
     sigel/Pipeline.cpp
     sigel/ResourceManager.cpp
     sigel/Renderer.cpp
+    sigel/Scene.cpp
 )
 
 # file(GLOB SRC_SHADERS "${CMAKE_CURRENT_SOURCE_DIR}/sigel/shaders/*.slang")

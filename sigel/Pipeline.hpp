@@ -39,11 +39,14 @@ namespace sigel
             std::unordered_map<std::string, uint32_t> nameIndex;
         public:
             PipelineManager() = default;
-            // void createGraphicsPipeline();
             void init(Swapchain *swapchain, Device *device);
-            const PipelineInstance &getPipeline(uint32_t id) const;
             uint32_t createPipeline(PipelineConfig config = {});
             vk::raii::DescriptorSetLayout createDescriptorSetLayout();
             PipelineConfig defaultConfig;
+            
+            const PipelineInstance &getPipeline(uint32_t id) const;
+            const PipelineInstance &getPipelineByName(std::string &name) const;
+            const uint32_t getPipelineID(const std::string &name) const;
+        private:
     };
 }

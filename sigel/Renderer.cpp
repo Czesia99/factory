@@ -25,8 +25,6 @@ namespace sigel
         {
             object.uniformBuffers.emplace_back(_resourceManager->createUniformBuffer(sizeof(UniformBufferObject)));
         }
-
-
         renderObjects.emplace_back(std::move(object));
     }
 
@@ -40,9 +38,9 @@ namespace sigel
 
         for (const auto& so : sceneObjects) {
             RenderObject ro;
-            ro.meshID     = so.meshID;
             ro.pipelineID = so.pipelineID;
-            ro.textureID  = so.textureID;
+            ro.meshID = so.meshID;
+            ro.textureID = so.textureID;
             for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
                 ro.uniformBuffers.emplace_back(_resourceManager->createUniformBuffer(sizeof(UniformBufferObject)));
             renderObjects.emplace_back(std::move(ro));

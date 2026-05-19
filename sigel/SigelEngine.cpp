@@ -46,9 +46,9 @@ namespace sigel
         auto last = std::chrono::high_resolution_clock::now();
         while (!glfwWindowShouldClose(window)) {
             glfwPollEvents();
-            auto   now = std::chrono::high_resolution_clock::now();
-            float  dt  = std::chrono::duration<float>(now - last).count();
-            last       = now;
+            auto now = std::chrono::high_resolution_clock::now();
+            float dt = std::chrono::duration<float>(now - last).count();
+            last = now;
 
             if (activeScene) activeScene->onUpdate(dt);
             renderer.drawFrame(*activeScene);

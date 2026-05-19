@@ -5,7 +5,7 @@
 #include "Pipeline.hpp"
 #include "ResourceManager.hpp"
 #include "GameObject.hpp"
-#include "frames.h"
+#include "vkapi/frames.h"
 #include "Scene.hpp"
 
 namespace sigel

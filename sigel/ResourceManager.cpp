@@ -73,8 +73,8 @@ namespace sigel
     {
         for (auto& mesh : meshes)
         {
-            _vctx->allocator.destroyBuffer(mesh.vertexBuffer);
-            _vctx->allocator.destroyBuffer(mesh.indexBuffer);
+            destroyBuffer(mesh.vertexBuffer);
+            destroyBuffer(mesh.indexBuffer);
         }
         meshes.clear();
 
