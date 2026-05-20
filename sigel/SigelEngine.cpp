@@ -50,7 +50,17 @@ namespace sigel
             float dt = std::chrono::duration<float>(now - last).count();
             last = now;
 
-            if (activeScene) activeScene->onUpdate(dt);
+            input.moveForward = (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS);
+            input.moveBackward = (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS);
+            input.moveLeft = (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS);
+            input.moveRight = (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS);
+            input.moveUp = (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS);
+            input.moveDown = (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS);
+
+            if (activeScene) {
+                activeScene->onUpdate(dt);
+                activeScene->processInput(input, dt);
+            }
             renderer.drawFrame(*activeScene);
         }
         vctx.waitIdle();

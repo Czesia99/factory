@@ -213,18 +213,17 @@ namespace sigel
     void Renderer::updateUniformBuffer(uint32_t currentImage, const IScene& scene) 
     {
         const auto& sceneObjects = scene.getObjects();
+        const auto& sceneCamera = scene.getCamera();
 
-        glm::mat4 view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        glm::mat4 proj = glm::perspective(glm::radians(45.0f),
-            static_cast<float>(_vctx->swapchain.swapChainExtent.width) /
-            static_cast<float>(_vctx->swapchain.swapChainExtent.height), 0.1f, 10.0f);
-        proj[1][1] *= -1;
+        float width  = static_cast<float>(_vctx->swapchain.swapChainExtent.width);
+        float height = static_cast<float>(_vctx->swapchain.swapChainExtent.height);
+        float aspect = width / height;
 
         for (size_t i = 0; i < renderObjects.size(); i++) {
             UniformBufferObject ubo{};
             ubo.model = sceneObjects[i].transform;
-            ubo.view  = view;
-            ubo.proj  = proj;
+            ubo.view  = sceneCamera.getViewMatrix();
+            ubo.proj  = sceneCamera.getProjectionMatrix(aspect);
             memcpy(renderObjects[i].uniformBuffers[currentImage].mapped, &ubo, sizeof(ubo));
         }
     }

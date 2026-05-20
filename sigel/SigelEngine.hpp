@@ -21,6 +21,7 @@ namespace sigel
             Renderer renderer;
             DefaultScene defaultScene;
             IScene* activeScene = nullptr;
+            MovementInput input;
         public:
             SigelEngine() = default;
             void run();
