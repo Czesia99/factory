@@ -19,5 +19,6 @@ namespace sigel
         void onUpdate(float dt) override;
 
         void processInput(const MovementInput &input, float dt) override;
+        void mouseCallback(float dx, float dy) override;
     };
 }

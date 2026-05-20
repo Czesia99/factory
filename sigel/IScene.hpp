@@ -5,6 +5,7 @@
 #include "Pipeline.hpp"
 #include "Input.hpp"
 #include "Camera.hpp"
+#include "Transform.hpp"
 
 namespace sigel
 {
@@ -13,7 +14,7 @@ namespace sigel
         uint32_t  pipelineID;
         uint32_t  meshID;
         uint32_t  textureID;
-        glm::mat4 transform = glm::mat4(1.0f);
+        Transform transform;
     };
 
     class IScene {
@@ -28,5 +29,6 @@ namespace sigel
         virtual void onUpdate(float deltaTime) = 0;
 
         virtual void processInput(const MovementInput &input, float dt) = 0;
+        virtual void mouseCallback(float dx, float dy) = 0;
     };
 }

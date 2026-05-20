@@ -9,9 +9,10 @@ namespace sigel
         uint32_t mesh = rm.loadMesh(cube_vertices, cube_indices);
         uint32_t defaultPipeline = pm.getPipelineID("default");
         objects.push_back({ defaultPipeline, mesh, flotex });
-        objects.push_back({ defaultPipeline, mesh, flotex });
+        // objects.push_back({ defaultPipeline, mesh, flotex });
 
         // objects[1].transform = glm::translate
+        objects[0].transform.rotation = glm::vec3{0.0f, 0.0f, 0.0f};
 
     }
 
@@ -22,11 +23,11 @@ namespace sigel
 
     void DefaultScene::onUpdate(float dt)
     {
-        elapsed += dt;
-        for (size_t i = 0; i < objects.size(); i++) {
-            glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(i * 1.5f, 0.0f, - 4.0f));
-            objects[i].transform = glm::rotate(model, elapsed * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        }
+        // elapsed += dt;
+        // for (size_t i = 0; i < objects.size(); i++) {
+        //     glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(i * 1.5f, 0.0f, - 4.0f));
+        //     objects[i].transform = glm::rotate(model, elapsed * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        // }
     }
 
     void DefaultScene::processInput(const MovementInput &input, float dt)
@@ -37,5 +38,10 @@ namespace sigel
         if (input.moveRight)    camera.processKeyboardMovement(RIGHT, dt);
         if (input.moveUp)       camera.processKeyboardMovement(UP, dt);
         if (input.moveDown)     camera.processKeyboardMovement(DOWN, dt);
+    }
+
+    void DefaultScene::mouseCallback(float dx, float dy)
+    {
+        camera.processMouseMovement(dx, dy);
     }
 }

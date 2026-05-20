@@ -33,6 +33,7 @@ namespace sigel
     uint32_t ResourceManager::createTextureImage(std::string path)
     {
         int width, height, channels;
+        stbi_set_flip_vertically_on_load(true); // TODO: Check if i can
         stbi_uc *pixels = stbi_load(path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
         vk::DeviceSize imageSize = width * height * 4;
 

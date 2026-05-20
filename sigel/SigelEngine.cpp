@@ -26,6 +26,7 @@ namespace sigel
 
         glfwSetWindowUserPointer(window, this);
         glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
+        glfwSetCursorPosCallback(window, mouseCallbackWrapper);
     }
 
     void SigelEngine::initEngine()
@@ -60,6 +61,7 @@ namespace sigel
             if (activeScene) {
                 activeScene->onUpdate(dt);
                 activeScene->processInput(input, dt);
+
             }
             renderer.drawFrame(*activeScene);
         }
@@ -90,4 +92,30 @@ namespace sigel
         auto app = reinterpret_cast<SigelEngine*>(glfwGetWindowUserPointer(window));
         app->renderer.framebufferResized = true;
     }
+
+    void SigelEngine::mouseCallbackWrapper(GLFWwindow* window, double x, double y)
+    {
+        auto app = reinterpret_cast<SigelEngine*>(glfwGetWindowUserPointer(window));
+        static bool firstMouse = true;
+
+        double dx = 0.0;
+        double dy = 0.0;
+
+        if (firstMouse) {
+            app->mouse_x = x;
+            app->mouse_y = y;
+            firstMouse = false;
+        } else {
+            dx = x - app->mouse_x;
+            dy = y - app->mouse_y;
+
+            app->mouse_x = x;
+            app->mouse_y = y;
+        }
+
+        if (app->activeScene) {
+            app->activeScene->mouseCallback(static_cast<float>(dx), static_cast<float>(dy));
+        }
+    }
+
 }

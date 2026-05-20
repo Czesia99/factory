@@ -221,7 +221,7 @@ namespace sigel
 
         for (size_t i = 0; i < renderObjects.size(); i++) {
             UniformBufferObject ubo{};
-            ubo.model = sceneObjects[i].transform;
+            ubo.model = sceneObjects[i].transform.getModelMatrix();
             ubo.view  = sceneCamera.getViewMatrix();
             ubo.proj  = sceneCamera.getProjectionMatrix(aspect);
             memcpy(renderObjects[i].uniformBuffers[currentImage].mapped, &ubo, sizeof(ubo));

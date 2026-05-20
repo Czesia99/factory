@@ -22,6 +22,8 @@ namespace sigel
             DefaultScene defaultScene;
             IScene* activeScene = nullptr;
             MovementInput input;
+            double mouse_x;
+            double mouse_y;
         public:
             SigelEngine() = default;
             void run();
@@ -34,5 +36,7 @@ namespace sigel
             void cleanup();
 
             static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
+            static void mouseCallbackWrapper(GLFWwindow* window, double x, double y);
+
     };
 }

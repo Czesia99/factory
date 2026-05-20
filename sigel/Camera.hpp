@@ -4,7 +4,7 @@
 
 namespace sigel
 {
-    enum CamDirection  {
+    enum CamDirection {
         FORWARD,
         BACKWARD,
         LEFT,
@@ -60,7 +60,7 @@ namespace sigel
                 world_up = glm::vec3(0.0f, 1.0f, 0.0f);
 
                 yaw = -90.0f;
-                pitch = -15.0f;
+                pitch = 0.0f;
                 fov = 60.0f;
 
                 movement_speed = 2.0f;
@@ -73,19 +73,19 @@ namespace sigel
                 movement_lock = false;
                 
                 updateCameraVectors();
-            };
+            }
 
             glm::mat4 getViewMatrix() const
             {
                 return glm::lookAt(position, position + front, up);
-            };
+            }
 
             glm::mat4 getProjectionMatrix(float aspect) const
             {
                 glm::mat4 proj = glm::perspective(glm::radians(fov), aspect, near_plane, far_plane);
                 proj[1][1] *= -1.0f;    
                 return proj;            
-            };
+            }
 
             void processKeyboardMovement(CamDirection direction, float delta_time)
             {
@@ -104,11 +104,7 @@ namespace sigel
                     position -= WORLD_UP * velocity;
                 if (fps)
                     position.y = initial_pos.y;
-
-                std::cout << "x = " << position.x << std::endl;
-                std::cout << "y = " << position.y << std::endl;
-                std::cout << "z = " << position.z << std::endl;
-            };
+            }
 
             void processMouseMovement(float xoffset, float yoffset)
             {
@@ -119,7 +115,7 @@ namespace sigel
                 yoffset *= sensitivity;
 
                 yaw   += xoffset;
-                pitch += yoffset;
+                pitch -= yoffset;
 
                 if (constrain_pitch)
                 {
@@ -130,20 +126,18 @@ namespace sigel
                 }
 
                 updateCameraVectors();
-            };
+            }
 
             void updateCameraVectors()
             {
-                // calculate the new Front vector
                 glm::vec3 nfront;
                 nfront.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
                 nfront.y = sin(glm::radians(pitch));
                 nfront.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
                 front = glm::normalize(nfront);
-                // also re-calculate the Right and Up vector
-                right = glm::normalize(glm::cross(front, world_up));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+                right = glm::normalize(glm::cross(front, world_up));
                 up = glm::normalize(glm::cross(right, front));
-            };
+            }
 
 
         private:
