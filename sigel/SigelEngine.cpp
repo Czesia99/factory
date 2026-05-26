@@ -6,9 +6,7 @@ namespace sigel
 {
     void SigelEngine::run()
     {
-        initWindow();
         try {
-            initEngine();
             mainLoop();
         } catch (const std::exception& e) {
             std::cerr << "Fatal: " << e.what() << "\n";
@@ -39,7 +37,8 @@ namespace sigel
         renderer.init(&vctx, &resourceManager, &pipelineManager);
         status("RENDERER", "Initialization..");
         
-        loadScene(&defaultScene);
+        addScene("default", &defaultScene);
+        queueScene("default");
     }
 
     void SigelEngine::mainLoop()
@@ -57,6 +56,13 @@ namespace sigel
             input.moveRight = (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS);
             input.moveUp = (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS);
             input.moveDown = (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS);
+            input.changeScene = (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS);
+
+            if (sceneToLoad)
+            {
+                loadScene(sceneToLoad);
+                sceneToLoad = nullptr;
+            }
 
             if (activeScene) {
                 activeScene->onUpdate(dt);
@@ -78,10 +84,24 @@ namespace sigel
         glfwTerminate();
     }
 
+    void SigelEngine::addScene(const std::string& name, IScene* scene)
+    {
+        scenes[name] = scene;
+    }
+
+    void SigelEngine::queueScene(const std::string& name)
+    {
+        sceneToLoad = scenes.at(name);
+    }
+
     void SigelEngine::loadScene(IScene* scene)
     {
         vctx.waitIdle();
-        if (activeScene) activeScene->onExit(resourceManager, pipelineManager);
+        if (activeScene)
+        {
+            activeScene->onExit(resourceManager, pipelineManager);
+            renderer.cleanupRenderObjects();
+        }
         scene->onEnter(resourceManager, pipelineManager);
         renderer.prepareScene(*scene);
         activeScene = scene;

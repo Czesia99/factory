@@ -3,9 +3,16 @@
 #include <cstdlib>
 
 #include "../sigel/SigelEngine.hpp"
+#include "TestScene.hpp"
+
+using namespace sigel;
 
 int main() {
-    sigel::SigelEngine app;
+    SigelEngine &app = SigelEngine::get();
+    
+    app.addScene("testscene", new factory::TestScene());
+
+    app.queueScene("testscene");
     
     try {
         app.run();

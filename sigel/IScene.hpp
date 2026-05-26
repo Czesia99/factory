@@ -30,5 +30,7 @@ namespace sigel
 
         virtual void processInput(const MovementInput &input, float dt) = 0;
         virtual void mouseCallback(float dx, float dy) = 0;
+        // virtual void keyCallback(int key, int scancode, int action, int mods) = 0;
+
     };
 }

@@ -20,15 +20,31 @@ namespace sigel
             ResourceManager resourceManager;
             Renderer renderer;
             DefaultScene defaultScene;
-            IScene* activeScene = nullptr;
+            
             MovementInput input;
             double mouse_x;
             double mouse_y;
-        public:
-            SigelEngine() = default;
-            void run();
-            void loadScene(IScene* scene);
         private:
+            std::unordered_map<std::string, IScene*> scenes;
+            IScene *activeScene = nullptr;
+            IScene *sceneToLoad = nullptr;
+
+        public:
+            static SigelEngine& get() {
+                static SigelEngine instance;
+                return instance;
+            }
+
+            SigelEngine(const SigelEngine&) = delete;
+            SigelEngine& operator=(const SigelEngine&) = delete;
+
+            void run();
+            void addScene(const std::string& name, IScene* scene);
+            void queueScene(const std::string& name);
+            
+        private:
+            SigelEngine() { initWindow(); initEngine(); }
+            void loadScene(IScene* scene);
             void initWindow();
             void initEngine();
             void mainLoop();

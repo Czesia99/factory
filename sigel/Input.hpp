@@ -8,4 +8,5 @@ struct MovementInput
     bool moveRight    = false;
     bool moveUp       = false;
     bool moveDown     = false;
+    bool changeScene = false;
 };

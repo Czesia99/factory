@@ -1,13 +1,12 @@
-#include "Scene.hpp"
-#include "SigelEngine.hpp"
-
-namespace sigel
+#include "TestScene.hpp"
+#include "../sigel/SigelEngine.hpp"
+namespace factory
 {
-    void DefaultScene::onEnter(ResourceManager &rm, PipelineManager &pm)
+    void TestScene::onEnter(ResourceManager &rm, PipelineManager &pm)
     {
-        printf("ENTER DEFAULT SCENE\n");
+        printf("ENTER TEST SCENE\n");
         // uint32_t casstex  = rm.createTextureImage("../cassgare.jpg");
-        uint32_t flotex  = rm.createTextureImage("../flo.jpg");
+        uint32_t flotex  = rm.createTextureImage("../texture.jpg");
         uint32_t mesh = rm.loadMesh(cube_vertices, cube_indices);
         uint32_t defaultPipeline = pm.getPipelineID("default");
         objects.push_back({ defaultPipeline, mesh, flotex });
@@ -18,13 +17,13 @@ namespace sigel
 
     }
 
-    void DefaultScene::onExit(ResourceManager &rm, PipelineManager &pm)
+    void TestScene::onExit(ResourceManager &rm, PipelineManager &pm)
     {
-        printf("EXIT DEFAULT SCENE\n");
+        printf("EXIT TEST SCENE\n");
         objects.clear();
     }
 
-    void DefaultScene::onUpdate(float dt)
+    void TestScene::onUpdate(float dt)
     {
         // elapsed += dt;
         // for (size_t i = 0; i < objects.size(); i++) {
@@ -33,7 +32,7 @@ namespace sigel
         // }
     }
 
-    void DefaultScene::processInput(const MovementInput &input, float dt)
+    void TestScene::processInput(const MovementInput &input, float dt)
     {
         if (input.moveForward)  camera.processKeyboardMovement(FORWARD, dt);
         if (input.moveBackward) camera.processKeyboardMovement(BACKWARD, dt);
@@ -41,10 +40,10 @@ namespace sigel
         if (input.moveRight)    camera.processKeyboardMovement(RIGHT, dt);
         if (input.moveUp)       camera.processKeyboardMovement(UP, dt);
         if (input.moveDown)     camera.processKeyboardMovement(DOWN, dt);
-        // if (input.changeScene)  SigelEngine::get().queueScene("testscene");
+        // if (input.changeScene)     SigelEngine::get().queueScene("default");
     }
 
-    void DefaultScene::mouseCallback(float dx, float dy)
+    void TestScene::mouseCallback(float dx, float dy)
     {
         camera.processMouseMovement(dx, dy);
     }
