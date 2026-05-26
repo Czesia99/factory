@@ -41,7 +41,7 @@ namespace sigel
             void run();
             void addScene(const std::string& name, IScene* scene);
             void queueScene(const std::string& name);
-            
+
         private:
             SigelEngine() { initWindow(); initEngine(); }
             void loadScene(IScene* scene);
@@ -52,6 +52,7 @@ namespace sigel
             void cleanup();
 
             static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
+            static void keyCallbackWrapper(GLFWwindow* window, int key, int scancode, int action, int mods);
             static void mouseCallbackWrapper(GLFWwindow* window, double x, double y);
 
     };

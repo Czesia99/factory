@@ -44,6 +44,14 @@ namespace sigel
         // if (input.changeScene)  SigelEngine::get().queueScene("testscene");
     }
 
+    void DefaultScene::keyCallback(int key, int scancode, int action, int mods)
+    {
+        if (key == GLFW_KEY_LEFT_ALT && action == GLFW_PRESS)
+        {
+            SigelEngine::get().queueScene("testscene");
+        }
+    }
+
     void DefaultScene::mouseCallback(float dx, float dy)
     {
         camera.processMouseMovement(dx, dy);

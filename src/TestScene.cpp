@@ -43,6 +43,15 @@ namespace factory
         // if (input.changeScene)     SigelEngine::get().queueScene("default");
     }
 
+    void TestScene::keyCallback(int key, int scancode, int action, int mods)
+    {
+        if (key == GLFW_KEY_LEFT_ALT && action == GLFW_PRESS)
+        {
+            printf("key callbakc \n");
+            SigelEngine::get().queueScene("default");
+        }
+    }
+
     void TestScene::mouseCallback(float dx, float dy)
     {
         camera.processMouseMovement(dx, dy);

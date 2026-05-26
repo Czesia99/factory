@@ -24,6 +24,7 @@ namespace sigel
 
         glfwSetWindowUserPointer(window, this);
         glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
+        glfwSetKeyCallback(window, keyCallbackWrapper);
         glfwSetCursorPosCallback(window, mouseCallbackWrapper);
     }
 
@@ -111,6 +112,15 @@ namespace sigel
     {
         auto app = reinterpret_cast<SigelEngine*>(glfwGetWindowUserPointer(window));
         app->renderer.framebufferResized = true;
+    }
+
+    void SigelEngine::keyCallbackWrapper(GLFWwindow* window, int key, int scancode, int action, int mods)
+    {
+        auto app = reinterpret_cast<SigelEngine*>(glfwGetWindowUserPointer(window));
+
+        if (app->activeScene != nullptr) {
+            app->activeScene->keyCallback(key, scancode, action, mods);
+        }
     }
 
     void SigelEngine::mouseCallbackWrapper(GLFWwindow* window, double x, double y)
