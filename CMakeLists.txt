@@ -45,9 +45,9 @@ set(SRC
     sigel/vkapi/GpuAllocator.cpp
     sigel/vkapi/WindowSurface.cpp
     sigel/vkapi/Swapchain.cpp
-    sigel/Pipeline.cpp
-    sigel/ResourceManager.cpp
-    sigel/Renderer.cpp
+    sigel/vkapi/Pipeline.cpp
+    sigel/vkapi/ResourceManager.cpp
+    sigel/vkapi/Renderer.cpp
     sigel/Scene.cpp
     src/TestScene.cpp
 )

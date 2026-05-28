@@ -1,6 +1,7 @@
 #include "Pipeline.hpp"
-#include "Vertex.hpp"
-#include "Utils.hpp"
+#include "../Vertex.hpp"
+#include "../Utils.hpp"
+
 namespace sigel
 {
     void PipelineManager::init(Swapchain *swapchain, Device *device)

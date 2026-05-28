@@ -1,8 +1,8 @@
 #pragma once
 
 #include "GameObject.hpp"
-#include "ResourceManager.hpp"
-#include "Pipeline.hpp"
+#include "vkapi/ResourceManager.hpp"
+#include "vkapi/Pipeline.hpp"
 #include "Input.hpp"
 #include "Camera.hpp"
 #include "Transform.hpp"

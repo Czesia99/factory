@@ -1,12 +1,12 @@
 #pragma once
 
-#include "vkapi/Device.hpp"
-#include "vkapi/Swapchain.hpp"
+#include "Device.hpp"
+#include "Swapchain.hpp"
 #include "Pipeline.hpp"
 #include "ResourceManager.hpp"
-#include "GameObject.hpp"
-#include "vkapi/frames.h"
-#include "Scene.hpp"
+#include "../GameObject.hpp"
+#include "frames.h"
+#include "../Scene.hpp"
 
 namespace sigel
 {
@@ -16,10 +16,10 @@ namespace sigel
             bool framebufferResized = false;
         
         private:
-            VulkanContext *_vctx = nullptr;
-            ResourceManager *_resourceManager = nullptr;
-            PipelineManager *_pipelineManager = nullptr;
-            
+            Device* _device;
+            Swapchain* _swapchain;
+            PipelineManager* _pipelineManager;
+            ResourceManager* _resourceManager;
 
             vk::raii::CommandPool commandPool = nullptr;
             vk::raii::DescriptorPool descriptorPool = nullptr;
@@ -31,7 +31,7 @@ namespace sigel
             std::vector<RenderObject> renderObjects;
 
         public:
-            void init(VulkanContext *vctx, ResourceManager *resourceManager, PipelineManager *pipelineManager);
+            void init(Device *device, Swapchain *swapchain, PipelineManager *pipelineManager, ResourceManager *resourceManager);
             void drawFrame(const IScene& scene);
             void createCommandPool();
             void createDescriptorPool();

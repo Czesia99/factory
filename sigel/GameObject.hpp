@@ -1,8 +1,8 @@
 #pragma once
 
 #include <vulkan/vulkan_raii.hpp>
-#include <glm/glm.hpp>
 #include <vma/include/vk_mem_alloc.h>
+#include <glm/glm.hpp>
 #include "Vertex.hpp"
 
 namespace sigel

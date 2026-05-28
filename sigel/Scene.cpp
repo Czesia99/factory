@@ -5,7 +5,7 @@ namespace sigel
 {
     void DefaultScene::onEnter(ResourceManager &rm, PipelineManager &pm)
     {
-        printf("ENTER DEFAULT SCENE\n");
+        status("SCENE MANAGER", "Loading default Scene...");
         // uint32_t casstex  = rm.createTextureImage("../cassgare.jpg");
         uint32_t flotex  = rm.createTextureImage("../flo.jpg");
         uint32_t mesh = rm.loadMesh(cube_vertices, cube_indices);
@@ -16,6 +16,7 @@ namespace sigel
         // objects[1].transform = glm::translate
         objects[0].transform.rotation = glm::vec3{0.0f, 0.0f, 0.0f};
 
+        glfwSetInputMode(SigelEngine::get().window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 
     void DefaultScene::onExit(ResourceManager &rm, PipelineManager &pm)
@@ -41,14 +42,14 @@ namespace sigel
         if (input.moveRight)    camera.processKeyboardMovement(RIGHT, dt);
         if (input.moveUp)       camera.processKeyboardMovement(UP, dt);
         if (input.moveDown)     camera.processKeyboardMovement(DOWN, dt);
-        // if (input.changeScene)  SigelEngine::get().queueScene("testscene");
+        // if (input.changeScene)  SigelEngine::get().drawScene("testscene");
     }
 
     void DefaultScene::keyCallback(int key, int scancode, int action, int mods)
     {
         if (key == GLFW_KEY_LEFT_ALT && action == GLFW_PRESS)
         {
-            SigelEngine::get().queueScene("testscene");
+            SigelEngine::get().drawScene("testscene");
         }
     }
 

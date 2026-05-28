@@ -2,8 +2,7 @@
 
 #include <GLFW/glfw3.h>
 #include "vkapi/VulkanContext.hpp"
-#include "Pipeline.hpp"
-#include "Renderer.hpp"
+
 #include "Utils.hpp"
 #include "Scene.hpp"
 
@@ -16,10 +15,6 @@ namespace sigel
         public:
             GLFWwindow *window;
             VulkanContext vctx;
-            PipelineManager pipelineManager;
-            ResourceManager resourceManager;
-            Renderer renderer;
-            DefaultScene defaultScene;
             
             MovementInput input;
             double mouse_x;
@@ -27,7 +22,7 @@ namespace sigel
         private:
             std::unordered_map<std::string, IScene*> scenes;
             IScene *activeScene = nullptr;
-            IScene *sceneToLoad = nullptr;
+            IScene *pendingScene = nullptr;
 
         public:
             static SigelEngine& get() {
@@ -40,16 +35,17 @@ namespace sigel
 
             void run();
             void addScene(const std::string& name, IScene* scene);
-            void queueScene(const std::string& name);
+            void drawScene(const std::string& name);
 
         private:
             SigelEngine() { initWindow(); initEngine(); }
-            void loadScene(IScene* scene);
             void initWindow();
             void initEngine();
             void mainLoop();
             void waitIdle();
             void cleanup();
+            
+            void loadScene(IScene* scene);
 
             static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
             static void keyCallbackWrapper(GLFWwindow* window, int key, int scancode, int action, int mods);

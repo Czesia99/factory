@@ -1,10 +1,9 @@
 #pragma once
 
-#include "vkapi/Swapchain.hpp"
-#include "vkapi/Device.hpp"
+#include "Swapchain.hpp"
+#include "Device.hpp"
 
 #include <unordered_map>
-#include "ResourceManager.hpp"
 
 namespace sigel
 {

@@ -1,14 +1,14 @@
 #include "ResourceManager.hpp"
-#include "vkapi/GpuAllocator.hpp"
-#include "Utils.hpp"
+#include "../Utils.hpp"
 
 #include <stb_image.h>
 
 namespace sigel
 {
-    void ResourceManager::init(VulkanContext *vctx)
+    void ResourceManager::init(GpuAllocator *allocator, Device *device)
     {
-        _vctx = vctx;
+        _allocator = allocator;
+        _device = device;
     }
 
     const Mesh& ResourceManager::getMesh(uint32_t index)
@@ -20,8 +20,8 @@ namespace sigel
     {
         Mesh mesh;
 
-        _vctx->allocator.uploadVertex(vertices, mesh);
-        _vctx->allocator.uploadIndices(indices, mesh);
+        _allocator->uploadVertex(vertices, mesh);
+        _allocator->uploadIndices(indices, mesh);
 
         mesh.indexCount = static_cast<uint32_t>(indices.size());
         uint32_t id = static_cast<uint32_t>(meshes.size());
@@ -41,13 +41,13 @@ namespace sigel
             throw std::runtime_error("failed to load texture image!");
         }
 
-        Buffer imgBuffer = _vctx->allocator.createStagingBuffer(imageSize);
+        Buffer imgBuffer = _allocator->createStagingBuffer(imageSize);
         memcpy(imgBuffer.mapped, pixels, imageSize);
         stbi_image_free(pixels);
 
-        auto texture = _vctx->allocator.createImageTexture(imgBuffer, width, height, VK_FORMAT_R8G8B8A8_SRGB);
+        auto texture = _allocator->createImageTexture(imgBuffer, width, height, VK_FORMAT_R8G8B8A8_SRGB);
 
-        _vctx->allocator.destroyBuffer(imgBuffer);
+        _allocator->destroyBuffer(imgBuffer);
         uint32_t id = static_cast<uint32_t>(textures.size());
         textures.emplace_back(std::move(texture));
         return id;
@@ -56,18 +56,18 @@ namespace sigel
     vk::raii::ShaderModule ResourceManager::createShaderModule(const std::vector<char>& code) const
     {
         vk::ShaderModuleCreateInfo createInfo{ .codeSize = code.size() * sizeof(char), .pCode = reinterpret_cast<const uint32_t*>(code.data()) };
-        vk::raii::ShaderModule shaderModule{ _vctx->device.logicalDevice, createInfo };
+        vk::raii::ShaderModule shaderModule{ _device->logicalDevice, createInfo };
         return shaderModule;
     }
 
     Buffer ResourceManager::createUniformBuffer(vk::DeviceSize size)
     {
-        return _vctx->allocator.createUniformBuffer(size);
+        return _allocator->createUniformBuffer(size);
     }
 
     void ResourceManager::destroyBuffer(Buffer& buffer)
     {
-        _vctx->allocator.destroyBuffer(buffer);
+        _allocator->destroyBuffer(buffer);
     }
 
     void ResourceManager::cleanup()
@@ -81,7 +81,7 @@ namespace sigel
 
         for (auto &texture : textures)
         {
-            _vctx->allocator.destroyImage(texture);
+            _allocator->destroyImage(texture);
         }
         textures.clear();
     }

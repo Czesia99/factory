@@ -12,7 +12,7 @@ int main() {
     
     app.addScene("testscene", new factory::TestScene());
 
-    app.queueScene("testscene");
+    app.drawScene("testscene");
     
     try {
         app.run();

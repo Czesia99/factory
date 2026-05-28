@@ -15,6 +15,7 @@ namespace factory
         // objects[1].transform = glm::translate
         objects[0].transform.rotation = glm::vec3{0.0f, 0.0f, 0.0f};
 
+        glfwSetInputMode(SigelEngine::get().window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 
     void TestScene::onExit(ResourceManager &rm, PipelineManager &pm)
@@ -40,15 +41,19 @@ namespace factory
         if (input.moveRight)    camera.processKeyboardMovement(RIGHT, dt);
         if (input.moveUp)       camera.processKeyboardMovement(UP, dt);
         if (input.moveDown)     camera.processKeyboardMovement(DOWN, dt);
-        // if (input.changeScene)     SigelEngine::get().queueScene("default");
     }
 
     void TestScene::keyCallback(int key, int scancode, int action, int mods)
     {
         if (key == GLFW_KEY_LEFT_ALT && action == GLFW_PRESS)
         {
-            printf("key callbakc \n");
-            SigelEngine::get().queueScene("default");
+            SigelEngine::get().drawScene("default");
+        }
+
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        {
+            
+            glfwSetWindowShouldClose(SigelEngine::get().window, true);
         }
     }
 

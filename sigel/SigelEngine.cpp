@@ -33,13 +33,8 @@ namespace sigel
         vctx.init(window);
         status("CORE", "Vulkan context ready");
         
-        resourceManager.init(&vctx);
-        pipelineManager.init(&vctx.swapchain, &vctx.device);
-        renderer.init(&vctx, &resourceManager, &pipelineManager);
-        status("RENDERER", "Initialization..");
-        
-        addScene("default", &defaultScene);
-        queueScene("default");
+        addScene("default", new DefaultScene());
+        drawScene("default");
     }
 
     void SigelEngine::mainLoop()
@@ -59,26 +54,26 @@ namespace sigel
             input.moveDown = (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS);
             input.changeScene = (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS);
 
-            if (sceneToLoad)
+            if (pendingScene)
             {
-                loadScene(sceneToLoad);
-                sceneToLoad = nullptr;
+                loadScene(pendingScene);
+                pendingScene = nullptr;
             }
 
             if (activeScene) {
                 activeScene->onUpdate(dt);
                 activeScene->processInput(input, dt);
-
             }
-            renderer.drawFrame(*activeScene);
+
+            vctx.renderer.drawFrame(*activeScene);
         }
         vctx.waitIdle();
     }
 
     void SigelEngine::cleanup()
     {
-        renderer.cleanupRenderObjects();
-        resourceManager.cleanup();
+        vctx.renderer.cleanupRenderObjects();
+        vctx.resourceManager.cleanup();
         vctx.clean();
 
         glfwDestroyWindow(window);
@@ -90,9 +85,9 @@ namespace sigel
         scenes[name] = scene;
     }
 
-    void SigelEngine::queueScene(const std::string& name)
+    void SigelEngine::drawScene(const std::string& name)
     {
-        sceneToLoad = scenes.at(name);
+        pendingScene = scenes.at(name);
     }
 
     void SigelEngine::loadScene(IScene* scene)
@@ -100,18 +95,18 @@ namespace sigel
         vctx.waitIdle();
         if (activeScene)
         {
-            activeScene->onExit(resourceManager, pipelineManager);
-            renderer.cleanupRenderObjects();
+            activeScene->onExit(vctx.resourceManager, vctx.pipelineManager);
+            vctx.renderer.cleanupRenderObjects();
         }
-        scene->onEnter(resourceManager, pipelineManager);
-        renderer.prepareScene(*scene);
+        scene->onEnter(vctx.resourceManager, vctx.pipelineManager);
+        vctx.renderer.prepareScene(*scene);
         activeScene = scene;
     }
 
     void SigelEngine::framebufferResizeCallback(GLFWwindow* window, int width, int height) 
     {
         auto app = reinterpret_cast<SigelEngine*>(glfwGetWindowUserPointer(window));
-        app->renderer.framebufferResized = true;
+        app->vctx.renderer.framebufferResized = true;
     }
 
     void SigelEngine::keyCallbackWrapper(GLFWwindow* window, int key, int scancode, int action, int mods)

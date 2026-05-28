@@ -5,6 +5,9 @@
 #include "Device.hpp"
 #include "GpuAllocator.hpp"
 #include "Swapchain.hpp"
+#include "Pipeline.hpp"
+#include "ResourceManager.hpp"
+#include "Renderer.hpp"
 
 namespace sigel
 {
@@ -16,6 +19,9 @@ namespace sigel
             Device       device;
             GpuAllocator allocator;
             Swapchain swapchain;
+            PipelineManager pipelineManager;
+            ResourceManager resourceManager;
+            Renderer renderer;
 
             void init(GLFWwindow* window)
             {
@@ -29,6 +35,9 @@ namespace sigel
                 swapchain.createSwapChain();
                 swapchain.createImageViews();
                 swapchain.createDepthResources();
+                pipelineManager.init(&swapchain, &device);
+                resourceManager.init(&allocator, &device);
+                renderer.init(&device, &swapchain, &pipelineManager, &resourceManager);
             }
 
             void waitIdle() { device.logicalDevice.waitIdle(); }
