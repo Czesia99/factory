@@ -1,5 +1,6 @@
 #include "TestScene.hpp"
 #include "../sigel/SigelEngine.hpp"
+
 namespace factory
 {
     void TestScene::onEnter(ResourceManager &rm, PipelineManager &pm)
@@ -31,29 +32,17 @@ namespace factory
         //     glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(i * 1.5f, 0.0f, - 4.0f));
         //     objects[i].transform = glm::rotate(model, elapsed * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         // }
-    }
 
-    void TestScene::processInput(const MovementInput &input, float dt)
-    {
-        if (input.moveForward)  camera.processKeyboardMovement(FORWARD, dt);
-        if (input.moveBackward) camera.processKeyboardMovement(BACKWARD, dt);
-        if (input.moveLeft)     camera.processKeyboardMovement(LEFT, dt);
-        if (input.moveRight)    camera.processKeyboardMovement(RIGHT, dt);
-        if (input.moveUp)       camera.processKeyboardMovement(UP, dt);
-        if (input.moveDown)     camera.processKeyboardMovement(DOWN, dt);
-    }
+        auto& input = SigelEngine::get().inputManager; 
+        if (input.isHeld(GLFW_KEY_W)) camera.processKeyboardMovement(FORWARD, dt);
+        if (input.isHeld(GLFW_KEY_S)) camera.processKeyboardMovement(BACKWARD, dt);
+        if (input.isHeld(GLFW_KEY_A)) camera.processKeyboardMovement(LEFT, dt);
+        if (input.isHeld(GLFW_KEY_D)) camera.processKeyboardMovement(RIGHT, dt);
+        if (input.isHeld(GLFW_KEY_SPACE)) camera.processKeyboardMovement(UP, dt);
+        if (input.isHeld(GLFW_KEY_LEFT_CONTROL)) camera.processKeyboardMovement(DOWN, dt);
 
-    void TestScene::keyCallback(int key, int scancode, int action, int mods)
-    {
-        if (key == GLFW_KEY_LEFT_ALT && action == GLFW_PRESS)
-        {
-            SigelEngine::get().drawScene("default");
-        }
-
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        {
-            glfwSetWindowShouldClose(SigelEngine::get().window, true);
-        }
+        if (input.isPressed(GLFW_KEY_LEFT_ALT))  SigelEngine::get().drawScene("default");
+        if (input.isPressed(GLFW_KEY_ESCAPE)) glfwSetWindowShouldClose(SigelEngine::get().window, true);
     }
 
     void TestScene::mouseCallback(float dx, float dy)

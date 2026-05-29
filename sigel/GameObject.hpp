@@ -20,13 +20,4 @@ namespace sigel
         Buffer indexBuffer;
         uint32_t indexCount = 0;
     };
-
-    struct RenderObject
-    {
-        uint32_t meshID;
-        uint32_t pipelineID;
-        uint32_t textureID;
-        std::vector<Buffer> uniformBuffers;
-        std::vector<vk::raii::DescriptorSet> descriptorSets;
-    };
 }

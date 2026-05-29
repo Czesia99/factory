@@ -2,7 +2,6 @@
 
 #include <GLFW/glfw3.h>
 #include "vkapi/VulkanContext.hpp"
-
 #include "Utils.hpp"
 #include "Scene.hpp"
 
@@ -15,8 +14,8 @@ namespace sigel
         public:
             GLFWwindow *window;
             VulkanContext vctx;
-            
-            MovementInput input;
+            InputManager inputManager;
+
             double mouse_x;
             double mouse_y;
         private:

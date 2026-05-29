@@ -3,7 +3,7 @@
 #include "GameObject.hpp"
 #include "vkapi/ResourceManager.hpp"
 #include "vkapi/Pipeline.hpp"
-#include "Input.hpp"
+#include "InputManager.hpp"
 #include "Camera.hpp"
 #include "Transform.hpp"
 
@@ -28,9 +28,6 @@ namespace sigel
         virtual void onExit(ResourceManager&, PipelineManager&) = 0;
         virtual void onUpdate(float deltaTime) = 0;
 
-        virtual void processInput(const MovementInput &input, float dt) = 0;
         virtual void mouseCallback(float dx, float dy) = 0;
-        virtual void keyCallback(int key, int scancode, int action, int mods) = 0;
-
     };
 }

@@ -4,7 +4,6 @@
 #include "Swapchain.hpp"
 #include "Pipeline.hpp"
 #include "ResourceManager.hpp"
-#include "../GameObject.hpp"
 #include "frames.h"
 #include "../Scene.hpp"
 
@@ -14,6 +13,15 @@ namespace sigel
         alignas(16) glm::mat4 model;
         alignas(16) glm::mat4 view;
         alignas(16) glm::mat4 proj;
+    };
+
+    struct RenderObject
+    {
+        uint32_t meshID;
+        uint32_t pipelineID;
+        uint32_t textureID;
+        std::vector<Buffer> uniformBuffers;
+        std::vector<vk::raii::DescriptorSet> descriptorSets;
     };
 
     class Renderer

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include "IScene.hpp"
 
 namespace sigel
@@ -18,8 +16,6 @@ namespace sigel
         void onExit(ResourceManager&, PipelineManager&) override;
         void onUpdate(float dt) override;
 
-        void processInput(const MovementInput &input, float dt) override;
-        void keyCallback(int key, int scancode, int action, int mods) override;
         void mouseCallback(float dx, float dy) override;
     };
 }

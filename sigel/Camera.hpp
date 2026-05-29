@@ -1,6 +1,5 @@
 #pragma once
 #include <glm/gtc/matrix_transform.hpp>
-#include <iostream>
 
 namespace sigel
 {
@@ -16,7 +15,7 @@ namespace sigel
         float pitch = 0.0f;
         float fov = 60.0f;
 
-        float speed = 2.0f;
+        float speed = 4.0f;
         float sensitivity = 0.1f;
 
         float near_plane = 0.1f;

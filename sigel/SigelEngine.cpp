@@ -41,18 +41,11 @@ namespace sigel
     {
         auto last = std::chrono::high_resolution_clock::now();
         while (!glfwWindowShouldClose(window)) {
+            inputManager.update();
             glfwPollEvents();
             auto now = std::chrono::high_resolution_clock::now();
             float dt = std::chrono::duration<float>(now - last).count();
             last = now;
-
-            input.moveForward = (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS);
-            input.moveBackward = (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS);
-            input.moveLeft = (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS);
-            input.moveRight = (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS);
-            input.moveUp = (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS);
-            input.moveDown = (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS);
-            input.changeScene = (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS);
 
             if (pendingScene)
             {
@@ -62,7 +55,6 @@ namespace sigel
 
             if (activeScene) {
                 activeScene->onUpdate(dt);
-                activeScene->processInput(input, dt);
             }
 
             vctx.renderer.drawFrame(*activeScene);
@@ -112,10 +104,7 @@ namespace sigel
     void SigelEngine::keyCallbackWrapper(GLFWwindow* window, int key, int scancode, int action, int mods)
     {
         auto app = reinterpret_cast<SigelEngine*>(glfwGetWindowUserPointer(window));
-
-        if (app->activeScene != nullptr) {
-            app->activeScene->keyCallback(key, scancode, action, mods);
-        }
+        app->inputManager.onKey(key, action);
     }
 
     void SigelEngine::mouseCallbackWrapper(GLFWwindow* window, double x, double y)
