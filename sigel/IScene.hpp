@@ -27,7 +27,5 @@ namespace sigel
         virtual void onEnter(ResourceManager&, PipelineManager&) = 0;
         virtual void onExit(ResourceManager&, PipelineManager&) = 0;
         virtual void onUpdate(float deltaTime) = 0;
-
-        virtual void mouseCallback(float dx, float dy) = 0;
     };
 }

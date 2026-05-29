@@ -47,16 +47,16 @@ namespace sigel
             cam.pos -= cam.up * velocity;
     }
 
-    void Camera::processMouseMovement(float xoffset, float yoffset)
+    void Camera::processMouseMovement(float dx, float dy)
     {
         if (movement_lock == true)
             return;
 
-        xoffset *= cam.sensitivity;
-        yoffset *= cam.sensitivity;
+        dx *= cam.sensitivity;
+        dy *= cam.sensitivity;
 
-        cam.yaw   += xoffset;
-        cam.pitch -= yoffset;
+        cam.yaw   += dx;
+        cam.pitch -= dy;
 
         if (constrain_pitch)
         {

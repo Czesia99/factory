@@ -11,7 +11,6 @@ int main() {
     SigelEngine &app = SigelEngine::get();
     
     app.addScene("testscene", new factory::TestScene());
-
     app.drawScene("testscene");
     
     try {

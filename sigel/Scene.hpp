@@ -15,7 +15,5 @@ namespace sigel
         void onEnter(ResourceManager& rm, PipelineManager& pm) override;
         void onExit(ResourceManager&, PipelineManager&) override;
         void onUpdate(float dt) override;
-
-        void mouseCallback(float dx, float dy) override;
     };
 }

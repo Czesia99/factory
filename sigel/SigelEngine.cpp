@@ -34,7 +34,6 @@ namespace sigel
         status("CORE", "Vulkan context ready");
         
         addScene("default", new DefaultScene());
-        drawScene("default");
     }
 
     void SigelEngine::mainLoop()
@@ -46,6 +45,12 @@ namespace sigel
             auto now = std::chrono::high_resolution_clock::now();
             float dt = std::chrono::duration<float>(now - last).count();
             last = now;
+
+            if (!pendingScene && !activeScene)
+            {
+                status("ENGINE", "no scene provided, loading default scene");
+                drawScene("default");
+            }
 
             if (pendingScene)
             {
@@ -79,6 +84,7 @@ namespace sigel
 
     void SigelEngine::drawScene(const std::string& name)
     {
+        status("SCENE MANAGER", "Drawing [" + name + "] Scene");
         pendingScene = scenes.at(name);
     }
 
@@ -110,26 +116,6 @@ namespace sigel
     void SigelEngine::mouseCallbackWrapper(GLFWwindow* window, double x, double y)
     {
         auto app = reinterpret_cast<SigelEngine*>(glfwGetWindowUserPointer(window));
-        static bool firstMouse = true;
-
-        double dx = 0.0;
-        double dy = 0.0;
-
-        if (firstMouse) {
-            app->mouse_x = x;
-            app->mouse_y = y;
-            firstMouse = false;
-        } else {
-            dx = x - app->mouse_x;
-            dy = y - app->mouse_y;
-
-            app->mouse_x = x;
-            app->mouse_y = y;
-        }
-
-        if (app->activeScene) {
-            app->activeScene->mouseCallback(static_cast<float>(dx), static_cast<float>(dy));
-        }
+        app->inputManager.onMouseMove(static_cast<float>(x), static_cast<float>(y));
     }
-
 }

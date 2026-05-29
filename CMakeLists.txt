@@ -48,6 +48,7 @@ set(SRC
     sigel/vkapi/Pipeline.cpp
     sigel/vkapi/ResourceManager.cpp
     sigel/vkapi/Renderer.cpp
+    sigel/InputManager.cpp
     sigel/Camera.cpp
     sigel/Scene.cpp
     src/TestScene.cpp

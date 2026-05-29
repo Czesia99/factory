@@ -52,7 +52,7 @@ namespace sigel
             glm::mat4 getProjectionMatrix(float aspect) const;
 
             void processKeyboardMovement(CamDirection direction, float delta_time);
-            void processMouseMovement(float xoffset, float yoffset);
+            void processMouseMovement(float dx, float dy);
             
         private:
             void updateCameraVectors();

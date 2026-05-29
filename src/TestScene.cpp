@@ -43,10 +43,7 @@ namespace factory
 
         if (input.isPressed(GLFW_KEY_LEFT_ALT))  SigelEngine::get().drawScene("default");
         if (input.isPressed(GLFW_KEY_ESCAPE)) glfwSetWindowShouldClose(SigelEngine::get().window, true);
-    }
 
-    void TestScene::mouseCallback(float dx, float dy)
-    {
-        camera.processMouseMovement(dx, dy);
+        camera.processMouseMovement(input.getMouseDeltaX(), input.getMouseDeltaY());
     }
 }

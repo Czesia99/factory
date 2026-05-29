@@ -5,7 +5,6 @@ namespace sigel
 {
     void DefaultScene::onEnter(ResourceManager &rm, PipelineManager &pm)
     {
-        status("SCENE MANAGER", "Loading default Scene...");
         // uint32_t casstex  = rm.createTextureImage("../cassgare.jpg");
         uint32_t flotex  = rm.createTextureImage("../flo.jpg");
         uint32_t mesh = rm.loadMesh(cube_vertices, cube_indices);
@@ -41,12 +40,9 @@ namespace sigel
         if (input.isHeld(GLFW_KEY_SPACE)) camera.processKeyboardMovement(UP, dt);
         if (input.isHeld(GLFW_KEY_LEFT_CONTROL)) camera.processKeyboardMovement(DOWN, dt);
 
-        if (input.isPressed(GLFW_KEY_LEFT_ALT))  SigelEngine::get().drawScene("default");
+        if (input.isPressed(GLFW_KEY_LEFT_ALT))  SigelEngine::get().drawScene("testscene");
         if (input.isPressed(GLFW_KEY_ESCAPE)) glfwSetWindowShouldClose(SigelEngine::get().window, true);
-    }
 
-    void DefaultScene::mouseCallback(float dx, float dy)
-    {
-        camera.processMouseMovement(dx, dy);
+        camera.processMouseMovement(input.getMouseDeltaX(), input.getMouseDeltaY());
     }
 }
