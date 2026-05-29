@@ -52,7 +52,6 @@ namespace factory
 
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         {
-            
             glfwSetWindowShouldClose(SigelEngine::get().window, true);
         }
     }

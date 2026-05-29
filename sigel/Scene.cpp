@@ -51,6 +51,11 @@ namespace sigel
         {
             SigelEngine::get().drawScene("testscene");
         }
+
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        {
+            glfwSetWindowShouldClose(SigelEngine::get().window, true);
+        }
     }
 
     void DefaultScene::mouseCallback(float dx, float dy)
