@@ -31,7 +31,11 @@ namespace sigel
         //     objects[i].transform = glm::rotate(model, elapsed * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         // }
 
-        auto& input = SigelEngine::get().inputManager; 
+        auto& input = SigelEngine::get().inputManager;
+        if (input.isPressed(GLFW_KEY_TAB))  SigelEngine::get().editorModeSwap();
+
+        if (SigelEngine::get().showEditor) { return; }
+
         if (input.isHeld(GLFW_KEY_W)) camera.processKeyboardMovement(FORWARD, dt);
         if (input.isHeld(GLFW_KEY_S)) camera.processKeyboardMovement(BACKWARD, dt);
         if (input.isHeld(GLFW_KEY_A)) camera.processKeyboardMovement(LEFT, dt);

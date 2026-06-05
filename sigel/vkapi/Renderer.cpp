@@ -65,7 +65,7 @@ namespace sigel
         renderObjects.clear();
     }
     
-    void Renderer::drawFrame(const IScene& scene)
+    void Renderer::drawFrame(const IScene& scene, bool showEditor)
     {
         auto &frame = currentFrame();
 
@@ -79,7 +79,7 @@ namespace sigel
         
         updateUniformBuffer(frameIndex, scene);
         frame.commandBuffer.reset();
-        recordCommandBuffer(imageIndex);
+        recordCommandBuffer(imageIndex, showEditor);
 
         vk::PipelineStageFlags waitDestinationStageMask( vk::PipelineStageFlagBits::eColorAttachmentOutput );
 		const vk::SubmitInfo submitInfo{.waitSemaphoreCount   = 1,
@@ -232,7 +232,7 @@ namespace sigel
         }
     }
 
-    void Renderer::recordCommandBuffer(uint32_t imageIndex)
+    void Renderer::recordCommandBuffer(uint32_t imageIndex, bool showEditor)
     {
         auto &cmd = currentFrame().commandBuffer;
         cmd.begin({});
@@ -312,7 +312,10 @@ namespace sigel
             cmd.drawIndexed(mesh.indexCount, 1, 0, 0, 0);
         }
 
-        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
+        if (showEditor)
+        {
+            ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
+        }
 
         cmd.endRendering();
 

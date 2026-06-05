@@ -25,10 +25,12 @@ namespace sigel
 
             double mouse_x;
             double mouse_y;
+
+            bool showEditor = false;
         private:
             std::unordered_map<std::string, IScene*> scenes;
             IScene *activeScene = nullptr;
-            IScene *pendingScene = nullptr;
+            IScene *nextActiveScene = nullptr;
 
         public:
             static SigelEngine& get() {
@@ -42,6 +44,8 @@ namespace sigel
             void run();
             void addScene(const std::string& name, IScene* scene);
             void drawScene(const std::string& name);
+
+            void editorModeSwap();
 
         private:
             SigelEngine() { initWindow(); initEngine(); }

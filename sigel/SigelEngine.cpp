@@ -54,7 +54,7 @@ namespace sigel
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO(); (void)io;
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; 
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
         ImGui::StyleColorsDark();
 
@@ -74,11 +74,13 @@ namespace sigel
         init_info.Allocator = nullptr;
         init_info.UseDynamicRendering = true;
 
-        static VkFormat colorFormat = static_cast<VkFormat>(vctx.swapchain.swapChainSurfaceFormat.format);        
+        static VkFormat colorFormat = static_cast<VkFormat>(vctx.swapchain.swapChainSurfaceFormat.format);
+        static VkFormat depthFormat = static_cast<VkFormat>(vctx.swapchain.depthFormat);    
         init_info.PipelineInfoMain.PipelineRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
         init_info.PipelineInfoMain.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
         init_info.PipelineInfoMain.PipelineRenderingCreateInfo.pColorAttachmentFormats = &colorFormat;
-        
+        init_info.PipelineInfoMain.PipelineRenderingCreateInfo.depthAttachmentFormat = depthFormat;
+
         init_info.PipelineInfoMain.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
         init_info.CheckVkResultFn = nullptr;
 
@@ -104,31 +106,46 @@ namespace sigel
             float dt = std::chrono::duration<float>(now - last).count();
             last = now;
 
-            if (!pendingScene && !activeScene)
+            if (!nextActiveScene && !activeScene)
             {
                 status("ENGINE", "no scene provided, loading default scene");
                 drawScene("default");
             }
 
-            if (pendingScene)
+            if (nextActiveScene)
             {
-                loadScene(pendingScene);
-                pendingScene = nullptr;
+                loadScene(nextActiveScene);
+                nextActiveScene = nullptr;
             }
 
             if (activeScene) {
                 activeScene->onUpdate(dt);
             }
 
-            ImGui_ImplVulkan_NewFrame();
-            ImGui_ImplGlfw_NewFrame();
-            ImGui::NewFrame();
-            ImGui::ShowDemoWindow(); 
-            ImGui::Render();
+            if (showEditor)
+            {
+                ImGui_ImplVulkan_NewFrame();
+                ImGui_ImplGlfw_NewFrame();
+                ImGui::NewFrame();
+                ImGui::ShowDemoWindow(); 
+                ImGui::Render();
+            }
 
-            vctx.renderer.drawFrame(*activeScene);
+            vctx.renderer.drawFrame(*activeScene, showEditor);
         }
         vctx.waitIdle();
+    }
+
+    void SigelEngine::editorModeSwap()
+    {
+        if (!showEditor) {
+            showEditor = true;
+            glfwSetInputMode(SigelEngine::get().window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+        else {
+            showEditor = false;
+            glfwSetInputMode(SigelEngine::get().window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
     }
 
     void SigelEngine::cleanup()
@@ -155,7 +172,7 @@ namespace sigel
     void SigelEngine::drawScene(const std::string& name)
     {
         status("SCENE MANAGER", "Drawing [" + name + "] Scene");
-        pendingScene = scenes.at(name);
+        nextActiveScene = scenes.at(name);
     }
 
     void SigelEngine::loadScene(IScene* scene)
