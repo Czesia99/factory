@@ -5,6 +5,10 @@
 #include "Utils.hpp"
 #include "Scene.hpp"
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_vulkan.h"
+
 namespace sigel
 {
     constexpr uint32_t WIDTH = 1920;
@@ -15,6 +19,9 @@ namespace sigel
             GLFWwindow *window;
             VulkanContext vctx;
             InputManager inputManager;
+
+            VkDescriptorPool imguiPool = VK_NULL_HANDLE;
+            VkPipelineCache  pipelineCache = VK_NULL_HANDLE;
 
             double mouse_x;
             double mouse_y;
@@ -45,6 +52,8 @@ namespace sigel
             void cleanup();
             
             void loadScene(IScene* scene);
+
+            void initImgui();
 
             static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
             static void keyCallbackWrapper(GLFWwindow* window, int key, int scancode, int action, int mods);

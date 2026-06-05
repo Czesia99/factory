@@ -5,7 +5,6 @@ namespace factory
 {
     void TestScene::onEnter(ResourceManager &rm, PipelineManager &pm)
     {
-        printf("ENTER TEST SCENE\n");
         // uint32_t casstex  = rm.createTextureImage("../cassgare.jpg");
         uint32_t flotex  = rm.createTextureImage("../texture.jpg");
         uint32_t mesh = rm.loadMesh(cube_vertices, cube_indices);
@@ -21,7 +20,6 @@ namespace factory
 
     void TestScene::onExit(ResourceManager &rm, PipelineManager &pm)
     {
-        printf("EXIT TEST SCENE\n");
         objects.clear();
     }
 

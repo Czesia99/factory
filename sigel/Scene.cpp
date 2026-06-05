@@ -20,7 +20,6 @@ namespace sigel
 
     void DefaultScene::onExit(ResourceManager &rm, PipelineManager &pm)
     {
-        printf("EXIT DEFAULT SCENE\n");
         objects.clear();
     }
 

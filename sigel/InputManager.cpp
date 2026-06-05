@@ -15,8 +15,8 @@ namespace sigel
     void InputManager::update()
     {
         prevKeys = currKeys;
-        mousedx = 0.0f;
-        mousedy = 0.0f;
+        mouse_dx = 0.0f;
+        mouse_dy = 0.0f;
     }
 
     void InputManager::onKey(int key, int action)
@@ -33,8 +33,8 @@ namespace sigel
             firstMouse = false;
             return;
         }
-        mousedx += x - mouse_x;
-        mousedy += y - mouse_y;
+        mouse_dx += x - mouse_x;
+        mouse_dy += y - mouse_y;
         mouse_x = x;
         mouse_y = y;
     }

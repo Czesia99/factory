@@ -27,12 +27,17 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 add_subdirectory(${LIB_DIR}/glfw-3.4)
+include_directories(${LIB_DIR}/glfw-3.4/deps)
 
 #GLM
 add_subdirectory(${LIB_DIR}/glm)
 
 #VMA
 add_subdirectory(${LIB_DIR}/vma)
+
+#IMGUI
+set(IMGUI_DIR ${LIB_DIR}/imgui)
+include_directories(${IMGUI_DIR} ${IMGUI_DIR}/backends ..)
 
 #SOURCES
 set(SRC
@@ -52,6 +57,16 @@ set(SRC
     sigel/Camera.cpp
     sigel/Scene.cpp
     src/TestScene.cpp
+)
+
+set(IMGUI_SRC
+    ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp 
+    ${IMGUI_DIR}/backends/imgui_impl_vulkan.cpp
+    ${IMGUI_DIR}/imgui.cpp
+    ${IMGUI_DIR}/imgui_draw.cpp
+    ${IMGUI_DIR}/imgui_demo.cpp
+    ${IMGUI_DIR}/imgui_tables.cpp
+    ${IMGUI_DIR}/imgui_widgets.cpp
 )
 
 # file(GLOB SRC_SHADERS "${CMAKE_CURRENT_SOURCE_DIR}/sigel/shaders/*.slang")
@@ -80,7 +95,7 @@ set(SRC
 
 # add_slang_shader_target(foo SOURCES ${SRC_SHADERS})
 
-add_executable(${PROJECT_NAME} ${SRC})
+add_executable(${PROJECT_NAME} ${SRC} ${IMGUI_SRC})
 # add_dependencies(${PROJECT_NAME} foo)
 
 #link lib

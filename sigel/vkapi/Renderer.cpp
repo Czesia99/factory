@@ -2,6 +2,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <chrono>
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_vulkan.h"
+
 namespace sigel
 {
     void Renderer::init(Device *device, Swapchain *swapchain, PipelineManager *pipelineManager, ResourceManager *resourceManager)
@@ -307,7 +311,9 @@ namespace sigel
             cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelineLayout, 0, *renderObjects[i].descriptorSets[frameIndex], nullptr);
             cmd.drawIndexed(mesh.indexCount, 1, 0, 0, 0);
         }
-        
+
+        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
+
         cmd.endRendering();
 
         transition_image_layout(

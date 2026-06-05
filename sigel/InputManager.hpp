@@ -13,12 +13,12 @@ namespace sigel
             void onKey(int key, int action);
             void onMouseMove(float dx, float dy);
 
-            bool isHeld (int key) { return currKeys.count(key); }
-            bool isPressed (int key) { return currKeys.count(key) && !prevKeys.count(key); }
-            bool isReleased (int key) { return !currKeys.count(key) && prevKeys.count(key); }
+            bool isHeld (int key) const { return currKeys.count(key); }
+            bool isPressed (int key) const { return currKeys.count(key) && !prevKeys.count(key); }
+            bool isReleased (int key) const { return !currKeys.count(key) && prevKeys.count(key); }
 
-            float getMouseDeltaX() { return mousedx; }
-            float getMouseDeltaY() { return mousedy; }
+            float getMouseDeltaX() const { return mouse_dx; }
+            float getMouseDeltaY() const { return mouse_dy; }
 
         private:
         public:
@@ -26,8 +26,8 @@ namespace sigel
             std::unordered_set<int> currKeys, prevKeys;
             float mouse_x = 0.0f;
             float mouse_y = 0.0f;
-            float mousedx = 0.0f;
-            float mousedy = 0.0f;
+            float mouse_dx = 0.0f;
+            float mouse_dy = 0.0f;
 
             bool firstMouse = true;
 
