@@ -8,6 +8,16 @@ namespace sigel
     class InputManager
     {
         public:
+        private:
+            std::unordered_set<int> currKeys, prevKeys;
+            float mouse_x = 0.0f;
+            float mouse_y = 0.0f;
+            float mouse_dx = 0.0f;
+            float mouse_dy = 0.0f;
+
+            bool firstMouse = true;
+
+        public:
             InputManager();
             void update();
             void onKey(int key, int action);
@@ -19,18 +29,6 @@ namespace sigel
 
             float getMouseDeltaX() const { return mouse_dx; }
             float getMouseDeltaY() const { return mouse_dy; }
-
-        private:
-        public:
-        private:
-            std::unordered_set<int> currKeys, prevKeys;
-            float mouse_x = 0.0f;
-            float mouse_y = 0.0f;
-            float mouse_dx = 0.0f;
-            float mouse_dy = 0.0f;
-
-            bool firstMouse = true;
-
     };
 }
 

@@ -32,9 +32,9 @@ namespace sigel
         // }
 
         auto& input = SigelEngine::get().inputManager;
-        if (input.isPressed(GLFW_KEY_TAB))  SigelEngine::get().editorModeSwap();
+        if (input.isPressed(GLFW_KEY_LEFT_ALT))  SigelEngine::get().editor.swapMode();
 
-        if (SigelEngine::get().showEditor) { return; }
+        if (SigelEngine::get().editor.display) { return; }
 
         if (input.isHeld(GLFW_KEY_W)) camera.processKeyboardMovement(FORWARD, dt);
         if (input.isHeld(GLFW_KEY_S)) camera.processKeyboardMovement(BACKWARD, dt);
@@ -43,7 +43,7 @@ namespace sigel
         if (input.isHeld(GLFW_KEY_SPACE)) camera.processKeyboardMovement(UP, dt);
         if (input.isHeld(GLFW_KEY_LEFT_CONTROL)) camera.processKeyboardMovement(DOWN, dt);
 
-        if (input.isPressed(GLFW_KEY_LEFT_ALT))  SigelEngine::get().drawScene("testscene");
+        if (input.isPressed(GLFW_KEY_TAB))  SigelEngine::get().drawScene("testscene");
         if (input.isPressed(GLFW_KEY_ESCAPE)) glfwSetWindowShouldClose(SigelEngine::get().window, true);
 
         camera.processMouseMovement(input.getMouseDeltaX(), input.getMouseDeltaY());

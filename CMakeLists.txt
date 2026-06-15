@@ -56,6 +56,7 @@ set(SRC
     sigel/InputManager.cpp
     sigel/Camera.cpp
     sigel/Scene.cpp
+    sigel/EditorUI.cpp
     src/TestScene.cpp
 )
 
