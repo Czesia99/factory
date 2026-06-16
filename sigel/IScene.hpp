@@ -19,13 +19,13 @@ namespace sigel
 
     class IScene {
         public:
-        virtual ~IScene() = default;
-        
-        virtual const std::vector<SceneObject>& getObjects() const = 0;
-        virtual const Camera& getCamera() const = 0;
-        
-        virtual void onEnter(ResourceManager&, PipelineManager&) = 0;
-        virtual void onExit(ResourceManager&, PipelineManager&) = 0;
-        virtual void onUpdate(float deltaTime) = 0;
+            virtual ~IScene() = default;
+            
+            virtual const std::vector<SceneObject>& getObjects() const = 0;
+            virtual Camera& getCamera() = 0;
+            
+            virtual void onEnter(ResourceManager&, PipelineManager&) = 0;
+            virtual void onExit(ResourceManager&, PipelineManager&) = 0;
+            virtual void onUpdate(float deltaTime) = 0;
     };
 }

@@ -10,7 +10,7 @@ namespace sigel
         float elapsed = 0.0f;
     public:
         const std::vector<SceneObject>& getObjects() const override { return objects; }
-        const Camera& getCamera()  const override { return camera; }
+        Camera& getCamera() override { return camera; }
 
         void onEnter(ResourceManager& rm, PipelineManager& pm) override;
         void onExit(ResourceManager&, PipelineManager&) override;

@@ -66,9 +66,8 @@ namespace sigel
 
             if (activeScene) {
                 activeScene->onUpdate(dt);
+                editor.update(activeScene);
             }
-            
-            editor.update();
 
             vctx.renderer.drawFrame(*activeScene, editor.display);
         }

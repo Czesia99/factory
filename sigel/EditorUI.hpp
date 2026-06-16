@@ -15,10 +15,11 @@ namespace sigel
     {
         public:
             void init(GLFWwindow *window, VulkanContext &vctx);
-            void update();
+            void update(IScene *scene);
             void swapMode();
             void cleanup();
         private:
+            void cameraSettingsFrame(IScene *scene);
         public:
             bool display = false;
         private:

@@ -65,7 +65,7 @@ namespace sigel
         renderObjects.clear();
     }
     
-    void Renderer::drawFrame(const IScene& scene, bool showEditor)
+    void Renderer::drawFrame(IScene& scene, bool showEditor)
     {
         auto &frame = currentFrame();
 
@@ -214,7 +214,7 @@ namespace sigel
         return frames[frameIndex];
     }
 
-    void Renderer::updateUniformBuffer(uint32_t currentImage, const IScene& scene) 
+    void Renderer::updateUniformBuffer(uint32_t currentImage, IScene& scene) 
     {
         const auto& sceneObjects = scene.getObjects();
         const auto& sceneCamera = scene.getCamera();

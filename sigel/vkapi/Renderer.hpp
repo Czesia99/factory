@@ -46,13 +46,13 @@ namespace sigel
 
         public:
             void init(Device *device, Swapchain *swapchain, PipelineManager *pipelineManager, ResourceManager *resourceManager);
-            void drawFrame(const IScene& scene, bool showEditor);
+            void drawFrame(IScene& scene, bool showEditor);
             void createCommandPool();
             void createDescriptorPool();
             void createDescriptorSets();
             void recordCommandBuffer(uint32_t imageIndex, bool showEditor);
             void createFrameData();
-            void updateUniformBuffer(uint32_t currentImage, const IScene& scene);
+            void updateUniformBuffer(uint32_t currentImage, IScene& scene);
             void createUniformBuffers(std::vector<Buffer> &uniformBuffers);
             FrameData &currentFrame();
 

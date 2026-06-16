@@ -1,5 +1,6 @@
 #include "EditorUI.hpp"
 #include "SigelEngine.hpp"
+#include <glm/gtc/type_ptr.hpp>
 
 namespace sigel
 {
@@ -61,14 +62,21 @@ namespace sigel
         ImGui_ImplVulkan_Init(&init_info);
     }
 
-    void EditorUI::update()
+    void EditorUI::update(IScene *scene)
     {
         if (!display) return;
         
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        ImGui::ShowDemoWindow(); 
+
+        ImGui::SetNextWindowSize(ImVec2(400.0f, 600.0f), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowPos(ImVec2(10.0f, 10.0f), ImGuiCond_FirstUseEver);
+        ImGui::Begin("EDITOR PANEL");
+
+        cameraSettingsFrame(scene);
+
+        ImGui::End();
         ImGui::Render();
     }
 
@@ -90,5 +98,29 @@ namespace sigel
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
         vkDestroyDescriptorPool(_logicalDevice, imguiPool, nullptr);
+    }
+
+    void EditorUI::cameraSettingsFrame(IScene *scene)
+    {
+        if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            sigel::Camera& camera = scene->getCamera();
+
+            ImGui::DragFloat3("Position", glm::value_ptr(camera.cam.pos), 0.1f);
+
+            ImGui::Separator();
+
+            ImGui::SliderFloat("FOV", &camera.cam.fov, 10.0f, 120.0f);
+            ImGui::SliderFloat("Speed", &camera.cam.speed, 0.1f, 100.0f);
+            ImGui::DragFloat("Sensitivity", &camera.cam.sensitivity, 0.01f, 0.01f, 1.0f);
+
+            ImGui::Separator();
+
+            ImGui::DragFloat("Near Plane", &camera.cam.near_plane, 0.05f, 0.01f, 10.0f);
+            ImGui::DragFloat("Far Plane", &camera.cam.far_plane, 5.0f, 10.0f, 2000.0f);
+            
+            ImGui::Checkbox("Lock Movement", &camera.movement_lock);
+            ImGui::Checkbox("FPS Mode", &camera.fps);
+        }
     }
 }

@@ -32,6 +32,10 @@ namespace factory
         // }
 
         auto& input = SigelEngine::get().inputManager; 
+        if (input.isPressed(GLFW_KEY_LEFT_ALT))  SigelEngine::get().editor.swapMode();
+        
+        if (SigelEngine::get().editor.display) { return; }
+
         if (input.isHeld(GLFW_KEY_W)) camera.processKeyboardMovement(FORWARD, dt);
         if (input.isHeld(GLFW_KEY_S)) camera.processKeyboardMovement(BACKWARD, dt);
         if (input.isHeld(GLFW_KEY_A)) camera.processKeyboardMovement(LEFT, dt);
