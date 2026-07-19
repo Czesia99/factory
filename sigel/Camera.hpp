@@ -39,7 +39,6 @@ namespace sigel
         public:
             CamSettings cam;
 
-            bool fps;
             bool movement_lock;
             bool constrain_pitch = true;
     

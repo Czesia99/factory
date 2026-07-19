@@ -1,9 +1,12 @@
 #pragma once
 
 #include <vma/include/vk_mem_alloc.h>
+
 #include "Instance.hpp"
 #include "Device.hpp"
-#include "../GameObject.hpp"
+#include "Buffer.h"
+#include "../Vertex.hpp"
+
 
 namespace sigel
 {
@@ -27,8 +30,8 @@ namespace sigel
             AllocatedImage createImageTexture(Buffer &imgBuffer, uint32_t width, uint32_t height, VkFormat format);
             void destroyImage(AllocatedImage &image);
             void immediateSubmit(std::function<void(vk::raii::CommandBuffer&)> fn);
-            void uploadVertex(const std::vector<Vertex> &vertices, Mesh &mesh);
-            void uploadIndices(const std::vector<uint32_t> &indices, Mesh &mesh);
+            void uploadVertex(const std::vector<Vertex> &vertices, Buffer &buffer);
+            void uploadIndices(const std::vector<uint32_t> &indices, Buffer &buffer);
             void cleanup();
         private:
             Device *_device = nullptr;

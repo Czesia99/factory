@@ -1,22 +1,14 @@
 #pragma once
 
-#include "GameObject.hpp"
+#include "Mesh.hpp"
 #include "vkapi/ResourceManager.hpp"
 #include "vkapi/Pipeline.hpp"
 #include "InputManager.hpp"
 #include "Camera.hpp"
-#include "Transform.hpp"
+#include "Object.hpp"
 
 namespace sigel
 {
-    struct SceneObject
-    {
-        uint32_t  pipelineID;
-        uint32_t  meshID;
-        uint32_t  textureID;
-        Transform transform;
-    };
-
     class IScene {
         public:
             virtual ~IScene() = default;

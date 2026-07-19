@@ -22,7 +22,7 @@ namespace sigel
     void Renderer::loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t pipelineID, uint32_t textureID)
     {
         RenderObject object;
-        object.meshID = _resourceManager->loadMesh(vertices, indices);
+        object.meshID = _resourceManager->createMesh(vertices, indices);
         object.pipelineID = pipelineID;
         object.textureID = textureID;
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)

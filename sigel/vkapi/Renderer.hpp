@@ -6,6 +6,7 @@
 #include "ResourceManager.hpp"
 #include "frames.h"
 #include "../Scene.hpp"
+#include "../Vertex.hpp"
 
 namespace sigel
 {

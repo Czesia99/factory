@@ -4,7 +4,6 @@ namespace sigel
 {
     Camera::Camera() : cam{CamSettings {}}
     {
-        fps = false;
         movement_lock = false;
         
         updateCameraVectors();
@@ -12,7 +11,6 @@ namespace sigel
 
     Camera::Camera(CamSettings conf) : cam(conf)
     {
-        fps = false;
         movement_lock = false;
         
         updateCameraVectors();

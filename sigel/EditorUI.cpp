@@ -120,7 +120,6 @@ namespace sigel
             ImGui::DragFloat("Far Plane", &camera.cam.far_plane, 5.0f, 10.0f, 2000.0f);
             
             ImGui::Checkbox("Lock Movement", &camera.movement_lock);
-            ImGui::Checkbox("FPS Mode", &camera.fps);
         }
     }
 }

@@ -16,12 +16,12 @@ namespace sigel
         return meshes[index];
     }
 
-    uint32_t ResourceManager::loadMesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices)
+    uint32_t ResourceManager::createMesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices)
     {
         Mesh mesh;
 
-        _allocator->uploadVertex(vertices, mesh);
-        _allocator->uploadIndices(indices, mesh);
+        _allocator->uploadVertex(vertices, mesh.vertexBuffer);
+        _allocator->uploadIndices(indices, mesh.indexBuffer);
 
         mesh.indexCount = static_cast<uint32_t>(indices.size());
         uint32_t id = static_cast<uint32_t>(meshes.size());

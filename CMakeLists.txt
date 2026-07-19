@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(LIB_DIR ${CMAKE_SOURCE_DIR}/libs)
 
 include_directories(${LIB_DIR}/stb)
+include_directories(${LIB_DIR}/tinyobj)
 
 #Vulkan
 find_package(Vulkan REQUIRED)

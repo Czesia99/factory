@@ -251,14 +251,14 @@ namespace sigel
         _device->graphicsQueue.waitIdle();
     }
 
-    void GpuAllocator::uploadVertex(const std::vector<Vertex> &vertices, Mesh &mesh)
+    void GpuAllocator::uploadVertex(const std::vector<Vertex> &vertices, Buffer &buffer)
     {
         vk::DeviceSize size = sizeof(vertices[0]) * vertices.size();
 
         Buffer staging = createStagingBuffer(size);
         memcpy(staging.mapped, vertices.data(), size);
 
-        mesh.vertexBuffer = createBuffer(
+        buffer = createBuffer(
             size,
             VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE
@@ -266,20 +266,20 @@ namespace sigel
 
         immediateSubmit([&](vk::raii::CommandBuffer& cmd) {
             vk::BufferCopy region{ .size = size };
-            cmd.copyBuffer(staging.buffer, mesh.vertexBuffer.buffer, region);
+            cmd.copyBuffer(staging.buffer, buffer.buffer, region);
         });
 
         destroyBuffer(staging);
     }
 
-    void GpuAllocator::uploadIndices(const std::vector<uint32_t> &indices, Mesh &mesh)
+    void GpuAllocator::uploadIndices(const std::vector<uint32_t> &indices, Buffer &buffer)
     {
         vk::DeviceSize size = sizeof(indices[0]) * indices.size();
 
         Buffer staging = createStagingBuffer(size);
         memcpy(staging.mapped, indices.data(), size);
 
-        mesh.indexBuffer = createBuffer(
+        buffer = createBuffer(
             size,
             VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE
@@ -287,7 +287,7 @@ namespace sigel
 
         immediateSubmit([&](vk::raii::CommandBuffer& cmd) {
             vk::BufferCopy region{ .size = size };
-            cmd.copyBuffer(staging.buffer, mesh.indexBuffer.buffer, region);
+            cmd.copyBuffer(staging.buffer, buffer.buffer, region);
         });
 
         destroyBuffer(staging);
