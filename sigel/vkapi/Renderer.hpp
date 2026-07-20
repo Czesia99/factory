@@ -16,13 +16,18 @@ namespace sigel
         alignas(16) glm::mat4 proj;
     };
 
-    struct RenderObject
+    struct MeshRenderData
     {
         uint32_t meshID;
-        uint32_t pipelineID;
         uint32_t textureID;
-        std::vector<Buffer> uniformBuffers;
         std::vector<vk::raii::DescriptorSet> descriptorSets;
+    };
+
+    struct RenderObject
+    {
+        uint32_t pipelineID;
+        std::vector<MeshRenderData> meshes;
+        std::vector<Buffer> uniformBuffers;
     };
 
     class Renderer

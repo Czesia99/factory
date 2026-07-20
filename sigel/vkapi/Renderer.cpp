@@ -22,9 +22,13 @@ namespace sigel
     void Renderer::loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t pipelineID, uint32_t textureID)
     {
         RenderObject object;
-        object.meshID = _resourceManager->createMesh(vertices, indices);
+
         object.pipelineID = pipelineID;
-        object.textureID = textureID;
+        for (auto &mesh : object.meshes)
+        {
+            mesh.meshID = _resourceManager->createMesh(vertices, indices);
+            mesh.textureID = textureID;
+        }
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {
             object.uniformBuffers.emplace_back(_resourceManager->createUniformBuffer(sizeof(UniformBufferObject)));
@@ -43,8 +47,15 @@ namespace sigel
         for (const auto& so : sceneObjects) {
             RenderObject ro;
             ro.pipelineID = so.pipelineID;
-            ro.meshID = so.meshID;
-            ro.textureID = so.textureID;
+            for (const auto &mesh : so.meshes)
+            {
+                MeshRenderData renderMesh;
+
+                renderMesh.meshID = mesh.meshID;
+                renderMesh.textureID = mesh.textureID;
+                ro.meshes.emplace_back(std::move(renderMesh));
+            }
+            
             for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
                 ro.uniformBuffers.emplace_back(_resourceManager->createUniformBuffer(sizeof(UniformBufferObject)));
             renderObjects.emplace_back(std::move(ro));
@@ -60,7 +71,11 @@ namespace sigel
         {
             for (auto& ubo : obj.uniformBuffers)
                 _resourceManager->destroyBuffer(ubo);
-            obj.descriptorSets.clear();
+
+            for (auto &mesh : obj.meshes)
+            {
+                mesh.descriptorSets.clear();
+            }
         }
         renderObjects.clear();
     }
@@ -160,53 +175,80 @@ namespace sigel
         descriptorPool = vk::raii::DescriptorPool(_device->logicalDevice, poolInfo);
     }
 
-    void Renderer::createDescriptorSets() {
-        for (auto &obj : renderObjects) 
+    void Renderer::createDescriptorSets()
+    {
+        for (auto& obj : renderObjects)
         {
-            const PipelineInstance &pipeline = _pipelineManager->getPipeline(obj.pipelineID);
-            std::vector<vk::DescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, *pipeline.descriptorSetLayout);
+            const PipelineInstance& pipeline =
+                _pipelineManager->getPipeline(obj.pipelineID);
+
+            std::vector<vk::DescriptorSetLayout> layouts(
+                MAX_FRAMES_IN_FLIGHT,
+                *pipeline.descriptorSetLayout
+            );
+
             vk::DescriptorSetAllocateInfo allocInfo{
                 .descriptorPool = *descriptorPool,
-                .descriptorSetCount = static_cast<uint32_t>(layouts.size()),
+                .descriptorSetCount =
+                    static_cast<uint32_t>(layouts.size()),
                 .pSetLayouts = layouts.data()
             };
 
-            obj.descriptorSets = _device->logicalDevice.allocateDescriptorSets(allocInfo);
+            for (auto &mesh : obj.meshes)
+            {
+                mesh.descriptorSets =
+                    _device->logicalDevice.allocateDescriptorSets(allocInfo);
 
-            for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-                vk::DescriptorBufferInfo bufferInfo{
-                    .buffer = vk::Buffer(obj.uniformBuffers[i].buffer),
-                    .offset = 0, 
-                    .range = sizeof(UniformBufferObject)
-                };
-                vk::DescriptorImageInfo  imageInfo{
-                    .sampler = _resourceManager->textures[obj.textureID].sampler, 
-                    .imageView = _resourceManager->textures[obj.textureID].view, 
-                    .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal
-                };
-
-                std::array<vk::WriteDescriptorSet, 2> descriptorWrites{{{
-                    .dstSet          = *obj.descriptorSets[i],
-                    .dstBinding      = 0,
-                    .dstArrayElement = 0,
-                    .descriptorCount = 1,
-                    .descriptorType  = vk::DescriptorType::eUniformBuffer,
-                    .pBufferInfo     = &bufferInfo
-                },
+                for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
                 {
-                    .dstSet          = *obj.descriptorSets[i],
-                    .dstBinding      = 1,
-                    .dstArrayElement = 0,
-                    .descriptorCount = 1,
-                    .descriptorType  = vk::DescriptorType::eCombinedImageSampler,
-                    .pImageInfo      = &imageInfo
-                }}};
+                    vk::DescriptorBufferInfo bufferInfo{
+                        .buffer = vk::Buffer(
+                            obj.uniformBuffers[i].buffer
+                        ),
+                        .offset = 0,
+                        .range = sizeof(UniformBufferObject)
+                    };
 
-                _device->logicalDevice.updateDescriptorSets(descriptorWrites, nullptr);
+                    const auto& texture =
+                        _resourceManager->textures[mesh.textureID];
+
+                    vk::DescriptorImageInfo imageInfo{
+                        .sampler = texture.sampler,
+                        .imageView = texture.view,
+                        .imageLayout =
+                            vk::ImageLayout::eShaderReadOnlyOptimal
+                    };
+
+                    std::array<vk::WriteDescriptorSet, 2>
+                        descriptorWrites{{
+                            {
+                                .dstSet = *mesh.descriptorSets[i],
+                                .dstBinding = 0,
+                                .dstArrayElement = 0,
+                                .descriptorCount = 1,
+                                .descriptorType =
+                                    vk::DescriptorType::eUniformBuffer,
+                                .pBufferInfo = &bufferInfo
+                            },
+                            {
+                                .dstSet = *mesh.descriptorSets[i],
+                                .dstBinding = 1,
+                                .dstArrayElement = 0,
+                                .descriptorCount = 1,
+                                .descriptorType =
+                                    vk::DescriptorType::
+                                        eCombinedImageSampler,
+                                .pImageInfo = &imageInfo
+                            }
+                        }};
+
+                    _device->logicalDevice.updateDescriptorSets(
+                        descriptorWrites,
+                        nullptr
+                    );
+                }
             }
         }
-
-        
     }
 
     FrameData& Renderer::currentFrame()
@@ -299,17 +341,38 @@ namespace sigel
         cmd.setViewport(0, vk::Viewport(0.0f, 0.0f, static_cast<float>(_swapchain->swapChainExtent.width), static_cast<float>(_swapchain->swapChainExtent.height), 0.0f, 1.0f));
         cmd.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _swapchain->swapChainExtent));
         
-        for (int i = 0; i < renderObjects.size(); i++)
+        for (const auto& renderObject : renderObjects)
         {
-            const Mesh &mesh = _resourceManager->getMesh(renderObjects[i].meshID);
-            const PipelineInstance &pipeline = _pipelineManager->getPipeline(renderObjects[i].pipelineID);
-            vk::Buffer vb = mesh.vertexBuffer.buffer;
-            vk::Buffer ib = mesh.indexBuffer.buffer;
-            cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline.pipeline);
-            cmd.bindVertexBuffers(0, vb, {0});
-            cmd.bindIndexBuffer(ib, 0, vk::IndexType::eUint32 );  
-            cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelineLayout, 0, *renderObjects[i].descriptorSets[frameIndex], nullptr);
-            cmd.drawIndexed(mesh.indexCount, 1, 0, 0, 0);
+            const PipelineInstance& pipeline =
+                _pipelineManager->getPipeline(
+                    renderObject.pipelineID
+                );
+
+            cmd.bindPipeline(
+                vk::PipelineBindPoint::eGraphics,
+                *pipeline.pipeline
+            );
+
+            for (const auto& meshData : renderObject.meshes)
+            {
+                const Mesh& mesh = _resourceManager->getMesh(meshData.meshID);
+
+                vk::Buffer vb = mesh.vertexBuffer.buffer;
+                vk::Buffer ib = mesh.indexBuffer.buffer;
+
+                cmd.bindVertexBuffers(0, vb, { 0 });
+                cmd.bindIndexBuffer(ib, 0, vk::IndexType::eUint32);
+
+                cmd.bindDescriptorSets(
+                    vk::PipelineBindPoint::eGraphics,
+                    *pipeline.pipelineLayout,
+                    0,
+                    *meshData.descriptorSets[frameIndex],
+                    nullptr
+                );
+
+                cmd.drawIndexed(mesh.indexCount, 1, 0, 0, 0);
+            }
         }
 
         if (showEditor)

@@ -5,12 +5,19 @@ namespace sigel
 {
     void DefaultScene::onEnter(ResourceManager &rm, PipelineManager &pm)
     {
-        // uint32_t casstex  = rm.createTextureImage("../cassgare.jpg");
         uint32_t flotex  = rm.createTextureImage("../assets/textures/flo.jpg");
         uint32_t mesh = rm.createMesh(cube_vertices, cube_indices);
         uint32_t defaultPipeline = pm.getPipelineID("default");
-        objects.push_back({ defaultPipeline, mesh, flotex });
-        // objects.push_back({ defaultPipeline, mesh, flotex });
+
+        SceneObject object;
+
+        object.pipelineID = defaultPipeline;
+        object.meshes.push_back({
+            mesh,
+            flotex
+        });
+
+        objects.push_back(object);
 
         // objects[1].transform = glm::translate
         objects[0].transform.rotation = glm::vec3{0.0f, 0.0f, 0.0f};
