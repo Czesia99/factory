@@ -36,6 +36,8 @@ namespace sigel
             void addScene(const std::string& name, IScene* scene);
             void drawScene(const std::string& name);
 
+            std::vector<MeshInfo> loadTinyModel(std::string path);
+
         private:
             SigelEngine() { initWindow(); initEngine(); }
             void initWindow();

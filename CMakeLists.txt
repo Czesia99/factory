@@ -96,9 +96,15 @@ set(IMGUI_SRC
 # endfunction()
 
 # add_slang_shader_target(foo SOURCES ${SRC_SHADERS})
+option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
 
 add_executable(${PROJECT_NAME} ${SRC} ${IMGUI_SRC})
 # add_dependencies(${PROJECT_NAME} foo)
+
+if (ENABLE_ASAN AND MSVC)
+    add_compile_options(/fsanitize=address)
+    add_link_options(/INCREMENTAL:NO)
+endif()
 
 #link lib
 target_link_libraries(${PROJECT_NAME} PRIVATE 

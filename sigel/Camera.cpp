@@ -24,7 +24,7 @@ namespace sigel
     glm::mat4 Camera::getProjectionMatrix(float aspect) const
     {
         glm::mat4 proj = glm::perspective(glm::radians(cam.fov), aspect, cam.near_plane, cam.far_plane);
-        proj[1][1] *= -1.0f;    
+        // proj[1][1] *= -1.0f;    
         return proj;            
     }
 
@@ -40,9 +40,9 @@ namespace sigel
         if (direction == RIGHT)
             cam.pos += cam.right * velocity;
         if (direction == UP)
-            cam.pos += cam.up * velocity;
+            cam.pos += cam.up * velocity * -1.0f;
         if (direction == DOWN)
-            cam.pos -= cam.up * velocity;
+            cam.pos -= cam.up * velocity * -1.0f;
     }
 
     void Camera::processMouseMovement(float dx, float dy)
@@ -54,7 +54,8 @@ namespace sigel
         dy *= cam.sensitivity;
 
         cam.yaw   += dx;
-        cam.pitch -= dy;
+        cam.pitch -= dy * -1.0f;
+
 
         if (constrain_pitch)
         {

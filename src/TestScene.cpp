@@ -6,7 +6,8 @@ namespace factory
     void TestScene::onEnter(ResourceManager &rm, PipelineManager &pm)
     {
         // uint32_t casstex  = rm.createTextureImage("../cassgare.jpg");
-        uint32_t flotex  = rm.createTextureImage("../assets/textures/texture.jpg");
+        uint32_t chips_tex = rm.createTextureImage("../assets/models/chipsbag/chips_audran.png");
+        uint32_t flotex  = rm.createTextureImage("../assets/textures/flo.jpg");
         uint32_t mesh = rm.createMesh(cube_vertices, cube_indices);
         uint32_t defaultPipeline = pm.getPipelineID("default");
 
@@ -19,6 +20,13 @@ namespace factory
         });
 
         objects.push_back(object);
+
+        SceneObject car;
+        car.pipelineID = defaultPipeline;
+        car.meshes = SigelEngine::get().loadTinyModel("../assets/models/chipsbag/chips2.obj");
+        // car.meshes[0].textureID = chips_tex;
+        car.transform.scale *= 10.0f;
+        objects.push_back(car);
 
         // objects[1].transform = glm::translate
         objects[0].transform.rotation = glm::vec3{0.0f, 0.0f, 0.0f};
