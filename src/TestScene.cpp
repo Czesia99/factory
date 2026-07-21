@@ -1,15 +1,19 @@
 #include "TestScene.hpp"
 #include "../sigel/SigelEngine.hpp"
+#include <print>
 
 namespace factory
 {
     void TestScene::onEnter(ResourceManager &rm, PipelineManager &pm)
     {
-        // uint32_t casstex  = rm.createTextureImage("../cassgare.jpg");
+        std::printf("ON ENTER TEST SCENE");
+        std::print("Objects : {}", objects.size());
         uint32_t chips_tex = rm.createTextureImage("../assets/models/chipsbag/chips_audran.png");
-        uint32_t flotex  = rm.createTextureImage("../assets/textures/flo.jpg");
+        // uint32_t flotex  = rm.createTextureImage("../assets/textures/flo.jpg");
+        uint32_t flotex = ResourceManager::get().createTextureImage("../assets/textures/flo.jpg");
         uint32_t mesh = rm.createMesh(cube_vertices, cube_indices);
-        uint32_t defaultPipeline = pm.getPipelineID("default");
+        uint32_t defaultPipeline = PipelineManager::get().getPipelineID("default");
+
 
         SceneObject object;
 
@@ -25,7 +29,6 @@ namespace factory
         car.pipelineID = defaultPipeline;
         car.meshes = SigelEngine::get().loadTinyModel("../assets/models/chipsbag/chips2.obj");
         // car.meshes[0].textureID = chips_tex;
-        car.transform.scale *= 10.0f;
         objects.push_back(car);
 
         // objects[1].transform = glm::translate
@@ -47,9 +50,9 @@ namespace factory
         //     objects[i].transform = glm::rotate(model, elapsed * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         // }
 
-        auto& input = SigelEngine::get().inputManager; 
+        auto& input = SigelEngine::get().inputManager;
         if (input.isPressed(GLFW_KEY_LEFT_ALT))  SigelEngine::get().editor.swapMode();
-        
+
         if (SigelEngine::get().editor.display) { return; }
 
         if (input.isHeld(GLFW_KEY_W)) camera.processKeyboardMovement(FORWARD, dt);

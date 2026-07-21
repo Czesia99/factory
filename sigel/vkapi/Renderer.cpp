@@ -55,7 +55,7 @@ namespace sigel
                 renderMesh.textureID = mesh.textureID;
                 ro.meshes.emplace_back(std::move(renderMesh));
             }
-            
+
             for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
                 ro.uniformBuffers.emplace_back(_resourceManager->createUniformBuffer(sizeof(UniformBufferObject)));
             renderObjects.emplace_back(std::move(ro));
@@ -79,7 +79,7 @@ namespace sigel
         }
         renderObjects.clear();
     }
-    
+
     void Renderer::drawFrame(IScene& scene, bool showEditor)
     {
         auto &frame = currentFrame();
@@ -89,9 +89,9 @@ namespace sigel
 		auto [result, imageIndex] = _swapchain->swapChain.acquireNextImage(UINT64_MAX, *frame.presentSemaphore, nullptr);
 
         checkImageResult(result);
-        
+
         _device->logicalDevice.resetFences(*frame.inFlightFence);
-        
+
         updateUniformBuffer(frameIndex, scene);
         frame.commandBuffer.reset();
         recordCommandBuffer(imageIndex, showEditor);
@@ -104,16 +104,16 @@ namespace sigel
                                         .pCommandBuffers      = &*frame.commandBuffer,
                                         .signalSemaphoreCount = 1,
                                         .pSignalSemaphores    = &*renderSemaphores[imageIndex]};
-        
+
         _device->graphicsQueue.submit(submitInfo, *frame.inFlightFence);
 
-        
+
 		const vk::PresentInfoKHR presentInfoKHR{.waitSemaphoreCount = 1,
 		                                        .pWaitSemaphores    = &*renderSemaphores[imageIndex],
 		                                        .swapchainCount     = 1,
 		                                        .pSwapchains        = &*_swapchain->swapChain,
 		                                        .pImageIndices      = &imageIndex};
-        
+
         result = _device->presentQueue.presentKHR(presentInfoKHR);
 
         if ((result == vk::Result::eSuboptimalKHR) || (result == vk::Result::eErrorOutOfDateKHR))
@@ -196,8 +196,7 @@ namespace sigel
 
             for (auto &mesh : obj.meshes)
             {
-                mesh.descriptorSets =
-                    _device->logicalDevice.allocateDescriptorSets(allocInfo);
+                mesh.descriptorSets = _device->logicalDevice.allocateDescriptorSets(allocInfo);
 
                 for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
                 {
@@ -256,7 +255,7 @@ namespace sigel
         return frames[frameIndex];
     }
 
-    void Renderer::updateUniformBuffer(uint32_t currentImage, IScene& scene) 
+    void Renderer::updateUniformBuffer(uint32_t currentImage, IScene& scene)
     {
         const auto& sceneObjects = scene.getObjects();
         const auto& sceneCamera = scene.getCamera();
@@ -337,10 +336,10 @@ namespace sigel
         };
 
         cmd.beginRendering(renderingInfo);
-        
+
         cmd.setViewport(0, vk::Viewport(0.0f, 0.0f, static_cast<float>(_swapchain->swapChainExtent.width), static_cast<float>(_swapchain->swapChainExtent.height), 0.0f, 1.0f));
         cmd.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _swapchain->swapChainExtent));
-        
+
         for (const auto& renderObject : renderObjects)
         {
             const PipelineInstance& pipeline =
@@ -399,7 +398,7 @@ namespace sigel
     void Renderer::waitFence()
     {
         auto &fence = currentFrame().inFlightFence;
-		auto fenceResult = _device->logicalDevice.waitForFences(*fence, vk::True, UINT64_MAX);        
+		auto fenceResult = _device->logicalDevice.waitForFences(*fence, vk::True, UINT64_MAX);
 		if (fenceResult != vk::Result::eSuccess)
 		{
 			throw std::runtime_error("failed to wait for fence!");

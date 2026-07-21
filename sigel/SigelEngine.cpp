@@ -130,7 +130,7 @@ namespace sigel
         app->inputManager.onMouseMove(static_cast<float>(x), static_cast<float>(y));
     }
 
-    std::vector<MeshInfo> SigelEngine::loadTinyModel(std::string path)
+    std::vector<SubMesh> SigelEngine::loadTinyModel(std::string path)
     {
 		tinyobj::attrib_t                attrib;
 		std::vector<tinyobj::shape_t>    shapes;
@@ -140,7 +140,7 @@ namespace sigel
         std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
 
-        std::vector<MeshInfo> meshes;
+        std::vector<SubMesh> meshes;
 
 		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path.c_str()))
 		{

@@ -10,7 +10,7 @@ namespace sigel
 {
     constexpr uint32_t WIDTH = 1920;
     constexpr uint32_t HEIGHT = 1080;
-    
+
     class SigelEngine {
         public:
             GLFWwindow *window;
@@ -36,7 +36,7 @@ namespace sigel
             void addScene(const std::string& name, IScene* scene);
             void drawScene(const std::string& name);
 
-            std::vector<MeshInfo> loadTinyModel(std::string path);
+            std::vector<SubMesh> loadTinyModel(std::string path);
 
         private:
             SigelEngine() { initWindow(); initEngine(); }
@@ -45,7 +45,7 @@ namespace sigel
             void mainLoop();
             void waitIdle();
             void cleanup();
-            
+
             void loadScene(IScene* scene);
 
             static void framebufferResizeCallback(GLFWwindow* window, int width, int height);

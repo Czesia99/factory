@@ -4,7 +4,7 @@
 
 namespace sigel
 {
-    struct MeshInfo
+    struct SubMesh
     {
         uint32_t  meshID;
         uint32_t  textureID;
@@ -14,7 +14,7 @@ namespace sigel
     struct SceneObject
     {
         uint32_t  pipelineID;
-        std::vector<MeshInfo> meshes;
+        std::vector<SubMesh> meshes;
         Transform transform;
     };
 }
