@@ -32,7 +32,7 @@ namespace factory
         objects.push_back(car);
 
         // objects[1].transform = glm::translate
-        objects[0].transform.rotation = glm::vec3{0.0f, 0.0f, 0.0f};
+        // objects[0].transform.rotation = glm::vec3{0.0f, 0.0f, 0.0f};
 
         glfwSetInputMode(SigelEngine::get().window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }

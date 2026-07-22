@@ -13,7 +13,7 @@ namespace sigel
         std::string shaderPath = "../sigel/shaders/slang2.spv";
         vk::PolygonMode polygonMode = vk::PolygonMode::eFill;
         vk::CullModeFlags cullMode = vk::CullModeFlagBits::eFront;
-        vk::FrontFace frontFace = vk::FrontFace::eCounterClockwise;
+        vk::FrontFace frontFace = vk::FrontFace::eClockwise;
         vk::Format depthFormat = vk::Format::eD32Sfloat;
         bool depthTest = true;
         bool depthWrite = true;

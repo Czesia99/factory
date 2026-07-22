@@ -337,7 +337,18 @@ namespace sigel
 
         cmd.beginRendering(renderingInfo);
 
-        cmd.setViewport(0, vk::Viewport(0.0f, 0.0f, static_cast<float>(_swapchain->swapChainExtent.width), static_cast<float>(_swapchain->swapChainExtent.height), 0.0f, 1.0f));
+        // cmd.setViewport(0, vk::Viewport(0.0f, 0.0f, static_cast<float>(_swapchain->swapChainExtent.width), static_cast<float>(_swapchain->swapChainExtent.height), 0.0f, 1.0f));
+        cmd.setViewport(
+            0,
+            vk::Viewport(
+                0.0f,
+                static_cast<float>(_swapchain->swapChainExtent.height),
+                static_cast<float>(_swapchain->swapChainExtent.width),
+                -static_cast<float>(_swapchain->swapChainExtent.height),
+                0.0f,
+                1.0f
+            )
+        );
         cmd.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _swapchain->swapChainExtent));
 
         for (const auto& renderObject : renderObjects)
