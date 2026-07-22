@@ -65,7 +65,8 @@ namespace sigel
                 nextActiveScene = nullptr;
             }
 
-            if (activeScene) {
+            if (activeScene)
+            {
                 activeScene->onUpdate(dt);
                 editor.update(activeScene);
             }
@@ -165,6 +166,8 @@ namespace sigel
         std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
 
+        std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+
         std::vector<SubMesh> meshes;
 
 		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path.c_str()))
@@ -189,8 +192,13 @@ namespace sigel
                     1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
                 };
 
-                vertices.push_back(vertex);
-                indices.push_back(indices.size());
+				auto [it, inserted] = uniqueVertices.insert({vertex, static_cast<uint32_t>(vertices.size())});
+				if (inserted)
+				{
+                    vertices.push_back(vertex);
+				}
+
+				indices.push_back(it->second);
             }
 
             uint32_t mesh = vctx.resourceManager.createMesh(vertices, indices);

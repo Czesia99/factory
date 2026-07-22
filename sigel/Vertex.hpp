@@ -1,7 +1,10 @@
 #pragma once
 
 #include <vulkan/vulkan_raii.hpp>
+
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
+#include <glm/gtx/hash.hpp>
 
 namespace sigel
 {
@@ -20,19 +23,12 @@ namespace sigel
                 vk::VertexInputAttributeDescription({1, 0, vk::Format::eR32G32Sfloat, offsetof(Vertex, texCoord)})
             };
         }
+
+        bool operator==(const Vertex& other) const
+        {
+            return pos == other.pos && texCoord == other.texCoord;
+        }
     };
-
-    // const std::vector<Vertex> triangle_vertices = {
-    //     {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-    //     {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-    //     {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-    //     {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
-    // };
-    
-
-    // const std::vector<uint16_t> triangle_indices = {
-    //     0, 1, 2, 2, 3, 0
-    // };
 
     const std::vector<Vertex> cube_vertices = {
         // Front
@@ -82,3 +78,12 @@ namespace sigel
         22, 23, 20,  20, 21, 22,
     };
 }
+
+template<>
+struct std::hash<sigel::Vertex>
+{
+    size_t operator()(sigel::Vertex const& vertex) const
+    {
+        return ((std::hash<glm::vec3>()(vertex.pos)) >> 1) ^ (std::hash<glm::vec2>()(vertex.texCoord) << 1);
+    }
+};
