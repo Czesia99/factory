@@ -40,7 +40,6 @@ namespace sigel
         vctx.init(window);
         editor.init(window, vctx);
         status("CORE", "Vulkan context ready");
-
         addScene("default", new DefaultScene());
     }
 
@@ -82,6 +81,17 @@ namespace sigel
 
         vctx.renderer.cleanupRenderObjects();
         vctx.resourceManager.cleanup();
+
+        for (auto& [name, scene] : scenes)
+        {
+            if (scene)
+            {
+                scene->onDestroy();
+                delete scene;
+            }
+        }
+
+        // scenes.clear();
         vctx.clean();
 
         glfwDestroyWindow(window);
@@ -95,24 +105,39 @@ namespace sigel
 
     void SigelEngine::drawScene(const std::string& name)
     {
-        status("SCENE MANAGER", "Drawing [" + name + "] Scene");
-        nextActiveScene = scenes.at(name);
+        if (scenes.contains(name))
+        {
+            status("SCENE MANAGER", "Drawing [" + name + "] Scene");
+            nextActiveScene = scenes.at(name);
+        }
+        else
+        {
+            status("SCENE MANAGER", "Scene [" + name + "] does not exist");
+        }
     }
 
     void SigelEngine::loadScene(IScene* scene)
     {
         vctx.waitIdle();
+
         if (activeScene)
         {
-            activeScene->onExit(vctx.resourceManager, vctx.pipelineManager);
+            activeScene->onExit();
             vctx.renderer.cleanupRenderObjects();
         }
-        scene->onEnter(vctx.resourceManager, vctx.pipelineManager);
+
+        if (!scene->isSetup)
+        {
+            scene->onSetup();
+            scene->isSetup = true;
+        }
+
+        scene->onEnter();
         vctx.renderer.prepareScene(*scene);
         activeScene = scene;
     }
 
-    void SigelEngine::framebufferResizeCallback(GLFWwindow* window, int width, int height) 
+    void SigelEngine::framebufferResizeCallback(GLFWwindow* window, int width, int height)
     {
         auto app = reinterpret_cast<SigelEngine*>(glfwGetWindowUserPointer(window));
         app->vctx.renderer.framebufferResized = true;

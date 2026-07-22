@@ -37,13 +37,7 @@ namespace sigel
             std::vector<PipelineInstance> pipelines;
             std::unordered_map<std::string, uint32_t> nameIndex;
         public:
-            static PipelineManager& get() {
-                static PipelineManager instance;
-                return instance;
-            }
-
-            PipelineManager(const PipelineManager&) = delete;
-            PipelineManager& operator=(const PipelineManager&) = delete;
+            static PipelineManager& get();
 
             PipelineManager() = default;
             void init(Swapchain *swapchain, Device *device);

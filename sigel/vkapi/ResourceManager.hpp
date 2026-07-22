@@ -17,13 +17,7 @@ namespace sigel
             GpuAllocator *_allocator;
             Device *_device;
         public:
-            static ResourceManager& get() {
-                static ResourceManager instance;
-                return instance;
-            }
-
-            ResourceManager(const ResourceManager&) = delete;
-            ResourceManager& operator=(const ResourceManager&) = delete;
+            static ResourceManager& get();
 
             ResourceManager() = default;
 

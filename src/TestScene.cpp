@@ -4,14 +4,14 @@
 
 namespace factory
 {
-    void TestScene::onEnter(ResourceManager &rm, PipelineManager &pm)
+    void TestScene::onSetup()
     {
-        std::printf("ON ENTER TEST SCENE");
+        std::printf("ON SETUP TEST SCENE\n");
         std::print("Objects : {}", objects.size());
-        uint32_t chips_tex = rm.createTextureImage("../assets/models/chipsbag/chips_audran.png");
+        uint32_t chips_tex = ResourceManager::get().createTextureImage("../assets/models/chipsbag/chips_audran.png");
         // uint32_t flotex  = rm.createTextureImage("../assets/textures/flo.jpg");
         uint32_t flotex = ResourceManager::get().createTextureImage("../assets/textures/flo.jpg");
-        uint32_t mesh = rm.createMesh(cube_vertices, cube_indices);
+        uint32_t mesh = ResourceManager::get().createMesh(cube_vertices, cube_indices);
         uint32_t defaultPipeline = PipelineManager::get().getPipelineID("default");
 
 
@@ -37,7 +37,17 @@ namespace factory
         glfwSetInputMode(SigelEngine::get().window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 
-    void TestScene::onExit(ResourceManager &rm, PipelineManager &pm)
+    void TestScene::onEnter()
+    {
+        status("TESTSCENE", "enter test scene");
+    }
+
+    void TestScene::onExit()
+    {
+        status("TESTSCENE", "exit test scene");
+    }
+
+    void TestScene::onDestroy()
     {
         objects.clear();
     }

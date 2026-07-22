@@ -1,6 +1,7 @@
 #include "Pipeline.hpp"
 #include "../Vertex.hpp"
 #include "../Utils.hpp"
+#include "../SigelEngine.hpp"
 
 namespace sigel
 {
@@ -10,6 +11,11 @@ namespace sigel
         _device = device;
 
         createPipeline();
+    }
+
+    PipelineManager& PipelineManager::get()
+    {
+        return SigelEngine::get().vctx.pipelineManager;
     }
 
     const PipelineInstance& PipelineManager::getPipeline(uint32_t id) const
@@ -54,26 +60,26 @@ namespace sigel
                                                                 .pVertexBindingDescriptions      = &bindingDescription,
                                                                 .vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size()),
                                                                 .pVertexAttributeDescriptions    = attributeDescriptions.data() };
-        
-        
+
+
         vk::PipelineInputAssemblyStateCreateInfo inputAssembly {.topology = vk::PrimitiveTopology::eTriangleList};
-        
+
         vk::PipelineViewportStateCreateInfo viewportState{ .viewportCount = 1, .scissorCount = 1 };
-        
+
         //hey
         vk::Viewport{ 0.0f, 0.0f, static_cast<float>(_swapchain->swapChainExtent.width), static_cast<float>(_swapchain->swapChainExtent.height), 0.0f, 1.0f };
         vk::Rect2D{vk::Offset2D{ 0, 0 }, _swapchain->swapChainExtent};
 
 
         vk::PipelineRasterizationStateCreateInfo rasterizer {
-            .depthClampEnable = vk::False, 
+            .depthClampEnable = vk::False,
             .rasterizerDiscardEnable = vk::False,
             .polygonMode = config.polygonMode,
             .cullMode = config.cullMode,
             .frontFace = config.frontFace,
             .depthBiasEnable = vk::False,
-            .depthBiasSlopeFactor = 1.0f, 
-            .lineWidth = 1.0f 
+            .depthBiasSlopeFactor = 1.0f,
+            .lineWidth = 1.0f
         };
 
         vk::PipelineMultisampleStateCreateInfo multisampling {.rasterizationSamples = vk::SampleCountFlagBits::e1, .sampleShadingEnable = vk::False};
@@ -96,10 +102,10 @@ namespace sigel
 
         std::vector dynamicStates = {vk::DynamicState::eViewport, vk::DynamicState::eScissor};
         vk::PipelineDynamicStateCreateInfo dynamicState{.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size()), .pDynamicStates = dynamicStates.data()};
-        
+
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo{.setLayoutCount = 1, .pSetLayouts = &*instance.descriptorSetLayout, .pushConstantRangeCount = 0};
         instance.pipelineLayout = vk::raii::PipelineLayout(_device->logicalDevice, pipelineLayoutInfo);
-        
+
         vk::PipelineRenderingCreateInfo renderingInfo{ .colorAttachmentCount = 1, .pColorAttachmentFormats = &(_swapchain->swapChainSurfaceFormat.format), .depthAttachmentFormat = config.depthFormat };
 
         vk::GraphicsPipelineCreateInfo pipelineInfo{
@@ -133,7 +139,7 @@ namespace sigel
             vk::DescriptorSetLayoutBinding( 0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eVertex, nullptr),
             vk::DescriptorSetLayoutBinding( 1, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment, nullptr)
         };
-        
+
         vk::DescriptorSetLayoutCreateInfo layoutInfo{.bindingCount = bindings.size(), .pBindings = bindings.data()};
         return vk::raii::DescriptorSetLayout(_device->logicalDevice, layoutInfo);
     }

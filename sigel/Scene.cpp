@@ -3,12 +3,15 @@
 
 namespace sigel
 {
-    void DefaultScene::onEnter(ResourceManager &rm, PipelineManager &pm)
+    void DefaultScene::onSetup()
     {
-        uint32_t flotex  = rm.createTextureImage("../assets/textures/flo.jpg");
-        uint32_t mesh = rm.createMesh(cube_vertices, cube_indices);
-        uint32_t defaultPipeline = pm.getPipelineID("default");
-
+        printf("DefaultScene::onSetup start\n");
+        uint32_t flotex  = ResourceManager::get().createTextureImage("../assets/textures/flo.jpg");
+        printf("DefaultScene::onSetup fllotex\n");
+        uint32_t mesh = ResourceManager::get().createMesh(cube_vertices, cube_indices);
+        printf("DefaultScene::onSetup mesh creation\n");
+        uint32_t defaultPipeline = PipelineManager::get().getPipelineID("default");
+        printf("DefaultScene::onSetup default pipeline get\n");
         SceneObject object;
 
         object.pipelineID = defaultPipeline;
@@ -23,9 +26,20 @@ namespace sigel
         objects[0].transform.rotation = glm::vec3{0.0f, 0.0f, 0.0f};
 
         glfwSetInputMode(SigelEngine::get().window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        printf("DefaultScene::onSetup end\n");
     }
 
-    void DefaultScene::onExit(ResourceManager &rm, PipelineManager &pm)
+    void DefaultScene::onEnter()
+    {
+        status("DEFAULT SCENE", "enter");
+    }
+
+    void DefaultScene::onExit()
+    {
+        status("DEFAULT SCENE", "exit");
+    }
+
+    void DefaultScene::onDestroy()
     {
         objects.clear();
     }

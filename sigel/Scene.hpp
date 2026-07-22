@@ -12,8 +12,10 @@ namespace sigel
         const std::vector<SceneObject>& getObjects() const override { return objects; }
         Camera& getCamera() override { return camera; }
 
-        void onEnter(ResourceManager& rm, PipelineManager& pm) override;
-        void onExit(ResourceManager&, PipelineManager&) override;
+        void onSetup() override;
+        void onEnter() override;
+        void onExit() override;
         void onUpdate(float dt) override;
+        void onDestroy() override;
     };
 }

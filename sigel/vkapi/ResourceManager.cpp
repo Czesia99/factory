@@ -1,5 +1,6 @@
 #include "ResourceManager.hpp"
 #include "../Utils.hpp"
+#include "../SigelEngine.hpp"
 
 #include <stb_image.h>
 
@@ -9,6 +10,11 @@ namespace sigel
     {
         _allocator = allocator;
         _device = device;
+    }
+
+    ResourceManager& ResourceManager::get()
+    {
+        return SigelEngine::get().vctx.resourceManager;
     }
 
     const Mesh& ResourceManager::getMesh(uint32_t index)
