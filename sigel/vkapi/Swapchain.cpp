@@ -42,7 +42,7 @@ namespace sigel
             .imageSharingMode = vk::SharingMode::eExclusive,
             .preTransform = surfaceCapabilities.currentTransform,
             .compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
-            .presentMode = chooseSwapPresentMode(_device->physicalDevice.getSurfacePresentModesKHR(*_surface->getSurface())), 
+            .presentMode = chooseSwapPresentMode(_device->physicalDevice.getSurfacePresentModesKHR(*_surface->getSurface())),
             .clipped = true,
             .oldSwapchain = nullptr
         };
@@ -76,7 +76,7 @@ namespace sigel
             glfwWaitEvents();
         }
         _device->logicalDevice.waitIdle();
-        
+
         cleanup();
 
         createSwapChain();
@@ -87,7 +87,18 @@ namespace sigel
     void Swapchain::createImageViews()
     {
         swapChainImageViews.clear();
-        vk::ImageViewCreateInfo imageViewCreateInfo{.viewType = vk::ImageViewType::e2D, .format = swapChainSurfaceFormat.format, .subresourceRange = {vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1}};
+        vk::ImageViewCreateInfo imageViewCreateInfo{
+            .viewType = vk::ImageViewType::e2D,
+            .format = swapChainSurfaceFormat.format,
+            .subresourceRange = {
+                .aspectMask     = vk::ImageAspectFlagBits::eColor,
+                .baseMipLevel   = 0,
+                .levelCount     = 1,
+                .baseArrayLayer = 0,
+                .layerCount     = 1
+            }
+        };
+
 		for (auto& image : swapChainImages)
 		{
 			imageViewCreateInfo.image = image;
@@ -147,7 +158,7 @@ namespace sigel
 
         return availableFormats[0];
     }
-    
+
     vk::PresentModeKHR Swapchain::chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes)
     {
         for (const auto& availablePresentMode : availablePresentModes) {

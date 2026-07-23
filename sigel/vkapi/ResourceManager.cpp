@@ -38,19 +38,21 @@ namespace sigel
 
     uint32_t ResourceManager::createTextureImage(std::string path)
     {
-        int width, height, channels;
+        int width, height, channels, mipLevels;
         stbi_uc *pixels = stbi_load(path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
-        vk::DeviceSize imageSize = width * height * 4;
 
         if (!pixels) {
             throw std::runtime_error("failed to load texture image!");
         }
 
+        vk::DeviceSize imageSize = width * height * 4;
+        mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
+
         Buffer imgBuffer = _allocator->createStagingBuffer(imageSize);
         memcpy(imgBuffer.mapped, pixels, imageSize);
         stbi_image_free(pixels);
 
-        auto texture = _allocator->createImageTexture(imgBuffer, width, height, VK_FORMAT_R8G8B8A8_SRGB);
+        auto texture = _allocator->createImageTexture(imgBuffer, width, height, mipLevels, VK_FORMAT_R8G8B8A8_SRGB);
 
         _allocator->destroyBuffer(imgBuffer);
         uint32_t id = static_cast<uint32_t>(textures.size());
