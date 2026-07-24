@@ -5,13 +5,9 @@ namespace sigel
 {
     void DefaultScene::onSetup()
     {
-        printf("DefaultScene::onSetup start\n");
         uint32_t flotex  = ResourceManager::get().createTextureImage("../assets/textures/flo.jpg");
-        printf("DefaultScene::onSetup fllotex\n");
         uint32_t mesh = ResourceManager::get().createMesh(cube_vertices, cube_indices);
-        printf("DefaultScene::onSetup mesh creation\n");
         uint32_t defaultPipeline = PipelineManager::get().getPipelineID("default");
-        printf("DefaultScene::onSetup default pipeline get\n");
         SceneObject object;
 
         object.pipelineID = defaultPipeline;

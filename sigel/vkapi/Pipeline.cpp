@@ -82,7 +82,7 @@ namespace sigel
             .lineWidth = 1.0f
         };
 
-        vk::PipelineMultisampleStateCreateInfo multisampling {.rasterizationSamples = vk::SampleCountFlagBits::e1, .sampleShadingEnable = vk::False};
+        vk::PipelineMultisampleStateCreateInfo multisampling {.rasterizationSamples = _device->msaaSamples, .sampleShadingEnable = vk::False};
 
         vk::PipelineColorBlendAttachmentState colorBlendAttachment {
             .blendEnable    = vk::False,

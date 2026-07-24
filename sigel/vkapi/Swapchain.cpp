@@ -81,6 +81,7 @@ namespace sigel
 
         createSwapChain();
         createImageViews();
+        createColorResources();
         createDepthResources();
     }
 
@@ -112,7 +113,8 @@ namespace sigel
             swapChainExtent.width,
             swapChainExtent.height,
             VK_FORMAT_D32_SFLOAT,
-            VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
+            VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+            static_cast<VkSampleCountFlagBits>(_device->msaaSamples)
         );
 
         vk::ImageViewCreateInfo viewInfo{
@@ -130,10 +132,28 @@ namespace sigel
         depthImageView = vk::raii::ImageView(_device->logicalDevice, viewInfo);
     }
 
+    void Swapchain::createColorResources()
+    {
+        VkSampleCountFlagBits sampleCount = static_cast<VkSampleCountFlagBits>(_device->msaaSamples);
+
+        msaaImage = _allocator->createColorAttachment(
+            swapChainExtent.width,
+            swapChainExtent.height,
+            static_cast<VkFormat>(swapChainSurfaceFormat.format),
+            sampleCount
+        );
+    }
+
     void Swapchain::cleanup()
     {
+        cleanupColorResources();
         cleanupDepthResources();
         cleanupImageViews();
+    }
+
+    void Swapchain::cleanupColorResources()
+    {
+        _allocator->destroyImage(msaaImage);
     }
 
     void Swapchain::cleanupDepthResources()

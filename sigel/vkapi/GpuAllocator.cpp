@@ -89,7 +89,7 @@ namespace sigel
         buffer.mapped     = nullptr;
     }
 
-    AllocatedImage GpuAllocator::createDepthImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage)
+    AllocatedImage GpuAllocator::createDepthImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, VkSampleCountFlagBits samples)
     {
         AllocatedImage result;
 
@@ -100,7 +100,7 @@ namespace sigel
             .extent        = { width, height, 1 },
             .mipLevels     = 1,
             .arrayLayers   = 1,
-            .samples       = VK_SAMPLE_COUNT_1_BIT,
+            .samples       = samples,
             .tiling        = VK_IMAGE_TILING_OPTIMAL,
             .usage         = usage,
             .sharingMode   = VK_SHARING_MODE_EXCLUSIVE,
@@ -201,6 +201,50 @@ namespace sigel
         return result;
     }
 
+    AllocatedImage GpuAllocator::createColorAttachment(uint32_t width, uint32_t height, VkFormat format, VkSampleCountFlagBits numSamples)
+    {
+        AllocatedImage result;
+
+        VkImageCreateInfo imageInfo{
+            .sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+            .imageType     = VK_IMAGE_TYPE_2D,
+            .format        = format,
+            .extent        = { width, height, 1 },
+            .mipLevels     = 1,
+            .arrayLayers   = 1,
+            .samples       = numSamples,
+            .tiling        = VK_IMAGE_TILING_OPTIMAL,
+            .usage         = VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+            .sharingMode   = VK_SHARING_MODE_EXCLUSIVE,
+            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED
+        };
+
+        VmaAllocationCreateInfo allocInfo{
+            .usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE
+        };
+
+        vmaCreateImage(allocator, &imageInfo, &allocInfo, &result.image, &result.allocation, nullptr);
+
+        VkImageViewCreateInfo imageViewInfo{
+            .sType            = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+            .image            = result.image,
+            .viewType         = VK_IMAGE_VIEW_TYPE_2D,
+            .format           = format,
+            .subresourceRange = {
+                .aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
+                .baseMipLevel   = 0,
+                .levelCount     = 1,
+                .baseArrayLayer = 0,
+                .layerCount     = 1
+            }
+        };
+
+        vkCreateImageView(*_device->logicalDevice, &imageViewInfo, nullptr, &result.view);
+        result.sampler = VK_NULL_HANDLE;
+
+        return result;
+    }
+
     void GpuAllocator::destroyImage(AllocatedImage& image)
     {
         VmaAllocatorInfo info{};
@@ -213,7 +257,7 @@ namespace sigel
             vkDestroyImageView(info.device, image.view, nullptr);
 
         vmaDestroyImage(allocator, image.image, image.allocation);
-        image.image      = VK_NULL_HANDLE;
+        image.image = VK_NULL_HANDLE;
         image.view = VK_NULL_HANDLE;
         image.sampler = VK_NULL_HANDLE;
         image.allocation = VK_NULL_HANDLE;

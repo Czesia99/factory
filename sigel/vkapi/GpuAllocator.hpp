@@ -26,9 +26,11 @@ namespace sigel
             Buffer createStagingBuffer(vk::DeviceSize size);
             Buffer createUniformBuffer(vk::DeviceSize size);
             void destroyBuffer(Buffer& buffer);
-            AllocatedImage createDepthImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage);
+            AllocatedImage createDepthImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, VkSampleCountFlagBits samples);
             // AllocatedImage createImage(Buffer &imgBuffer, uint32_t width, uint32_t height, VkFormat format);
             AllocatedImage createImageTexture(Buffer &imgBuffer, uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format);
+            AllocatedImage createColorAttachment(uint32_t width, uint32_t height, VkFormat format, VkSampleCountFlagBits samples);
+
             void destroyImage(AllocatedImage &image);
             void immediateSubmit(std::function<void(vk::raii::CommandBuffer&)> fn);
             void uploadVertex(const std::vector<Vertex> &vertices, Buffer &buffer);

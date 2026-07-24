@@ -279,7 +279,18 @@ namespace sigel
         cmd.begin({});
         transition_image_layout(
             cmd,
-            imageIndex,
+            _swapchain->swapChainImages[imageIndex],
+            vk::ImageLayout::eUndefined,
+            vk::ImageLayout::eColorAttachmentOptimal,
+            {},
+            vk::AccessFlagBits2::eColorAttachmentWrite,
+            vk::PipelineStageFlagBits2::eColorAttachmentOutput,
+            vk::PipelineStageFlagBits2::eColorAttachmentOutput
+        );
+
+        transition_image_layout(
+            cmd,
+            _swapchain->msaaImage.image,
             vk::ImageLayout::eUndefined,
             vk::ImageLayout::eColorAttachmentOptimal,
             {},
@@ -289,11 +300,14 @@ namespace sigel
         );
 
         vk::ClearValue clearColor = vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f);
-        vk::RenderingAttachmentInfo attachmentInfo = {
-            .imageView = _swapchain->swapChainImageViews[imageIndex],
+        vk::RenderingAttachmentInfo colorAttachment = {
+            .imageView = _swapchain->msaaImage.view,
             .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
+            .resolveMode = vk::ResolveModeFlagBits::eAverage,
+            .resolveImageView = *_swapchain->swapChainImageViews[imageIndex],
+            .resolveImageLayout = vk::ImageLayout::eColorAttachmentOptimal,
             .loadOp = vk::AttachmentLoadOp::eClear,
-            .storeOp = vk::AttachmentStoreOp::eStore,
+            .storeOp = vk::AttachmentStoreOp::eDontCare,
             .clearValue = clearColor
         };
 
@@ -331,7 +345,7 @@ namespace sigel
             .renderArea = { .offset = { 0, 0 }, .extent = _swapchain->swapChainExtent },
             .layerCount = 1,
             .colorAttachmentCount = 1,
-            .pColorAttachments = &attachmentInfo,
+            .pColorAttachments = &colorAttachment,
             .pDepthAttachment = &depthAttachment
         };
 
@@ -353,15 +367,8 @@ namespace sigel
 
         for (const auto& renderObject : renderObjects)
         {
-            const PipelineInstance& pipeline =
-                _pipelineManager->getPipeline(
-                    renderObject.pipelineID
-                );
-
-            cmd.bindPipeline(
-                vk::PipelineBindPoint::eGraphics,
-                *pipeline.pipeline
-            );
+            const PipelineInstance& pipeline = _pipelineManager->getPipeline(renderObject.pipelineID);
+            cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline.pipeline);
 
             for (const auto& meshData : renderObject.meshes)
             {
@@ -385,22 +392,38 @@ namespace sigel
             }
         }
 
+        cmd.endRendering();
+
         if (showEditor)
         {
-            ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
-        }
+            vk::RenderingAttachmentInfo imguiColorAttachment = {
+                .imageView = *_swapchain->swapChainImageViews[imageIndex],
+                .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
+                .loadOp = vk::AttachmentLoadOp::eLoad,
+                .storeOp = vk::AttachmentStoreOp::eStore
+            };
 
-        cmd.endRendering();
+            vk::RenderingInfo imguiRenderingInfo = {
+                .renderArea = { .offset = { 0, 0 }, .extent = _swapchain->swapChainExtent },
+                .layerCount = 1,
+                .colorAttachmentCount = 1,
+                .pColorAttachments = &imguiColorAttachment
+            };
+
+            cmd.beginRendering(imguiRenderingInfo);
+            ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
+            cmd.endRendering();
+        }
 
         transition_image_layout(
             cmd,
-            imageIndex,
+            _swapchain->swapChainImages[imageIndex],
             vk::ImageLayout::eColorAttachmentOptimal,
             vk::ImageLayout::ePresentSrcKHR,
-            vk::AccessFlagBits2::eColorAttachmentWrite,             // srcAccessMask
-            {},                                                     // dstAccessMask
-            vk::PipelineStageFlagBits2::eColorAttachmentOutput,     // srcStage
-            vk::PipelineStageFlagBits2::eBottomOfPipe               // dstStage
+            vk::AccessFlagBits2::eColorAttachmentWrite,
+            {},
+            vk::PipelineStageFlagBits2::eColorAttachmentOutput,
+            vk::PipelineStageFlagBits2::eBottomOfPipe
         );
 
         cmd.end();
@@ -432,7 +455,7 @@ namespace sigel
 
     void Renderer::transition_image_layout(
         vk::raii::CommandBuffer &cmd,
-        uint32_t imageIndex,
+        vk::Image image,
         vk::ImageLayout oldLayout,
         vk::ImageLayout newLayout,
         vk::AccessFlags2 srcAccessMask,
@@ -449,7 +472,7 @@ namespace sigel
             .newLayout = newLayout,
             .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
             .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .image = _swapchain->swapChainImages[imageIndex],
+            .image = image,
             .subresourceRange = {
                 .aspectMask = vk::ImageAspectFlagBits::eColor,
                 .baseMipLevel = 0,

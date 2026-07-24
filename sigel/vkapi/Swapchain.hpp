@@ -9,7 +9,7 @@
 
 namespace sigel
 {
-    class Swapchain 
+    class Swapchain
     {
         public:
             vk::raii::SwapchainKHR swapChain = nullptr;
@@ -18,6 +18,7 @@ namespace sigel
             vk::Extent2D swapChainExtent;
             std::vector<vk::raii::ImageView> swapChainImageViews;
 
+            AllocatedImage      msaaImage      = {};
             AllocatedImage      depthImage     = {};
             vk::raii::ImageView depthImageView = nullptr;
             vk::Format          depthFormat    = vk::Format::eD32Sfloat;
@@ -35,7 +36,9 @@ namespace sigel
             void recreateSwapChain();
             void createImageViews();
             void createDepthResources();
+            void createColorResources();
             void cleanup();
+            void cleanupColorResources();
             void cleanupDepthResources();
             void cleanupImageViews();
         private:

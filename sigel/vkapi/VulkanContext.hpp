@@ -34,6 +34,7 @@ namespace sigel
                 swapchain.init(&device, &surface, window, &allocator);
                 swapchain.createSwapChain();
                 swapchain.createImageViews();
+                swapchain.createColorResources();
                 swapchain.createDepthResources();
                 pipelineManager.init(&swapchain, &device);
                 resourceManager.init(&allocator, &device);
@@ -44,8 +45,7 @@ namespace sigel
 
             void clean()
             {
-                swapchain.cleanupDepthResources();
-                swapchain.cleanupImageViews();
+                swapchain.cleanup();
                 allocator.cleanup();
             }
     };

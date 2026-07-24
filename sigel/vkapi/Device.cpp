@@ -25,6 +25,7 @@ namespace sigel
                 isSuitable = isSuitable && found;
                 if (isSuitable) {
                     physicalDevice = device;
+                    msaaSamples = getMaxUsableSampleCount();
                 }
                 return isSuitable;
         });
@@ -44,7 +45,7 @@ namespace sigel
         presentIndex = physicalDevice.getSurfaceSupportKHR(graphicsIndex, *surface)
                                             ? graphicsIndex
                                             : static_cast<uint32_t>(queueFamilyProperties.size());
-        
+
         if (presentIndex == queueFamilyProperties.size()) {
             // the graphicsIndex doesn't support present -> look for another family index that supports both
             // graphics and present
@@ -99,12 +100,27 @@ namespace sigel
                                                 .enabledExtensionCount   = static_cast<uint32_t>(deviceExtensions.size()),
                                                 .ppEnabledExtensionNames = deviceExtensions.data()};
 
-		logicalDevice = vk::raii::Device(physicalDevice, deviceCreateInfo); 
+		logicalDevice = vk::raii::Device(physicalDevice, deviceCreateInfo);
 		graphicsQueue = vk::raii::Queue(logicalDevice, graphicsIndex, 0);
         presentQueue = vk::raii::Queue(logicalDevice, presentIndex, 0);
     }
 
-    uint32_t Device::findQueueFamilies(vk::raii::PhysicalDevice physicalDevice) 
+    vk::SampleCountFlagBits Device::getMaxUsableSampleCount()
+    {
+        vk::PhysicalDeviceProperties physicalDeviceProperties = physicalDevice.getProperties();
+
+        vk::SampleCountFlags counts = physicalDeviceProperties.limits.framebufferColorSampleCounts & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
+        if (counts & vk::SampleCountFlagBits::e64) { return vk::SampleCountFlagBits::e64; }
+        if (counts & vk::SampleCountFlagBits::e32) { return vk::SampleCountFlagBits::e32; }
+        if (counts & vk::SampleCountFlagBits::e16) { return vk::SampleCountFlagBits::e16; }
+        if (counts & vk::SampleCountFlagBits::e8) { return vk::SampleCountFlagBits::e8; }
+        if (counts & vk::SampleCountFlagBits::e4) { return vk::SampleCountFlagBits::e4; }
+        if (counts & vk::SampleCountFlagBits::e2) { return vk::SampleCountFlagBits::e2; }
+
+        return vk::SampleCountFlagBits::e1;
+    }
+
+    uint32_t Device::findQueueFamilies(vk::raii::PhysicalDevice physicalDevice)
     {
         std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
 
@@ -123,7 +139,7 @@ namespace sigel
         std::string gpuType = "Type: " + vk::to_string(props.deviceType);
         status("GPU", gpuName);
         status("GPU", gpuType);
-        printf("Vulkan API Version: %d.%d.%d\n", 
+        printf("Vulkan API Version: %d.%d.%d\n",
             VK_API_VERSION_MAJOR(props.apiVersion),
             VK_API_VERSION_MINOR(props.apiVersion),
             VK_API_VERSION_PATCH(props.apiVersion));

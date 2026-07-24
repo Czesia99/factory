@@ -34,7 +34,7 @@ namespace sigel
     {
         public:
             bool framebufferResized = false;
-        
+
         private:
             Device* _device;
             Swapchain* _swapchain;
@@ -43,7 +43,7 @@ namespace sigel
 
             vk::raii::CommandPool commandPool = nullptr;
             vk::raii::DescriptorPool descriptorPool = nullptr;
-            
+
             uint32_t frameIndex = 0;
             std::array<FrameData, MAX_FRAMES_IN_FLIGHT> frames;
             std::vector<vk::raii::Semaphore> renderSemaphores;
@@ -65,11 +65,11 @@ namespace sigel
             void loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t pipelineID, uint32_t textureID);
             void prepareScene(const IScene& scene);
             void cleanupRenderObjects();
-        
+
         private:
             void waitFence();
             void checkImageResult(vk::Result result);
-            void transition_image_layout(vk::raii::CommandBuffer&cmd, uint32_t imageIndex, vk::ImageLayout oldLayout,
+            void transition_image_layout(vk::raii::CommandBuffer&cmd, vk::Image image, vk::ImageLayout oldLayout,
                 vk::ImageLayout newLayout, vk::AccessFlags2 srcAccessMask,
                 vk::AccessFlags2 dstAccessMask, vk::PipelineStageFlags2 srcStageMask,
                 vk::PipelineStageFlags2 dstStageMask);
