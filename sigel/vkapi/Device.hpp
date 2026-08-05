@@ -23,10 +23,10 @@ namespace sigel
             Device() = default;
             void pickPhysicalDevice(vk::raii::Instance &instance);
             void createLogicalDevice(vk::raii::SurfaceKHR &surface);
-            vk::SampleCountFlagBits getMaxUsableSampleCount();
             void printDeviceInfo();
             uint32_t findQueueFamilies(vk::raii::PhysicalDevice physicalDevice);
         private:
-
+            vk::SampleCountFlagBits getMaxUsableSampleCount();
+            vk::SampleCountFlagBits getBalancedSampleCount();
     };
 }

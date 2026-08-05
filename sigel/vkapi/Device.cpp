@@ -26,7 +26,7 @@ namespace sigel
                 if (isSuitable) {
                     physicalDevice = device;
                     maxMsaaSamples = getMaxUsableSampleCount();
-                    msaaSamples = maxMsaaSamples;
+                    msaaSamples = getBalancedSampleCount();
                 }
                 return isSuitable;
         });
@@ -34,6 +34,7 @@ namespace sigel
             throw std::runtime_error("failed to find a suitable GPU!");
         }
     }
+
     void Device::createLogicalDevice(vk::raii::SurfaceKHR &surface)
     {
         std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
@@ -106,21 +107,6 @@ namespace sigel
         presentQueue = vk::raii::Queue(logicalDevice, presentIndex, 0);
     }
 
-    vk::SampleCountFlagBits Device::getMaxUsableSampleCount()
-    {
-        vk::PhysicalDeviceProperties physicalDeviceProperties = physicalDevice.getProperties();
-
-        vk::SampleCountFlags counts = physicalDeviceProperties.limits.framebufferColorSampleCounts & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
-        if (counts & vk::SampleCountFlagBits::e64) { return vk::SampleCountFlagBits::e64; }
-        if (counts & vk::SampleCountFlagBits::e32) { return vk::SampleCountFlagBits::e32; }
-        if (counts & vk::SampleCountFlagBits::e16) { return vk::SampleCountFlagBits::e16; }
-        if (counts & vk::SampleCountFlagBits::e8) { return vk::SampleCountFlagBits::e8; }
-        if (counts & vk::SampleCountFlagBits::e4) { return vk::SampleCountFlagBits::e4; }
-        if (counts & vk::SampleCountFlagBits::e2) { return vk::SampleCountFlagBits::e2; }
-
-        return vk::SampleCountFlagBits::e1;
-    }
-
     uint32_t Device::findQueueFamilies(vk::raii::PhysicalDevice physicalDevice)
     {
         std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
@@ -131,6 +117,33 @@ namespace sigel
                         []( vk::QueueFamilyProperties const & qfp ) { return qfp.queueFlags & vk::QueueFlagBits::eGraphics; } );
 
         return static_cast<uint32_t>( std::distance( queueFamilyProperties.begin(), graphicsQueueFamilyProperty ) );
+    }
+
+    vk::SampleCountFlagBits Device::getMaxUsableSampleCount()
+    {
+        vk::PhysicalDeviceProperties properties = physicalDevice.getProperties();
+
+        vk::SampleCountFlags counts = properties.limits.framebufferColorSampleCounts & properties.limits.framebufferDepthSampleCounts;
+        if (counts & vk::SampleCountFlagBits::e64)  return vk::SampleCountFlagBits::e64;
+        if (counts & vk::SampleCountFlagBits::e32)  return vk::SampleCountFlagBits::e32;
+        if (counts & vk::SampleCountFlagBits::e16)  return vk::SampleCountFlagBits::e16;
+        if (counts & vk::SampleCountFlagBits::e8)   return vk::SampleCountFlagBits::e8;
+        if (counts & vk::SampleCountFlagBits::e4)   return vk::SampleCountFlagBits::e4;
+        if (counts & vk::SampleCountFlagBits::e2)   return vk::SampleCountFlagBits::e2;
+
+        return vk::SampleCountFlagBits::e1;
+    }
+
+    vk::SampleCountFlagBits Device::getBalancedSampleCount()
+    {
+        vk::PhysicalDeviceProperties properties = physicalDevice.getProperties();
+        vk::SampleCountFlags counts = properties.limits.framebufferColorSampleCounts & properties.limits.framebufferDepthSampleCounts;
+
+        if (counts & vk::SampleCountFlagBits::e4) return vk::SampleCountFlagBits::e4;
+        if (counts & vk::SampleCountFlagBits::e2) return vk::SampleCountFlagBits::e2;
+        if (counts & vk::SampleCountFlagBits::e8) return vk::SampleCountFlagBits::e8;
+
+        return vk::SampleCountFlagBits::e1;
     }
 
     void Device::printDeviceInfo()
