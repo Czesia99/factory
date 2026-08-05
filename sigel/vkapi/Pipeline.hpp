@@ -5,6 +5,8 @@
 
 #include <unordered_map>
 
+#include <iostream>
+
 namespace sigel
 {
     struct PipelineConfig
@@ -22,6 +24,8 @@ namespace sigel
     struct PipelineInstance
     {
         std::string name = "default";
+        PipelineConfig config;
+        // std::vector<char> shaderCode;
         vk::raii::Pipeline pipeline = nullptr;
         vk::raii::DescriptorSetLayout descriptorSetLayout = nullptr;
         vk::raii::PipelineLayout pipelineLayout = nullptr;
@@ -30,20 +34,31 @@ namespace sigel
     class PipelineManager
     {
         public:
+            PipelineConfig defaultConfig;
+            bool msaaChanged = false;
         private:
             Swapchain *_swapchain = nullptr;
             Device *_device = nullptr;
 
-            std::vector<PipelineInstance> pipelines;
+            uint32_t nextPipelineID = 0;
             std::unordered_map<std::string, uint32_t> nameIndex;
+            std::unordered_map<uint32_t, PipelineInstance> pipelines;
+
         public:
             static PipelineManager& get();
 
             PipelineManager() = default;
             void init(Swapchain *swapchain, Device *device);
+
             uint32_t createPipeline(PipelineConfig config = {});
+            void recreateAllPipelines();
+
             vk::raii::DescriptorSetLayout createDescriptorSetLayout();
-            PipelineConfig defaultConfig;
+
+
+            void listPipelines() {
+                std::cout <<"aaaaaaaaaaaaa" <<  nameIndex.size() << std::endl;
+            }
 
             const PipelineInstance &getPipeline(uint32_t id) const;
             const PipelineInstance &getPipelineByName(std::string &name) const;

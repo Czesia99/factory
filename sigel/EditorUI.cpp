@@ -1,6 +1,7 @@
 #include "EditorUI.hpp"
 #include "SigelEngine.hpp"
 #include <glm/gtc/type_ptr.hpp>
+    #include <iostream>
 
 namespace sigel
 {
@@ -50,7 +51,7 @@ namespace sigel
         init_info.UseDynamicRendering = true;
 
         static VkFormat colorFormat = static_cast<VkFormat>(vctx.swapchain.swapChainSurfaceFormat.format);
-        static VkFormat depthFormat = static_cast<VkFormat>(vctx.swapchain.depthFormat);    
+        static VkFormat depthFormat = static_cast<VkFormat>(vctx.swapchain.depthFormat);
         init_info.PipelineInfoMain.PipelineRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
         init_info.PipelineInfoMain.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
         init_info.PipelineInfoMain.PipelineRenderingCreateInfo.pColorAttachmentFormats = &colorFormat;
@@ -65,7 +66,7 @@ namespace sigel
     void EditorUI::update(IScene *scene)
     {
         if (!display) return;
-        
+
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -75,6 +76,50 @@ namespace sigel
         ImGui::Begin("EDITOR PANEL");
 
         cameraSettingsFrame(scene);
+
+        if (ImGui::CollapsingHeader("Settings", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            auto& msaaSamples = SigelEngine::get().vctx.device.msaaSamples;
+            auto &maxSamples = SigelEngine::get().vctx.device.maxMsaaSamples;
+
+            const vk::SampleCountFlagBits sampleCounts[] = {
+                vk::SampleCountFlagBits::e1,
+                vk::SampleCountFlagBits::e2,
+                vk::SampleCountFlagBits::e4,
+                vk::SampleCountFlagBits::e8,
+                vk::SampleCountFlagBits::e16,
+                vk::SampleCountFlagBits::e32,
+                vk::SampleCountFlagBits::e64
+            };
+
+            std::string currentLabel = (msaaSamples == vk::SampleCountFlagBits::e1) ? "None" : vk::to_string(msaaSamples);
+
+            if (ImGui::BeginCombo("MSAA", currentLabel.c_str()))
+            {
+                for (auto count : sampleCounts)
+                {
+                    if (count <= maxSamples)
+                    {
+                        std::string label = (count == vk::SampleCountFlagBits::e1) ? "None" : vk::to_string(count);
+                        bool isSelected = (msaaSamples == count);
+
+                        if (ImGui::Selectable(label.c_str(), isSelected))
+                        {
+                            SigelEngine::get().vctx.device.msaaSamples = count;
+                            SigelEngine::get().vctx.pipelineManager.msaaChanged = true;
+                        }
+
+                        if (isSelected)
+                        {
+                            ImGui::SetItemDefaultFocus();
+                        }
+                    }
+                }
+                ImGui::EndCombo();
+            }
+
+            ImGui::Separator();
+        }
 
         ImGui::End();
         ImGui::Render();
@@ -118,7 +163,7 @@ namespace sigel
 
             ImGui::DragFloat("Near Plane", &camera.cam.near_plane, 0.05f, 0.01f, 10.0f);
             ImGui::DragFloat("Far Plane", &camera.cam.far_plane, 5.0f, 10.0f, 2000.0f);
-            
+
             ImGui::Checkbox("Lock Movement", &camera.movement_lock);
         }
     }

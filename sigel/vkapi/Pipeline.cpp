@@ -20,12 +20,12 @@ namespace sigel
 
     const PipelineInstance& PipelineManager::getPipeline(uint32_t id) const
     {
-        return pipelines[id];
+        return pipelines.at(id);
     }
 
     const PipelineInstance& PipelineManager::getPipelineByName(std::string &name) const
     {
-        return pipelines[nameIndex.at(name)];
+        return pipelines.at(getPipelineID(name));
     }
 
     const uint32_t PipelineManager::getPipelineID(const std::string &name) const
@@ -37,6 +37,7 @@ namespace sigel
     {
         PipelineInstance instance;
         instance.name = config.name;
+        instance.config = config;
 
         instance.descriptorSetLayout = createDescriptorSetLayout();
 
@@ -125,12 +126,39 @@ namespace sigel
         };
 
         instance.pipeline = vk::raii::Pipeline(_device->logicalDevice, nullptr, pipelineInfo);
-        uint32_t id = static_cast<uint32_t>(pipelines.size());
 
-        nameIndex.insert({instance.name, id});
-        pipelines.emplace_back(std::move(instance));
+        uint32_t id;
+        if (nameIndex.find(config.name) != nameIndex.end())
+        {
+            id = nameIndex[config.name];
+        }
+        else
+        {
+            id = nextPipelineID++;
+            nameIndex[config.name] = id;
+        }
 
+        pipelines[id] = std::move(instance);
         return id;
+    }
+
+    void PipelineManager::recreateAllPipelines()
+    {
+        // std::vector<std::pair<PipelineConfig, std::vector<char>>> data;
+        std::vector<PipelineConfig> data;
+        for (const auto& [id, instance] : pipelines)
+        {
+            data.push_back(instance.config);
+        }
+
+        pipelines.clear();
+        nameIndex.clear();
+        nextPipelineID = 0;
+
+        for (const auto& config : data)
+        {
+            createPipeline(config);
+        }
     }
 
     vk::raii::DescriptorSetLayout PipelineManager::createDescriptorSetLayout()

@@ -84,6 +84,14 @@ namespace sigel
     {
         auto &frame = currentFrame();
 
+        if (_pipelineManager->msaaChanged)
+        {
+            _device->logicalDevice.waitIdle();
+            _swapchain->recreateSwapChain();
+            _pipelineManager->recreateAllPipelines();
+            _pipelineManager->msaaChanged = false;
+        }
+
         waitFence();
 
 		auto [result, imageIndex] = _swapchain->swapChain.acquireNextImage(UINT64_MAX, *frame.presentSemaphore, nullptr);
@@ -277,6 +285,7 @@ namespace sigel
     {
         auto &cmd = currentFrame().commandBuffer;
         cmd.begin({});
+
         transition_image_layout(
             cmd,
             _swapchain->swapChainImages[imageIndex],
@@ -288,28 +297,43 @@ namespace sigel
             vk::PipelineStageFlagBits2::eColorAttachmentOutput
         );
 
-        transition_image_layout(
-            cmd,
-            _swapchain->msaaImage.image,
-            vk::ImageLayout::eUndefined,
-            vk::ImageLayout::eColorAttachmentOptimal,
-            {},
-            vk::AccessFlagBits2::eColorAttachmentWrite,
-            vk::PipelineStageFlagBits2::eColorAttachmentOutput,
-            vk::PipelineStageFlagBits2::eColorAttachmentOutput
-        );
+        if (_device->msaaSamples != vk::SampleCountFlagBits::e1)
+        {
+            transition_image_layout(
+                cmd,
+                _swapchain->msaaImage.image,
+                vk::ImageLayout::eUndefined,
+                vk::ImageLayout::eColorAttachmentOptimal,
+                {},
+                vk::AccessFlagBits2::eColorAttachmentWrite,
+                vk::PipelineStageFlagBits2::eColorAttachmentOutput,
+                vk::PipelineStageFlagBits2::eColorAttachmentOutput
+            );
+        }
 
         vk::ClearValue clearColor = vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f);
         vk::RenderingAttachmentInfo colorAttachment = {
-            .imageView = _swapchain->msaaImage.view,
             .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
-            .resolveMode = vk::ResolveModeFlagBits::eAverage,
-            .resolveImageView = *_swapchain->swapChainImageViews[imageIndex],
-            .resolveImageLayout = vk::ImageLayout::eColorAttachmentOptimal,
             .loadOp = vk::AttachmentLoadOp::eClear,
-            .storeOp = vk::AttachmentStoreOp::eDontCare,
             .clearValue = clearColor
         };
+
+        if (_device->msaaSamples != vk::SampleCountFlagBits::e1)
+        {
+            colorAttachment.imageView = _swapchain->msaaImage.view;
+            colorAttachment.resolveMode = vk::ResolveModeFlagBits::eAverage;
+            colorAttachment.resolveImageView = *_swapchain->swapChainImageViews[imageIndex];
+            colorAttachment.resolveImageLayout = vk::ImageLayout::eColorAttachmentOptimal;
+            colorAttachment.storeOp = vk::AttachmentStoreOp::eDontCare;
+        }
+        else
+        {
+            colorAttachment.imageView = *_swapchain->swapChainImageViews[imageIndex];
+            colorAttachment.resolveMode = vk::ResolveModeFlagBits::eNone;
+            colorAttachment.resolveImageView = VK_NULL_HANDLE;
+            colorAttachment.resolveImageLayout = vk::ImageLayout::eUndefined;
+            colorAttachment.storeOp = vk::AttachmentStoreOp::eStore;
+        }
 
         vk::ImageMemoryBarrier2 depthBarrier{
             .srcStageMask        = vk::PipelineStageFlagBits2::eEarlyFragmentTests,
@@ -351,7 +375,6 @@ namespace sigel
 
         cmd.beginRendering(renderingInfo);
 
-        // cmd.setViewport(0, vk::Viewport(0.0f, 0.0f, static_cast<float>(_swapchain->swapChainExtent.width), static_cast<float>(_swapchain->swapChainExtent.height), 0.0f, 1.0f));
         cmd.setViewport(
             0,
             vk::Viewport(
@@ -363,6 +386,7 @@ namespace sigel
                 1.0f
             )
         );
+
         cmd.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _swapchain->swapChainExtent));
 
         for (const auto& renderObject : renderObjects)

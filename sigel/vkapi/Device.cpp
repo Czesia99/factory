@@ -25,7 +25,8 @@ namespace sigel
                 isSuitable = isSuitable && found;
                 if (isSuitable) {
                     physicalDevice = device;
-                    msaaSamples = getMaxUsableSampleCount();
+                    maxMsaaSamples = getMaxUsableSampleCount();
+                    msaaSamples = maxMsaaSamples;
                 }
                 return isSuitable;
         });

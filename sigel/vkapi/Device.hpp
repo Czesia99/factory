@@ -11,6 +11,7 @@ namespace sigel
             vk::raii::Queue graphicsQueue = nullptr;
             vk::raii::Queue presentQueue = nullptr;
 
+            vk::SampleCountFlagBits maxMsaaSamples = vk::SampleCountFlagBits::e1;
             vk::SampleCountFlagBits msaaSamples = vk::SampleCountFlagBits::e1;
 
             uint32_t graphicsIndex;
