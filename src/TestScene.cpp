@@ -6,10 +6,7 @@ namespace factory
 {
     void TestScene::onSetup()
     {
-        std::printf("ON SETUP TEST SCENE\n");
-        std::print("Objects : {}", objects.size());
-        uint32_t chips_tex = ResourceManager::get().createTextureImage("../assets/models/chipsbag/chips_audran.png");
-        // uint32_t flotex  = rm.createTextureImage("../assets/textures/flo.jpg");
+        uint32_t missing = ResourceManager::get().createTextureImage("../assets/textures/texture0.jpg");
         uint32_t flotex = ResourceManager::get().createTextureImage("../assets/textures/flo.jpg");
         uint32_t mesh = ResourceManager::get().createMesh(cube_vertices, cube_indices);
         uint32_t defaultPipeline = PipelineManager::get().getPipelineID("default");
@@ -28,7 +25,6 @@ namespace factory
         SceneObject car;
         car.pipelineID = defaultPipeline;
         car.meshes = SigelEngine::get().loadTinyModel("../assets/models/chipsbag/chips2.obj");
-        // car.meshes[0].textureID = chips_tex;
         objects.push_back(car);
 
         // objects[1].transform = glm::translate

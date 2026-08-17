@@ -4,11 +4,20 @@
 
 namespace sigel
 {
+    struct Material
+    {
+        uint32_t  diffuseID;
+        uint32_t  metallicID;
+        uint32_t  roughnessID;
+        uint32_t  normalID;
+    };
+
     struct SubMesh
     {
         uint32_t  meshID;
         uint32_t  textureID;
         //localtransform
+        //material
     };
 
     struct SceneObject

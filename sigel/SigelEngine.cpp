@@ -170,10 +170,19 @@ namespace sigel
 
         std::vector<SubMesh> meshes;
 
-		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path.c_str()))
-		{
-			throw std::runtime_error(warn + err);
-		}
+        std::string base_dir = "";
+        size_t pos = path.find_last_of("/\\");
+        if (pos != std::string::npos)
+        {
+            base_dir = path.substr(0, pos + 1);
+        }
+
+        if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path.c_str(), base_dir.c_str()))
+        {
+            throw std::runtime_error(warn + err);
+        }
+
+        std::cout << materials.size() << " materials found in " << path << std::endl;
 
         for (const auto &shape : shapes)
         {
@@ -202,7 +211,8 @@ namespace sigel
             }
 
             uint32_t mesh = vctx.resourceManager.createMesh(vertices, indices);
-            meshes.push_back({mesh, 0});
+            uint32_t texid = vctx.resourceManager.createTextureImage(base_dir + '/' + materials[shape.mesh.material_ids[0]].diffuse_texname);
+            meshes.push_back({mesh, texid});
         }
         return meshes;
     }
