@@ -68,8 +68,8 @@ namespace sigel
         vk::PipelineViewportStateCreateInfo viewportState{ .viewportCount = 1, .scissorCount = 1 };
 
         //hey
-        vk::Viewport{ 0.0f, 0.0f, static_cast<float>(_swapchain->swapChainExtent.width), static_cast<float>(_swapchain->swapChainExtent.height), 0.0f, 1.0f };
-        vk::Rect2D{vk::Offset2D{ 0, 0 }, _swapchain->swapChainExtent};
+        // vk::Viewport{ 0.0f, 0.0f, static_cast<float>(_swapchain->swapChainExtent.width), static_cast<float>(_swapchain->swapChainExtent.height), 0.0f, 1.0f };
+        // vk::Rect2D{vk::Offset2D{ 0, 0 }, _swapchain->swapChainExtent};
 
 
         vk::PipelineRasterizationStateCreateInfo rasterizer {

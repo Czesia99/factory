@@ -6,6 +6,7 @@
 #include "InputManager.hpp"
 #include "Camera.hpp"
 #include "Object.hpp"
+#include "Light.hpp"
 
 namespace sigel
 {
@@ -15,6 +16,7 @@ namespace sigel
 
             virtual const std::vector<SceneObject>& getObjects() const = 0;
             virtual Camera& getCamera() = 0;
+            virtual DirLight& getLight() = 0;
 
             virtual void onSetup() = 0;
             virtual void onEnter() = 0;

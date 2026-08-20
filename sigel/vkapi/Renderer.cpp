@@ -267,6 +267,7 @@ namespace sigel
     {
         const auto& sceneObjects = scene.getObjects();
         const auto& sceneCamera = scene.getCamera();
+        const auto& sceneDirLight = scene.getLight();
 
         float width  = static_cast<float>(_swapchain->swapChainExtent.width);
         float height = static_cast<float>(_swapchain->swapChainExtent.height);
@@ -277,6 +278,7 @@ namespace sigel
             ubo.model = sceneObjects[i].transform.getModelMatrix();
             ubo.view  = sceneCamera.getViewMatrix();
             ubo.proj  = sceneCamera.getProjectionMatrix(aspect);
+            ubo.light = sceneDirLight;
             memcpy(renderObjects[i].uniformBuffers[currentImage].mapped, &ubo, sizeof(ubo));
         }
     }

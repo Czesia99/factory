@@ -11,61 +11,63 @@ namespace sigel
     struct Vertex
     {
         glm::vec3 pos;
+        glm::vec3 normal;
         glm::vec2 texCoord;
 
         static vk::VertexInputBindingDescription getBindingDescription() {
             return { 0, sizeof(Vertex), vk::VertexInputRate::eVertex };
         }
 
-        static std::array<vk::VertexInputAttributeDescription, 2> getAttributeDescriptions() {
+        static std::array<vk::VertexInputAttributeDescription, 3> getAttributeDescriptions() {
             return {
                 vk::VertexInputAttributeDescription({0, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, pos)}),
-                vk::VertexInputAttributeDescription({1, 0, vk::Format::eR32G32Sfloat, offsetof(Vertex, texCoord)})
+                vk::VertexInputAttributeDescription({1, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, normal)}),
+                vk::VertexInputAttributeDescription({2, 0, vk::Format::eR32G32Sfloat, offsetof(Vertex, texCoord)})
             };
         }
 
         bool operator==(const Vertex& other) const
         {
-            return pos == other.pos && texCoord == other.texCoord;
+            return pos == other.pos && normal == other.normal && texCoord == other.texCoord;
         }
     };
 
     const std::vector<Vertex> cube_vertices = {
-        // Front
-        {{-1.0f, -1.0f,  1.0f}, {0.0f, 1.0f}},
-        {{ 1.0f, -1.0f,  1.0f}, {1.0f, 1.0f}},
-        {{ 1.0f,  1.0f,  1.0f}, {1.0f, 0.0f}},
-        {{-1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
+        // Front (+Z)
+        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f,  1.0f}, {0.0f, 1.0f}},
+        {{ 1.0f, -1.0f,  1.0f}, {0.0f, 0.0f,  1.0f}, {1.0f, 1.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f,  1.0f}, {1.0f, 0.0f}},
+        {{-1.0f,  1.0f,  1.0f}, {0.0f, 0.0f,  1.0f}, {0.0f, 0.0f}},
 
-        // Back
-        {{ 1.0f, -1.0f, -1.0f}, {1.0f, 1.0f}},
-        {{-1.0f, -1.0f, -1.0f}, {0.0f, 1.0f}},
-        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f,  1.0f, -1.0f}, {1.0f, 0.0f}},
+        // Back (-Z)
+        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f}},
+        {{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}},
+        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f, -1.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}},
 
-        // Left
-        {{-1.0f, -1.0f, -1.0f}, {0.0f, 1.0f}},
-        {{-1.0f, -1.0f,  1.0f}, {1.0f, 1.0f}},
-        {{-1.0f,  1.0f,  1.0f}, {1.0f, 0.0f}},
-        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+        // Left (-X)
+        {{-1.0f, -1.0f, -1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
+        {{-1.0f, -1.0f,  1.0f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
+        {{-1.0f,  1.0f,  1.0f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+        {{-1.0f,  1.0f, -1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
 
-        // Right
-        {{ 1.0f, -1.0f, -1.0f}, {1.0f, 1.0f}},
-        {{ 1.0f, -1.0f,  1.0f}, {0.0f, 1.0f}},
-        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f,  1.0f, -1.0f}, {1.0f, 0.0f}},
+        // Right (+X)
+        {{ 1.0f, -1.0f, -1.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
+        {{ 1.0f, -1.0f,  1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f, -1.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
 
-        // Top
-        {{-1.0f,  1.0f,  1.0f}, {0.0f, 1.0f}},
-        {{ 1.0f,  1.0f,  1.0f}, {1.0f, 1.0f}},
-        {{ 1.0f,  1.0f, -1.0f}, {1.0f, 0.0f}},
-        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+        // Top (+Y)
+        {{-1.0f,  1.0f,  1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
+        {{ 1.0f,  1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+        {{-1.0f,  1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
 
-        // Bottom
-        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f,  1.0f}, {1.0f, 0.0f}},
-        {{ 1.0f, -1.0f, -1.0f}, {1.0f, 1.0f}},
-        {{-1.0f, -1.0f, -1.0f}, {0.0f, 1.0f}},
+        // Bottom (-Y)
+        {{-1.0f, -1.0f,  1.0f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f,  1.0f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f}},
+        {{ 1.0f, -1.0f, -1.0f}, {0.0f, -1.0f, 0.0f}, {1.0f, 1.0f}},
+        {{-1.0f, -1.0f, -1.0f}, {0.0f, -1.0f, 0.0f}, {0.0f, 1.0f}},
     };
 
     const std::vector<uint32_t> cube_indices = {
@@ -89,6 +91,10 @@ struct std::hash<sigel::Vertex>
 {
     size_t operator()(sigel::Vertex const& vertex) const
     {
-        return ((std::hash<glm::vec3>()(vertex.pos)) >> 1) ^ (std::hash<glm::vec2>()(vertex.texCoord) << 1);
+        size_t h1 = std::hash<glm::vec3>()(vertex.pos);
+        size_t h2 = std::hash<glm::vec3>()(vertex.normal);
+        size_t h3 = std::hash<glm::vec2>()(vertex.texCoord);
+
+        return ((h1 ^ (h2 << 1)) >> 1) ^ (h3 << 1);
     }
 };

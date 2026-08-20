@@ -12,15 +12,17 @@ namespace factory
         uint32_t defaultPipeline = PipelineManager::get().getPipelineID("default");
 
 
-        SceneObject object;
+        SceneObject cube;
 
-        object.pipelineID = defaultPipeline;
-        object.meshes.push_back({
+        cube.pipelineID = defaultPipeline;
+        cube.meshes.push_back({
             mesh,
             flotex
         });
 
-        objects.push_back(object);
+        cube.transform.position = glm::vec3(-2.5f, 0.0f, 0.0f);
+        objects.push_back(cube);
+
 
         SceneObject car;
         car.pipelineID = defaultPipeline;
