@@ -6,33 +6,51 @@ namespace sigel
     void Device::pickPhysicalDevice(vk::raii::Instance &instance)
     {
         std::vector<vk::raii::PhysicalDevice> devices = instance.enumeratePhysicalDevices();
-        const auto devIter = std::ranges::find_if(devices,
-        [&](auto const & device) {
-                auto queueFamilies = device.getQueueFamilyProperties();
-                bool isSuitable = device.getProperties().apiVersion >= VK_API_VERSION_1_3;
-                const auto qfpIter = std::ranges::find_if(queueFamilies,
-                []( vk::QueueFamilyProperties const & qfp )
-                        {
-                            return (qfp.queueFlags & vk::QueueFlagBits::eGraphics) != static_cast<vk::QueueFlags>(0);
-                        } );
-                isSuitable = isSuitable && ( qfpIter != queueFamilies.end() );
-                auto extensions = device.enumerateDeviceExtensionProperties( );
-                bool found = true;
-                for (auto const & extension : deviceExtensions) {
-                    auto extensionIter = std::ranges::find_if(extensions, [extension](auto const & ext) {return strcmp(ext.extensionName, extension) == 0;});
-                    found = found &&  extensionIter != extensions.end();
-                }
-                isSuitable = isSuitable && found;
-                if (isSuitable) {
-                    physicalDevice = device;
-                    maxMsaaSamples = getMaxUsableSampleCount();
-                    msaaSamples = getBalancedSampleCount();
-                }
-                return isSuitable;
-        });
-        if (devIter == devices.end()) {
+        
+        int bestScore = -1;
+        
+        for (const auto& device : devices) {
+            auto props = device.getProperties();
+            auto queueFamilies = device.getQueueFamilyProperties();
+
+            bool supportsApi = props.apiVersion >= VK_API_VERSION_1_3;
+            
+            bool hasGraphicsQueue = std::ranges::any_of(queueFamilies, [](const auto& qfp) {
+                return (qfp.queueFlags & vk::QueueFlagBits::eGraphics) != static_cast<vk::QueueFlags>(0);
+            });
+
+            auto extensions = device.enumerateDeviceExtensionProperties();
+            bool hasExtensions = true;
+            for (const char* extension : deviceExtensions) {
+                bool found = std::ranges::any_of(extensions, [extension](const auto& ext) {
+                    return strcmp(ext.extensionName, extension) == 0;
+                });
+                hasExtensions = hasExtensions && found;
+            }
+
+            bool isSuitable = supportsApi && hasGraphicsQueue && hasExtensions;
+
+            if (!isSuitable) continue;
+
+            int score = 0;
+            if (props.deviceType == vk::PhysicalDeviceType::eDiscreteGpu) {
+                score += 1000;
+            } else if (props.deviceType == vk::PhysicalDeviceType::eIntegratedGpu) {
+                score += 10;
+            }
+
+            if (score > bestScore) {
+                bestScore = score;
+                physicalDevice = device;
+            }
+        }
+
+        if (bestScore == -1) {
             throw std::runtime_error("failed to find a suitable GPU!");
         }
+
+        maxMsaaSamples = getMaxUsableSampleCount();
+        msaaSamples = getBalancedSampleCount();
     }
 
     void Device::createLogicalDevice(vk::raii::SurfaceKHR &surface)
