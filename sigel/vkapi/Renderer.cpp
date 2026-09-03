@@ -36,7 +36,7 @@ namespace sigel
         renderObjects.emplace_back(std::move(object));
     }
 
-    void Renderer::prepareScene(const IScene& scene)
+    void Renderer::prepareScene(const Scene& scene)
     {
         cleanupRenderObjects();
         descriptorPool.clear();
@@ -80,7 +80,7 @@ namespace sigel
         renderObjects.clear();
     }
 
-    void Renderer::drawFrame(IScene& scene, bool showEditor)
+    void Renderer::drawFrame(Scene& scene, bool showEditor)
     {
         auto &frame = currentFrame();
 
@@ -263,7 +263,7 @@ namespace sigel
         return frames[frameIndex];
     }
 
-    void Renderer::updateUniformBuffer(uint32_t currentImage, IScene& scene)
+    void Renderer::updateUniformBuffer(uint32_t currentImage, Scene& scene)
     {
         const auto& sceneObjects = scene.getObjects();
         const auto& sceneCamera = scene.getCamera();

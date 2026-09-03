@@ -1,23 +1,36 @@
 #pragma once
 
-#include "IScene.hpp"
+#include "InputManager.hpp"
+#include "Camera.hpp"
+#include "Object.hpp"
+#include "Light.hpp"
 
 namespace sigel
 {
-    class DefaultScene : public IScene {
-        std::vector<SceneObject> objects;
-        Camera camera;
-        DirLight sun;
-        float elapsed = 0.0f;
-    public:
-        const std::vector<SceneObject>& getObjects() const override { return objects; }
-        Camera& getCamera() override { return camera; }
-        DirLight &getLight() override { return sun; }
+    class Scene
+    {
+        protected:
+            std::vector<SceneObject> objects;
+            Camera camera;
+            DirLight dirLight;
+            float elapsed = 0.0f;
 
-        void onSetup() override;
-        void onEnter() override;
-        void onExit() override;
-        void onUpdate(float dt) override;
-        void onDestroy() override;
+
+        public:
+            virtual ~Scene() = default;
+
+            virtual const std::vector<SceneObject>& getObjects() const { return objects; }
+            virtual Camera& getCamera() { return camera; }
+            virtual DirLight& getLight() { return dirLight; }
+
+            virtual void onSetup();
+            virtual void onEnter() {}
+            virtual void onExit() {}
+            virtual void onUpdate(float dt);
+            virtual void onDestroy() { objects.clear(); }
+
+            bool isSetup = false;
     };
+
+    class DefaultScene : public Scene {};
 }

@@ -53,18 +53,18 @@ namespace sigel
 
         public:
             void init(Device *device, Swapchain *swapchain, PipelineManager *pipelineManager, ResourceManager *resourceManager);
-            void drawFrame(IScene& scene, bool showEditor);
+            void drawFrame(Scene& scene, bool showEditor);
             void createCommandPool();
             void createDescriptorPool();
             void createDescriptorSets();
             void recordCommandBuffer(uint32_t imageIndex, bool showEditor);
             void createFrameData();
-            void updateUniformBuffer(uint32_t currentImage, IScene& scene);
+            void updateUniformBuffer(uint32_t currentImage, Scene& scene);
             void createUniformBuffers(std::vector<Buffer> &uniformBuffers);
             FrameData &currentFrame();
 
             void loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t pipelineID, uint32_t textureID);
-            void prepareScene(const IScene& scene);
+            void prepareScene(const Scene& scene);
             void cleanupRenderObjects();
 
         private:

@@ -63,7 +63,7 @@ namespace sigel
         ImGui_ImplVulkan_Init(&init_info);
     }
 
-    void EditorUI::update(IScene *scene)
+    void EditorUI::update(Scene *scene)
     {
         if (!display) return;
 
@@ -145,7 +145,7 @@ namespace sigel
         vkDestroyDescriptorPool(_logicalDevice, imguiPool, nullptr);
     }
 
-    void EditorUI::cameraSettingsFrame(IScene *scene)
+    void EditorUI::cameraSettingsFrame(Scene *scene)
     {
         if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
         {

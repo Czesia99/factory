@@ -45,10 +45,6 @@ namespace factory
         status("TESTSCENE", "exit test scene");
     }
 
-    void TestScene::onDestroy()
-    {
-        objects.clear();
-    }
 
     void TestScene::onUpdate(float dt)
     {

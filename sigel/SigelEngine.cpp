@@ -99,7 +99,7 @@ namespace sigel
         glfwTerminate();
     }
 
-    void SigelEngine::addScene(const std::string& name, IScene* scene)
+    void SigelEngine::addScene(const std::string& name, Scene* scene)
     {
         scenes[name] = scene;
     }
@@ -117,7 +117,7 @@ namespace sigel
         }
     }
 
-    void SigelEngine::loadScene(IScene* scene)
+    void SigelEngine::loadScene(Scene* scene)
     {
         vctx.waitIdle();
 
@@ -196,7 +196,7 @@ namespace sigel
                     attrib.vertices[3 * index.vertex_index + 2]
                 };
 
-                if (index.normal_index >= 0) 
+                if (index.normal_index >= 0)
                 {
                     vertex.normal = {
                         attrib.normals[3 * index.normal_index + 0],
@@ -204,7 +204,7 @@ namespace sigel
                         attrib.normals[3 * index.normal_index + 2]
                     };
                 } else {
-                    vertex.normal = glm::vec3(0.0f, 1.0f, 0.0f); // Default UP normal fallback
+                    vertex.normal = glm::vec3(0.0f, 1.0f, 0.0f);
                 }
 
                 vertex.texCoord = {

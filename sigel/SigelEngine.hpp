@@ -19,9 +19,9 @@ namespace sigel
             EditorUI editor;
 
         private:
-            std::unordered_map<std::string, IScene*> scenes;
-            IScene *activeScene = nullptr;
-            IScene *nextActiveScene = nullptr;
+            std::unordered_map<std::string, Scene*> scenes;
+            Scene *activeScene = nullptr;
+            Scene *nextActiveScene = nullptr;
 
         public:
             static SigelEngine& get() {
@@ -33,7 +33,7 @@ namespace sigel
             SigelEngine& operator=(const SigelEngine&) = delete;
 
             void run();
-            void addScene(const std::string& name, IScene* scene);
+            void addScene(const std::string& name, Scene* scene);
             void drawScene(const std::string& name);
 
             std::vector<SubMesh> loadTinyModel(std::string path);
@@ -46,7 +46,7 @@ namespace sigel
             void waitIdle();
             void cleanup();
 
-            void loadScene(IScene* scene);
+            void loadScene(Scene* scene);
 
             static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
             static void keyCallbackWrapper(GLFWwindow* window, int key, int scancode, int action, int mods);
