@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 #include "vkapi/VulkanContext.hpp"
 #include "Utils.hpp"
-#include "Scene.hpp"
+// #include "Scene.hpp"
 #include "EditorUI.hpp"
 
 namespace sigel
@@ -35,8 +35,6 @@ namespace sigel
             void run();
             void addScene(const std::string& name, Scene* scene);
             void drawScene(const std::string& name);
-
-            std::vector<SubMesh> loadTinyModel(std::string path);
 
         private:
             SigelEngine() { initWindow(); initEngine(); }

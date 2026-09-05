@@ -1,5 +1,6 @@
 #include "TestScene.hpp"
 #include "../sigel/SigelEngine.hpp"
+#include <sigel/Loader.hpp>
 #include <print>
 
 namespace factory
@@ -24,10 +25,16 @@ namespace factory
         objects.push_back(cube);
 
 
-        SceneObject car;
-        car.pipelineID = defaultPipeline;
-        car.meshes = SigelEngine::get().loadTinyModel("../assets/models/chipsbag/chips2.obj");
-        objects.push_back(car);
+        SceneObject chips;
+        chips.pipelineID = defaultPipeline;
+        chips.meshes = loadTinyModel("../assets/models/chipsbag/chips2.obj");
+        objects.push_back(chips);
+
+        SceneObject chips2;
+        chips2.pipelineID = defaultPipeline;
+        chips2.meshes = loadAssimpModel("../assets/models/chipsbag/chips2.obj");
+        chips2.transform.position = glm::vec3(-4.5f, 0.0f, 0.0f);
+        objects.push_back(chips2);
 
         // objects[1].transform = glm::translate
         // objects[0].transform.rotation = glm::vec3{0.0f, 0.0f, 0.0f};

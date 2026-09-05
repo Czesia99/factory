@@ -36,6 +36,15 @@ add_subdirectory(${LIB_DIR}/glm)
 #VMA
 add_subdirectory(${LIB_DIR}/vma)
 
+#ASSIMP
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+add_subdirectory(${LIB_DIR}/assimp)
+include_directories(${LIB_DIR}/assimp/include)
+
 #IMGUI
 set(IMGUI_DIR ${LIB_DIR}/imgui)
 include_directories(${IMGUI_DIR} ${IMGUI_DIR}/backends ..)
@@ -58,6 +67,7 @@ set(SRC
     sigel/Camera.cpp
     sigel/Scene.cpp
     sigel/EditorUI.cpp
+    sigel/Loader.cpp
     src/TestScene.cpp
 )
 
@@ -111,6 +121,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     VulkanConfig
     glfw
     glm
+    assimp
     GPUOpen::VulkanMemoryAllocator
 )
 
