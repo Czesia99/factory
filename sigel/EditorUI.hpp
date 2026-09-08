@@ -21,6 +21,7 @@ namespace sigel
             void cleanup();
         private:
             void cameraSettingsFrame(Scene *scene);
+            void lightSettingsFrame(Scene *scene);
         public:
             bool display = false;
         private:

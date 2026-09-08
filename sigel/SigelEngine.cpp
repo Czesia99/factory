@@ -40,6 +40,7 @@ namespace sigel
         vctx.init(window);
         editor.init(window, vctx);
         status("CORE", "Vulkan context ready");
+        vctx.resourceManager.createTextureImage("../assets/textures/texture0.jpg");
         addScene("default", new DefaultScene());
     }
 

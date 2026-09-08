@@ -26,6 +26,7 @@ namespace sigel
             const Mesh &getMesh(uint32_t index);
             uint32_t createMesh(const std::vector<Vertex>&, const std::vector<uint32_t>&);
             uint32_t createTextureImage(std::string path);
+            uint32_t createTextureImageFromMemory(const void* buffer, size_t bufferSize);
 
             Buffer createUniformBuffer(vk::DeviceSize size);
             void destroyBuffer(Buffer& buffer);

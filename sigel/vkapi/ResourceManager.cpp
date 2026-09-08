@@ -60,6 +60,38 @@ namespace sigel
         return id;
     }
 
+    uint32_t ResourceManager::createTextureImageFromMemory(const void* buffer, size_t bufferSize)
+    {
+        int width, height, channels, mipLevels;
+
+        stbi_uc* pixels = stbi_load_from_memory(
+            reinterpret_cast<const stbi_uc*>(buffer),
+            static_cast<int>(bufferSize),
+            &width,
+            &height,
+            &channels,
+            STBI_rgb_alpha
+        );
+
+        if (!pixels) {
+            throw std::runtime_error("failed to load texture image!");
+        }
+
+        vk::DeviceSize imageSize = width * height * 4;
+        mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
+
+        Buffer imgBuffer = _allocator->createStagingBuffer(imageSize);
+        memcpy(imgBuffer.mapped, pixels, imageSize);
+        stbi_image_free(pixels);
+
+        auto texture = _allocator->createImageTexture(imgBuffer, width, height, mipLevels, VK_FORMAT_R8G8B8A8_SRGB);
+
+        _allocator->destroyBuffer(imgBuffer);
+        uint32_t id = static_cast<uint32_t>(textures.size());
+        textures.emplace_back(std::move(texture));
+        return id;
+    }
+
     vk::raii::ShaderModule ResourceManager::createShaderModule(const std::vector<char>& code) const
     {
         vk::ShaderModuleCreateInfo createInfo{ .codeSize = code.size() * sizeof(char), .pCode = reinterpret_cast<const uint32_t*>(code.data()) };

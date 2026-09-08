@@ -15,12 +15,21 @@ namespace sigel
         alignas(16) glm::mat4 view;
         alignas(16) glm::mat4 proj;
         alignas(16) DirLight light;
+        alignas(16) glm::vec3 camPos;
+
+    };
+
+    struct LightBufferObject {
+        alignas(16) DirLight light;
     };
 
     struct MeshRenderData
     {
         uint32_t meshID;
-        uint32_t textureID;
+        uint32_t  diffuseID;
+        uint32_t  metallicID;
+        uint32_t  roughnessID;
+        uint32_t  normalID;
         std::vector<vk::raii::DescriptorSet> descriptorSets;
     };
 
@@ -60,10 +69,11 @@ namespace sigel
             void recordCommandBuffer(uint32_t imageIndex, bool showEditor);
             void createFrameData();
             void updateUniformBuffer(uint32_t currentImage, Scene& scene);
+            void updateLightBuffer(uint32_t currentImage, Scene& scene);
             void createUniformBuffers(std::vector<Buffer> &uniformBuffers);
             FrameData &currentFrame();
 
-            void loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t pipelineID, uint32_t textureID);
+            void loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t pipelineID, Material &mat);
             void prepareScene(const Scene& scene);
             void cleanupRenderObjects();
 

@@ -15,7 +15,8 @@ namespace sigel
     struct SubMesh
     {
         uint32_t  meshID;
-        uint32_t  textureID;
+        Material material;
+        // uint32_t  textureID;
         //localtransform
         //material
     };

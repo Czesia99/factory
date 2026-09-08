@@ -19,7 +19,7 @@ namespace sigel
         createFrameData();
     }
 
-    void Renderer::loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t pipelineID, uint32_t textureID)
+    void Renderer::loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t pipelineID, Material &mat)
     {
         RenderObject object;
 
@@ -27,7 +27,10 @@ namespace sigel
         for (auto &mesh : object.meshes)
         {
             mesh.meshID = _resourceManager->createMesh(vertices, indices);
-            mesh.textureID = textureID;
+            mesh.diffuseID = mat.diffuseID;
+            mesh.metallicID = mat.metallicID;
+            mesh.roughnessID = mat.roughnessID;
+            mesh.normalID = mat.normalID;
         }
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {
@@ -52,7 +55,10 @@ namespace sigel
                 MeshRenderData renderMesh;
 
                 renderMesh.meshID = mesh.meshID;
-                renderMesh.textureID = mesh.textureID;
+                renderMesh.diffuseID = mesh.material.diffuseID;
+                renderMesh.metallicID = mesh.material.metallicID;
+                renderMesh.roughnessID = mesh.material.roughnessID;
+                renderMesh.normalID = mesh.material.normalID;
                 ro.meshes.emplace_back(std::move(renderMesh));
             }
 
@@ -167,10 +173,19 @@ namespace sigel
 
     void Renderer::createDescriptorPool()
     {
-        uint32_t maxSets = static_cast<uint32_t>(renderObjects.size()) * MAX_FRAMES_IN_FLIGHT;
+        uint32_t totalSubMeshes = 0;
+        for (const auto& ro : renderObjects)
+        {
+            totalSubMeshes += static_cast<uint32_t>(ro.meshes.size());
+        }
+
+        if (totalSubMeshes == 0) return;
+
+        uint32_t maxSets = totalSubMeshes * MAX_FRAMES_IN_FLIGHT;
+
         std::array poolSize {
             vk::DescriptorPoolSize( vk::DescriptorType::eUniformBuffer, maxSets),
-            vk::DescriptorPoolSize( vk::DescriptorType::eCombinedImageSampler, maxSets)
+            vk::DescriptorPoolSize( vk::DescriptorType::eCombinedImageSampler, maxSets * 4),
         };
 
         vk::DescriptorPoolCreateInfo poolInfo{
@@ -206,6 +221,19 @@ namespace sigel
             {
                 mesh.descriptorSets = _device->logicalDevice.allocateDescriptorSets(allocInfo);
 
+                auto getTexInfo = [&](uint32_t texID) -> vk::DescriptorImageInfo {
+                    const auto& tex = _resourceManager->textures[texID];
+                    return vk::DescriptorImageInfo{
+                            .sampler = tex.sampler,
+                            .imageView = tex.view,
+                            .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal};
+                };
+
+                vk::DescriptorImageInfo diffuseInfo   = getTexInfo(mesh.diffuseID);
+                vk::DescriptorImageInfo metallicInfo  = getTexInfo(mesh.metallicID);
+                vk::DescriptorImageInfo roughnessInfo = getTexInfo(mesh.roughnessID);
+                vk::DescriptorImageInfo normalInfo    = getTexInfo(mesh.normalID);
+
                 for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
                 {
                     vk::DescriptorBufferInfo bufferInfo{
@@ -216,37 +244,47 @@ namespace sigel
                         .range = sizeof(UniformBufferObject)
                     };
 
-                    const auto& texture =
-                        _resourceManager->textures[mesh.textureID];
-
-                    vk::DescriptorImageInfo imageInfo{
-                        .sampler = texture.sampler,
-                        .imageView = texture.view,
-                        .imageLayout =
-                            vk::ImageLayout::eShaderReadOnlyOptimal
-                    };
-
-                    std::array<vk::WriteDescriptorSet, 2>
-                        descriptorWrites{{
-                            {
-                                .dstSet = *mesh.descriptorSets[i],
-                                .dstBinding = 0,
-                                .dstArrayElement = 0,
-                                .descriptorCount = 1,
-                                .descriptorType =
-                                    vk::DescriptorType::eUniformBuffer,
-                                .pBufferInfo = &bufferInfo
-                            },
-                            {
-                                .dstSet = *mesh.descriptorSets[i],
-                                .dstBinding = 1,
-                                .dstArrayElement = 0,
-                                .descriptorCount = 1,
-                                .descriptorType =
-                                    vk::DescriptorType::
-                                        eCombinedImageSampler,
-                                .pImageInfo = &imageInfo
-                            }
+                    std::array<vk::WriteDescriptorSet, 5> descriptorWrites{{
+                    {
+                        .dstSet = *mesh.descriptorSets[i],
+                        .dstBinding = 0,
+                        .dstArrayElement = 0,
+                        .descriptorCount = 1,
+                        .descriptorType = vk::DescriptorType::eUniformBuffer,
+                        .pBufferInfo = &bufferInfo
+                    },
+                    {
+                        .dstSet = *mesh.descriptorSets[i],
+                        .dstBinding = 1,
+                        .dstArrayElement = 0,
+                        .descriptorCount = 1,
+                        .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+                        .pImageInfo = &diffuseInfo
+                    },
+                    {
+                        .dstSet = *mesh.descriptorSets[i],
+                        .dstBinding = 2,
+                        .dstArrayElement = 0,
+                        .descriptorCount = 1,
+                        .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+                        .pImageInfo = &metallicInfo
+                    },
+                    {
+                        .dstSet = *mesh.descriptorSets[i],
+                        .dstBinding = 3,
+                        .dstArrayElement = 0,
+                        .descriptorCount = 1,
+                        .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+                        .pImageInfo = &roughnessInfo
+                    },
+                    {
+                        .dstSet = *mesh.descriptorSets[i],
+                        .dstBinding = 4,
+                        .dstArrayElement = 0,
+                        .descriptorCount = 1,
+                        .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+                        .pImageInfo = &normalInfo
+                    }
                         }};
 
                     _device->logicalDevice.updateDescriptorSets(
@@ -273,14 +311,29 @@ namespace sigel
         float height = static_cast<float>(_swapchain->swapChainExtent.height);
         float aspect = width / height;
 
+        UniformBufferObject ubo{};
+        ubo.view  = sceneCamera.getViewMatrix();
+        ubo.proj  = sceneCamera.getProjectionMatrix(aspect);
+        ubo.light = sceneDirLight;
+        ubo.camPos = sceneCamera.cam.pos;
+
         for (size_t i = 0; i < renderObjects.size(); i++) {
-            UniformBufferObject ubo{};
             ubo.model = sceneObjects[i].transform.getModelMatrix();
-            ubo.view  = sceneCamera.getViewMatrix();
-            ubo.proj  = sceneCamera.getProjectionMatrix(aspect);
-            ubo.light = sceneDirLight;
             memcpy(renderObjects[i].uniformBuffers[currentImage].mapped, &ubo, sizeof(ubo));
         }
+    }
+
+    void Renderer::updateLightBuffer(uint32_t currentImage, Scene& scene)
+    {
+        const auto& sceneDirLight = scene.getLight();
+
+        float width  = static_cast<float>(_swapchain->swapChainExtent.width);
+        float height = static_cast<float>(_swapchain->swapChainExtent.height);
+        float aspect = width / height;
+
+            LightBufferObject lbo{};
+            lbo.light = sceneDirLight;
+            // memcpy(, &lbo, sizeof(lbo));
     }
 
     void Renderer::recordCommandBuffer(uint32_t imageIndex, bool showEditor)

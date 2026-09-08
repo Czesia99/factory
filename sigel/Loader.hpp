@@ -5,6 +5,6 @@
 
 namespace sigel
 {
-   std::vector<SubMesh> loadTinyModel(const std::string &path);
+   // std::vector<SubMesh> loadTinyModel(const std::string &path);
    std::vector<SubMesh> loadAssimpModel(const std::string &path);
 }

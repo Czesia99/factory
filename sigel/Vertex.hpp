@@ -13,22 +13,24 @@ namespace sigel
         glm::vec3 pos;
         glm::vec3 normal;
         glm::vec2 texCoord;
+        glm::vec4 tangent;
 
         static vk::VertexInputBindingDescription getBindingDescription() {
             return { 0, sizeof(Vertex), vk::VertexInputRate::eVertex };
         }
 
-        static std::array<vk::VertexInputAttributeDescription, 3> getAttributeDescriptions() {
+        static std::array<vk::VertexInputAttributeDescription, 4> getAttributeDescriptions() {
             return {
                 vk::VertexInputAttributeDescription({0, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, pos)}),
                 vk::VertexInputAttributeDescription({1, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, normal)}),
-                vk::VertexInputAttributeDescription({2, 0, vk::Format::eR32G32Sfloat, offsetof(Vertex, texCoord)})
+                vk::VertexInputAttributeDescription({2, 0, vk::Format::eR32G32Sfloat, offsetof(Vertex, texCoord)}),
+                vk::VertexInputAttributeDescription({3, 0, vk::Format::eR32G32B32A32Sfloat, offsetof(Vertex, tangent)})
             };
         }
 
         bool operator==(const Vertex& other) const
         {
-            return pos == other.pos && normal == other.normal && texCoord == other.texCoord;
+            return pos == other.pos && normal == other.normal && texCoord == other.texCoord && tangent == other.tangent;
         }
     };
 

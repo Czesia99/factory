@@ -26,4 +26,22 @@ namespace sigel
 
         return buffer;
     }
+
+    static std::string toLower(const std::string& str) {
+        std::string lowerStr = str;
+        std::transform(lowerStr.begin(), lowerStr.end(), lowerStr.begin(),
+            [](unsigned char c){ return std::tolower(c); });
+        return lowerStr;
+    }
+
+    static std::string getBaseDir(const std::string &path)
+    {
+        std::string base_dir = "";
+        size_t pos = path.find_last_of("/\\");
+        if (pos != std::string::npos) {
+            base_dir = path.substr(0, pos + 1);
+        }
+
+        return base_dir;
+    }
 }
