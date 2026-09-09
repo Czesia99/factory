@@ -77,6 +77,7 @@ namespace sigel
 
         cameraSettingsFrame(scene);
         lightSettingsFrame(scene);
+        objectsSettingsFrame(scene);
 
         if (ImGui::CollapsingHeader("Settings", ImGuiTreeNodeFlags_DefaultOpen))
         {
@@ -178,6 +179,25 @@ namespace sigel
             ImGui::DragFloat4("direction", glm::value_ptr(light.direction), 0.1f);
             ImGui::DragFloat4("color", glm::value_ptr(light.color), 0.1f, 0.0f, 255.0f);
             ImGui::DragFloat4("ambient", glm::value_ptr(light.ambient), 0.1f);
+        }
+    }
+
+    void EditorUI::objectsSettingsFrame(Scene *scene)
+    {
+        if (ImGui::CollapsingHeader("Objects", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            std::vector<sigel::SceneObject> &objects = scene->getObjects();
+            for (int i = 0; i < objects.size(); i++)
+            {
+                ImGui::PushID(i);
+                std::string label = "Entity Unamed " + std::to_string(i);
+                // ImGui::Text("Name: ", obj.)
+                ImGui::Text(label.c_str());
+                ImGui::DragFloat3("position" , glm::value_ptr(objects[i].transform.position), 0.1f);
+                ImGui::DragFloat3("rotation", glm::value_ptr(objects[i].transform.rotation), 0.1f);
+                ImGui::DragFloat3("scale", glm::value_ptr(objects[i].transform.scale), 0.1f);
+                ImGui::PopID();
+            }
         }
     }
 }

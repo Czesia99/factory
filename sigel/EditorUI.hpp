@@ -22,6 +22,7 @@ namespace sigel
         private:
             void cameraSettingsFrame(Scene *scene);
             void lightSettingsFrame(Scene *scene);
+            void objectsSettingsFrame(Scene *scene);
         public:
             bool display = false;
         private:

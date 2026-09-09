@@ -12,7 +12,9 @@ namespace sigel
     {
         public:
             std::vector<Mesh> meshes;
-            std::vector<AllocatedImage> textures;
+
+            std::unordered_map<std::string, uint32_t> texPathIndex;
+            std::unordered_map<uint32_t, AllocatedImage> textures;
         private:
             GpuAllocator *_allocator;
             Device *_device;
@@ -26,7 +28,7 @@ namespace sigel
             const Mesh &getMesh(uint32_t index);
             uint32_t createMesh(const std::vector<Vertex>&, const std::vector<uint32_t>&);
             uint32_t createTextureImage(std::string path);
-            uint32_t createTextureImageFromMemory(const void* buffer, size_t bufferSize);
+            uint32_t createTextureImageFromMemory(const void* buffer, size_t bufferSize, const std::string &path);
 
             Buffer createUniformBuffer(vk::DeviceSize size);
             void destroyBuffer(Buffer& buffer);

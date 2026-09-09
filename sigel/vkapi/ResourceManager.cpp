@@ -38,6 +38,12 @@ namespace sigel
 
     uint32_t ResourceManager::createTextureImage(std::string path)
     {
+        auto it = texPathIndex.find(path);
+        if (it != texPathIndex.end())
+        {
+            return it->second;
+        }
+
         int width, height, channels, mipLevels;
         stbi_uc *pixels = stbi_load(path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 
@@ -56,12 +62,19 @@ namespace sigel
 
         _allocator->destroyBuffer(imgBuffer);
         uint32_t id = static_cast<uint32_t>(textures.size());
-        textures.emplace_back(std::move(texture));
+        textures[id] = std::move(texture);
+        texPathIndex[path] = id;
         return id;
     }
 
-    uint32_t ResourceManager::createTextureImageFromMemory(const void* buffer, size_t bufferSize)
+    uint32_t ResourceManager::createTextureImageFromMemory(const void* buffer, size_t bufferSize, const std::string &path)
     {
+        auto it = texPathIndex.find(path);
+        if (it != texPathIndex.end())
+        {
+            return it->second;
+        }
+
         int width, height, channels, mipLevels;
 
         stbi_uc* pixels = stbi_load_from_memory(
@@ -88,7 +101,8 @@ namespace sigel
 
         _allocator->destroyBuffer(imgBuffer);
         uint32_t id = static_cast<uint32_t>(textures.size());
-        textures.emplace_back(std::move(texture));
+        texPathIndex[path] = id;
+        textures[id] = std::move(texture);
         return id;
     }
 
@@ -120,7 +134,7 @@ namespace sigel
 
         for (auto &texture : textures)
         {
-            _allocator->destroyImage(texture);
+            _allocator->destroyImage(texture.second);
         }
         textures.clear();
     }

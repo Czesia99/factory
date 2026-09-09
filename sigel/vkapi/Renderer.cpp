@@ -39,18 +39,18 @@ namespace sigel
         renderObjects.emplace_back(std::move(object));
     }
 
-    void Renderer::prepareScene(const Scene& scene)
+    void Renderer::prepareScene(Scene& scene)
     {
         cleanupRenderObjects();
         descriptorPool.clear();
 
-        const auto& sceneObjects = scene.getObjects();
+        auto& sceneObjects = scene.getObjects();
         if (sceneObjects.empty()) return;
 
-        for (const auto& so : sceneObjects) {
+        for (auto &so : sceneObjects) {
             RenderObject ro;
             ro.pipelineID = so.pipelineID;
-            for (const auto &mesh : so.meshes)
+            for (auto &mesh : so.meshes)
             {
                 MeshRenderData renderMesh;
 

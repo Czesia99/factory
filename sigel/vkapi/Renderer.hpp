@@ -74,7 +74,7 @@ namespace sigel
             FrameData &currentFrame();
 
             void loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t pipelineID, Material &mat);
-            void prepareScene(const Scene& scene);
+            void prepareScene(Scene& scene);
             void cleanupRenderObjects();
 
         private:

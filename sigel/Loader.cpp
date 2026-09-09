@@ -81,7 +81,7 @@ namespace sigel
 
         if (embeddedTex) {
             size_t size = (embeddedTex->mHeight == 0) ? embeddedTex->mWidth : embeddedTex->mWidth * embeddedTex->mHeight * 4;
-            return SigelEngine::get().vctx.resourceManager.createTextureImageFromMemory(embeddedTex->pcData, size);
+            return SigelEngine::get().vctx.resourceManager.createTextureImageFromMemory(embeddedTex->pcData, size, embeddedTex->mFilename.C_Str());
         } else {
             std::string fullPath = base_dir + texPath;
             try {

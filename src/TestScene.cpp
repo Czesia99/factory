@@ -62,8 +62,6 @@ namespace factory
         building.meshes = loadAssimpModel("../assets/models/building/old_residential_building.fbx");
         building.transform.scale *= 0.01f;
         objects.push_back(building);
-        // objects[1].transform = glm::translate
-        // objects[0].transform.rotation = glm::vec3{0.0f, 0.0f, 0.0f};
 
         glfwSetInputMode(SigelEngine::get().window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }

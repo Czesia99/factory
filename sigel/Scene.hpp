@@ -19,7 +19,7 @@ namespace sigel
         public:
             virtual ~Scene() = default;
 
-            virtual const std::vector<SceneObject>& getObjects() const { return objects; }
+            virtual std::vector<SceneObject>& getObjects() { return objects; }
             virtual Camera& getCamera() { return camera; }
             virtual DirLight& getLight() { return dirLight; }
 
