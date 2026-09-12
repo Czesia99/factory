@@ -68,6 +68,7 @@ set(SRC
     sigel/Scene.cpp
     sigel/EditorUI.cpp
     sigel/Loader.cpp
+    sigel/ecs/EntityManager.cpp
     src/TestScene.cpp
 )
 
