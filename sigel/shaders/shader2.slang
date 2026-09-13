@@ -4,6 +4,7 @@ struct VSInput {
     [[vk::location(0)]] float3 inPosition : POSITION;
     [[vk::location(1)]] float3 inNormal : NORMAL;
     [[vk::location(2)]] float2 inTexCoord : TEXCOORD0;
+    [[vk::location(3)]] float4 inTangent : TANGENT;
 };
 
 struct DirLight {
@@ -13,14 +14,23 @@ struct DirLight {
 };
 
 struct UniformBuffer {
-    float4x4 model;
     float4x4 view;
     float4x4 proj;
     DirLight light;
     float3 camPos;
 };
 
+struct ObjBufferObject {
+    float4x4 model;
+};
+
+struct PushConstants {
+    uint objectIndex;
+};
+[[vk::push_constant]] PushConstants push;
+
 [[vk::binding(0, 0)]] ConstantBuffer<UniformBuffer> ubo;
+[[vk::binding(1, 0)]] StructuredBuffer<ObjBufferObject> objectSSBO;
 
 [[vk::binding(0, 1)]] Sampler2D textureMap;
 [[vk::binding(1, 1)]] Sampler2D texture2;
@@ -31,16 +41,20 @@ struct VSOutput {
     float4 pos : SV_Position;
     float3 normal;
     float2 fragTexCoord;
+    float4 tangent;
 };
 
 [shader("vertex")]
 VSOutput vertMain(VSInput input) {
     VSOutput output;
 
-    output.pos = mul(ubo.proj, mul(ubo.view, mul(ubo.model, float4(input.inPosition, 1.0))));
+    float4x4 modelMatrix = objectSSBO[push.objectIndex].model;
 
-    float3x3 normalMatrix = (float3x3)ubo.model;
+    output.pos = mul(ubo.proj, mul(ubo.view, mul(modelMatrix, float4(input.inPosition, 1.0))));
+
+    float3x3 normalMatrix = (float3x3)modelMatrix;
     output.normal = mul(normalMatrix, input.inNormal);
+    output.tangent = input.inTangent; //float4(normalize(mul(normalMatrix, input.inTangent.xyz)), input.inTangent.w);
 
     output.fragTexCoord = input.inTexCoord;
     return output;
