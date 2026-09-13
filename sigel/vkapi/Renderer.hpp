@@ -11,12 +11,15 @@
 namespace sigel
 {
     struct UniformBufferObject {
-        alignas(16) glm::mat4 model;
         alignas(16) glm::mat4 view;
         alignas(16) glm::mat4 proj;
         alignas(16) DirLight light;
         alignas(16) glm::vec3 camPos;
 
+    };
+
+    struct ObjBufferObject {
+        glm::mat4 model;
     };
 
     struct LightBufferObject {
@@ -37,7 +40,11 @@ namespace sigel
     {
         uint32_t pipelineID;
         std::vector<MeshRenderData> meshes;
-        std::vector<Buffer> uniformBuffers;
+        // std::vector<Buffer> uniformBuffers;
+    };
+
+    struct ObjectPushConstants {
+        uint32_t objectIndex;
     };
 
     class Renderer
@@ -60,6 +67,10 @@ namespace sigel
 
             std::vector<RenderObject> renderObjects;
 
+            std::vector<Buffer> uniformBuffers;
+            std::vector<Buffer> objectSSBOs;
+            std::vector<vk::raii::DescriptorSet> globalDescriptorSets;
+
         public:
             void init(Device *device, Swapchain *swapchain, PipelineManager *pipelineManager, ResourceManager *resourceManager);
             void drawFrame(Scene& scene, bool showEditor);
@@ -69,7 +80,6 @@ namespace sigel
             void recordCommandBuffer(uint32_t imageIndex, bool showEditor);
             void createFrameData();
             void updateUniformBuffer(uint32_t currentImage, Scene& scene);
-            void updateLightBuffer(uint32_t currentImage, Scene& scene);
             void createUniformBuffers(std::vector<Buffer> &uniformBuffers);
             FrameData &currentFrame();
 

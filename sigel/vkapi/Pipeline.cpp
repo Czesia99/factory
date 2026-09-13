@@ -39,7 +39,14 @@ namespace sigel
         instance.name = config.name;
         instance.config = config;
 
-        instance.descriptorSetLayout = createDescriptorSetLayout();
+        instance.globalDescriptorSetLayout = createGlobalDescriptorSetLayout();
+        instance.materialDescriptorSetLayout = createMaterialDescriptorSetLayout();
+
+        vk::PushConstantRange pushConstantRange{
+            .stageFlags = vk::ShaderStageFlagBits::eVertex,
+            .offset = 0,
+            .size = sizeof(uint32_t)
+        };
 
         auto code = readFile(config.shaderPath);
 
@@ -104,7 +111,18 @@ namespace sigel
         std::vector dynamicStates = {vk::DynamicState::eViewport, vk::DynamicState::eScissor};
         vk::PipelineDynamicStateCreateInfo dynamicState{.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size()), .pDynamicStates = dynamicStates.data()};
 
-        vk::PipelineLayoutCreateInfo pipelineLayoutInfo{.setLayoutCount = 1, .pSetLayouts = &*instance.descriptorSetLayout, .pushConstantRangeCount = 0};
+        std::vector<vk::DescriptorSetLayout> layouts = {
+            *instance.globalDescriptorSetLayout,
+            *instance.materialDescriptorSetLayout
+        };
+
+        vk::PipelineLayoutCreateInfo pipelineLayoutInfo {
+            .setLayoutCount = static_cast<uint32_t>(layouts.size()),
+            .pSetLayouts = layouts.data(),
+            .pushConstantRangeCount = 1,
+            .pPushConstantRanges = &pushConstantRange
+        };
+
         instance.pipelineLayout = vk::raii::PipelineLayout(_device->logicalDevice, pipelineLayoutInfo);
 
         vk::PipelineRenderingCreateInfo renderingInfo{ .colorAttachmentCount = 1, .pColorAttachmentFormats = &(_swapchain->swapChainSurfaceFormat.format), .depthAttachmentFormat = config.depthFormat };
@@ -161,14 +179,24 @@ namespace sigel
         }
     }
 
-    vk::raii::DescriptorSetLayout PipelineManager::createDescriptorSetLayout()
+    vk::raii::DescriptorSetLayout PipelineManager::createGlobalDescriptorSetLayout()
     {
         std::array bindings = {
-            vk::DescriptorSetLayoutBinding( 0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, nullptr),
+            vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, nullptr),
+            vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eStorageBuffer, 1, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, nullptr)
+        };
+
+        vk::DescriptorSetLayoutCreateInfo layoutInfo{.bindingCount = bindings.size(), .pBindings = bindings.data()};
+        return vk::raii::DescriptorSetLayout(_device->logicalDevice, layoutInfo);
+    }
+
+    vk::raii::DescriptorSetLayout PipelineManager::createMaterialDescriptorSetLayout()
+    {
+        std::array bindings = {
+            vk::DescriptorSetLayoutBinding( 0, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment, nullptr),
             vk::DescriptorSetLayoutBinding( 1, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment, nullptr),
             vk::DescriptorSetLayoutBinding( 2, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment, nullptr),
-            vk::DescriptorSetLayoutBinding( 3, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment, nullptr),
-            vk::DescriptorSetLayoutBinding( 4, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment, nullptr)
+            vk::DescriptorSetLayoutBinding( 3, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment, nullptr)
         };
 
         vk::DescriptorSetLayoutCreateInfo layoutInfo{.bindingCount = bindings.size(), .pBindings = bindings.data()};

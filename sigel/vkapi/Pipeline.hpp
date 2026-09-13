@@ -27,8 +27,12 @@ namespace sigel
         PipelineConfig config;
         // std::vector<char> shaderCode;
         vk::raii::Pipeline pipeline = nullptr;
-        vk::raii::DescriptorSetLayout descriptorSetLayout = nullptr;
         vk::raii::PipelineLayout pipelineLayout = nullptr;
+
+        // vk::raii::DescriptorSetLayout descriptorSetLayout = nullptr;
+
+        vk::raii::DescriptorSetLayout globalDescriptorSetLayout = nullptr;
+        vk::raii::DescriptorSetLayout materialDescriptorSetLayout = nullptr;
     };
 
     class PipelineManager
@@ -53,7 +57,8 @@ namespace sigel
             uint32_t createPipeline(PipelineConfig config = {});
             void recreateAllPipelines();
 
-            vk::raii::DescriptorSetLayout createDescriptorSetLayout();
+            vk::raii::DescriptorSetLayout createGlobalDescriptorSetLayout();
+            vk::raii::DescriptorSetLayout createMaterialDescriptorSetLayout();
 
 
             void listPipelines() {

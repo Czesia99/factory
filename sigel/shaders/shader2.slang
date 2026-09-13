@@ -1,8 +1,9 @@
+static const float PI = 3.14159265359;
+
 struct VSInput {
     [[vk::location(0)]] float3 inPosition : POSITION;
     [[vk::location(1)]] float3 inNormal : NORMAL;
     [[vk::location(2)]] float2 inTexCoord : TEXCOORD0;
-    [[vk::location(3)]] float4 inTangent : TANGENT;
 };
 
 struct DirLight {
@@ -19,10 +20,14 @@ struct UniformBuffer {
     float3 camPos;
 };
 
-ConstantBuffer<UniformBuffer> ubo;
+[[vk::binding(0, 0)]] ConstantBuffer<UniformBuffer> ubo;
 
-struct VSOutput
-{
+[[vk::binding(0, 1)]] Sampler2D textureMap;
+[[vk::binding(1, 1)]] Sampler2D texture2;
+[[vk::binding(2, 1)]] Sampler2D texture3;
+[[vk::binding(3, 1)]] Sampler2D texture4;
+
+struct VSOutput {
     float4 pos : SV_Position;
     float3 normal;
     float2 fragTexCoord;
@@ -41,12 +46,6 @@ VSOutput vertMain(VSInput input) {
     return output;
 }
 
-Sampler2D texture;
-Sampler2D texture2;
-Sampler2D texture3;
-Sampler2D texture4;
-
-
 [shader("fragment")]
 float4 fragMain(VSOutput vertIn) : SV_TARGET {
     float3 N = normalize(vertIn.normal);
@@ -62,6 +61,6 @@ float4 fragMain(VSOutput vertIn) : SV_TARGET {
 
     float3 totalLighting = saturate(ambient + diffuse);
 
-    float4 texColor = texture.Sample(vertIn.fragTexCoord);
+    float4 texColor = textureMap.Sample(vertIn.fragTexCoord);
     return float4(texColor.rgb * totalLighting, texColor.a);
 }

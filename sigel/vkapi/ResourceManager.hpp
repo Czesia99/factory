@@ -31,6 +31,7 @@ namespace sigel
             uint32_t createTextureImageFromMemory(const void* buffer, size_t bufferSize, const std::string &path);
 
             Buffer createUniformBuffer(vk::DeviceSize size);
+            Buffer createStorageBuffer(vk::DeviceSize size);
             void destroyBuffer(Buffer& buffer);
 
             void cleanup();

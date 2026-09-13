@@ -14,14 +14,22 @@ struct DirLight {
 };
 
 struct UniformBuffer {
-    float4x4 model;
     float4x4 view;
     float4x4 proj;
     DirLight light;
     float3 camPos;
 };
 
-ConstantBuffer<UniformBuffer> ubo;
+[[vk::binding(0, 0)]] ConstantBuffer<UniformBuffer> ubo;
+struct ObjectData {
+    float4x4 model;
+};
+[[vk::binding(1, 0)]] StructuredBuffer<ObjectData> objectBuffer;
+
+struct PushConstants {
+    uint objectIndex;
+};
+[[vk::push_constant]] PushConstants push;
 
 struct VSOutput {
     float4 pos : SV_Position;
@@ -35,15 +43,17 @@ struct VSOutput {
 VSOutput vertMain(VSInput input) {
     VSOutput output;
 
+    ObjectData obj = objectBuffer[push.objectIndex];
+
     // Calculate World Position
-    float4 worldPos = mul(ubo.model, float4(input.inPosition, 1.0));
+    float4 worldPos = mul(obj.model, float4(input.inPosition, 1.0));
     output.worldPos = worldPos.xyz;
 
     // Calculate Screen Position
     output.pos = mul(ubo.proj, mul(ubo.view, worldPos));
 
     // Calculate Normal and Tangent in World Space
-    float3x3 normalMatrix = (float3x3)ubo.model;
+    float3x3 normalMatrix = (float3x3)obj.model;
     output.normal = normalize(mul(normalMatrix, input.inNormal));
     output.tangent = float4(normalize(mul(normalMatrix, input.inTangent.xyz)), input.inTangent.w);
 
@@ -87,11 +97,10 @@ float3 fresnelSchlick(float cosTheta, float3 F0) {
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
-
-Sampler2D diffuseMap;
-Sampler2D metallic;
-Sampler2D roughnessMap;
-Sampler2D normalMap;
+[[vk::binding(0, 1)]] Sampler2D diffuseMap;
+[[vk::binding(1, 1)]] Sampler2D metallic;
+[[vk::binding(2, 1)]] Sampler2D roughnessMap;
+[[vk::binding(3, 1)]] Sampler2D normalMap;
 
 [shader("fragment")]
 float4 fragMain(VSOutput vertIn) : SV_TARGET {

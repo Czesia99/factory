@@ -61,6 +61,26 @@ namespace sigel
         return result;
     }
 
+    Buffer GpuAllocator::createStorageBuffer(vk::DeviceSize size)
+    {
+        Buffer result;
+
+        VkBufferCreateInfo bufferInfo{
+            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .size  = size,
+            .usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+        };
+        VmaAllocationCreateInfo allocInfo{
+            .flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT,
+            .usage = VMA_MEMORY_USAGE_AUTO
+        };
+
+        VmaAllocationInfo info{};
+        vmaCreateBuffer(allocator, &bufferInfo, &allocInfo, &result.buffer, &result.allocation, &info);
+        result.mapped = info.pMappedData;
+        return result;
+    }
+
     Buffer GpuAllocator::createUniformBuffer(vk::DeviceSize size)
     {
         Buffer result;

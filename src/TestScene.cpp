@@ -57,11 +57,11 @@ namespace factory
         // ak.transform.scale *= 0.01f;
         objects.push_back(ak);
 
-        SceneObject building;
-        building.pipelineID = pbrPipeline;
-        building.meshes = loadAssimpModel("../assets/models/building/old_residential_building.fbx");
-        building.transform.scale *= 0.01f;
-        objects.push_back(building);
+        // SceneObject building;
+        // building.pipelineID = pbrPipeline;
+        // building.meshes = loadAssimpModel("../assets/models/building/old_residential_building.fbx");
+        // building.transform.scale *= 0.01f;
+        // objects.push_back(building);
 
         glfwSetInputMode(SigelEngine::get().window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }

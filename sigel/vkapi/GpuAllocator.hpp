@@ -24,6 +24,7 @@ namespace sigel
             void init(Device *device, Instance *instance);
             Buffer createBuffer(vk::DeviceSize size, VkBufferUsageFlags  usage, VmaMemoryUsage memoryUsage);
             Buffer createStagingBuffer(vk::DeviceSize size);
+            Buffer createStorageBuffer(vk::DeviceSize size);
             Buffer createUniformBuffer(vk::DeviceSize size);
             void destroyBuffer(Buffer& buffer);
             AllocatedImage createDepthImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, VkSampleCountFlagBits samples);

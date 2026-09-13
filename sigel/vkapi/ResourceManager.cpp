@@ -118,6 +118,11 @@ namespace sigel
         return _allocator->createUniformBuffer(size);
     }
 
+    Buffer ResourceManager::createStorageBuffer(vk::DeviceSize size)
+    {
+        return _allocator->createStorageBuffer(size);
+    }
+
     void ResourceManager::destroyBuffer(Buffer& buffer)
     {
         _allocator->destroyBuffer(buffer);
