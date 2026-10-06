@@ -9,12 +9,12 @@ namespace sigel
         uint32_t mesh = ResourceManager::get().createMesh(cube_vertices, cube_indices);
         uint32_t defaultPipeline = PipelineManager::get().getPipelineID("default");
 
-        SceneObject object;
-        object.pipelineID = defaultPipeline;
-        object.meshes.push_back({ mesh, flotex });
+        // SceneObject object;
+        // object.pipelineID = defaultPipeline;
+        // object.meshes.push_back({ mesh, flotex });
 
-        objects.push_back(object);
-        objects[0].transform.rotation = glm::vec3{0.0f, 0.0f, 0.0f};
+        // objects.push_back(object);
+        // objects[0].transform.rotation = glm::vec3{0.0f, 0.0f, 0.0f};
 
         glfwSetInputMode(SigelEngine::get().window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }

@@ -151,7 +151,7 @@ namespace sigel
     }
 
     static void processNode(aiNode* node, const aiScene* scene, const glm::mat4& parentTransform,
-                            const std::string& base_dir, std::vector<SubMesh>& outMeshes)
+                            const std::string& base_dir, std::vector<MeshItem>& outMeshes)
     {
         glm::mat4 nodeTransform = parentTransform * aiToGlmMat4(node->mTransformation);
         glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(nodeTransform)));
@@ -237,7 +237,7 @@ namespace sigel
         }
     }
 
-    std::vector<SubMesh> loadAssimpModel(const std::string& path)
+    std::vector<MeshItem> loadAssimpModel(const std::string& path)
     {
         Assimp::Importer importer;
 
@@ -262,7 +262,7 @@ namespace sigel
                   << " | Embedded Textures: " << scene->mNumTextures << std::endl;
         std::cout << "==========================================\n" << std::endl;
 
-        std::vector<SubMesh> meshes;
+        std::vector<MeshItem> meshes;
 
         processNode(scene->mRootNode, scene, glm::mat4(1.0f), base_dir, meshes);
 

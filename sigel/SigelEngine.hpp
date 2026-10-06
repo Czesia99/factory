@@ -5,6 +5,8 @@
 #include "Utils.hpp"
 // #include "Scene.hpp"
 #include "EditorUI.hpp"
+#include <sigel/ecs/Coordinator.hpp>
+#include <sigel/ecs/systems/RenderSystem.hpp>
 
 namespace sigel
 {
@@ -17,6 +19,9 @@ namespace sigel
             VulkanContext vctx;
             InputManager inputManager;
             EditorUI editor;
+            Coordinator coordinator;
+            std::shared_ptr<RenderSystem> renderSystem;
+
 
         private:
             std::unordered_map<std::string, Scene*> scenes;

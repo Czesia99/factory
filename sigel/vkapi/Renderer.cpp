@@ -19,52 +19,29 @@ namespace sigel
         createFrameData();
     }
 
-    void Renderer::loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t pipelineID, Material &mat)
-    {
-        RenderObject object;
-
-        object.pipelineID = pipelineID;
-        for (auto &mesh : object.meshes)
-        {
-            mesh.meshID = _resourceManager->createMesh(vertices, indices);
-            mesh.diffuseID = mat.diffuseID;
-            mesh.metallicID = mat.metallicID;
-            mesh.roughnessID = mat.roughnessID;
-            mesh.normalID = mat.normalID;
-        }
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-        {
-            uniformBuffers.emplace_back(_resourceManager->createUniformBuffer(sizeof(UniformBufferObject)));
-        }
-        renderObjects.emplace_back(std::move(object));
-    }
-
-    void Renderer::prepareScene(Scene& scene)
+    void Renderer::prepareScene(std::span<const RenderItem> items)
     {
         cleanupRenderObjects();
         descriptorPool.clear();
 
-        auto& sceneObjects = scene.getObjects();
-        if (sceneObjects.empty()) return;
+        if (items.empty()) return;
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {
             uniformBuffers.emplace_back(_resourceManager->createUniformBuffer(sizeof(UniformBufferObject)));
-            objectSSBOs.emplace_back(_resourceManager->createStorageBuffer(sceneObjects.size() * sizeof(ObjBufferObject)));
+            objectSSBOs.emplace_back(_resourceManager->createStorageBuffer(items.size() * sizeof(ObjBufferObject)));
         }
 
-        for (auto &so : sceneObjects) {
+        renderObjects.reserve(items.size());
+        for (auto& item : items) {
             RenderObject ro;
-            ro.pipelineID = so.pipelineID;
-            for (auto &mesh : so.meshes)
+            ro.pipelineID = item.pipelineID;
+            for (auto &mesh : item.meshes)
             {
                 MeshRenderData renderMesh;
 
                 renderMesh.meshID = mesh.meshID;
-                renderMesh.diffuseID = mesh.material.diffuseID;
-                renderMesh.metallicID = mesh.material.metallicID;
-                renderMesh.roughnessID = mesh.material.roughnessID;
-                renderMesh.normalID = mesh.material.normalID;
+                renderMesh.material = mesh.material;
                 ro.meshes.emplace_back(std::move(renderMesh));
             }
 
@@ -98,7 +75,7 @@ namespace sigel
         objectSSBOs.clear();
     }
 
-    void Renderer::drawFrame(Scene& scene, bool showEditor)
+    void Renderer::drawFrame(Scene& scene, std::span<const RenderItem> items, bool showEditor)
     {
         auto &frame = currentFrame();
 
@@ -110,6 +87,12 @@ namespace sigel
             _pipelineManager->msaaChanged = false;
         }
 
+        if (items.size() != renderObjects.size())
+        {
+            _device->logicalDevice.waitIdle();
+            prepareScene(items);
+        }
+
         waitFence();
 
 		auto [result, imageIndex] = _swapchain->swapChain.acquireNextImage(UINT64_MAX, *frame.presentSemaphore, nullptr);
@@ -118,7 +101,7 @@ namespace sigel
 
         _device->logicalDevice.resetFences(*frame.inFlightFence);
 
-        updateUniformBuffer(frameIndex, scene);
+        updateUniformBuffer(frameIndex, scene, items);
         frame.commandBuffer.reset();
         recordCommandBuffer(imageIndex, showEditor);
 
@@ -286,10 +269,10 @@ namespace sigel
                     };
                 };
 
-                vk::DescriptorImageInfo diffuseInfo   = getTexInfo(mesh.diffuseID);
-                vk::DescriptorImageInfo metallicInfo  = getTexInfo(mesh.metallicID);
-                vk::DescriptorImageInfo roughnessInfo = getTexInfo(mesh.roughnessID);
-                vk::DescriptorImageInfo normalInfo    = getTexInfo(mesh.normalID);
+                vk::DescriptorImageInfo diffuseInfo   = getTexInfo(mesh.material.diffuseID);
+                vk::DescriptorImageInfo metallicInfo  = getTexInfo(mesh.material.metallicID);
+                vk::DescriptorImageInfo roughnessInfo = getTexInfo(mesh.material.roughnessID);
+                vk::DescriptorImageInfo normalInfo    = getTexInfo(mesh.material.normalID);
 
                 for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
                 {
@@ -338,36 +321,25 @@ namespace sigel
         return frames[frameIndex];
     }
 
-    void Renderer::updateUniformBuffer(uint32_t currentImage, Scene& scene)
+    void Renderer::updateUniformBuffer(uint32_t currentImage, Scene& scene, std::span<const RenderItem> items)
     {
-        const auto& sceneObjects = scene.getObjects();
-        const auto& sceneCamera = scene.getCamera();
-        const auto& sceneDirLight = scene.getLight();
+        if (uniformBuffers.empty()) return;
 
-        float width  = static_cast<float>(_swapchain->swapChainExtent.width);
-        float height = static_cast<float>(_swapchain->swapChainExtent.height);
-        float aspect = width / height;
+        const auto& camera = scene.getCamera();
+
+        float aspect = static_cast<float>(_swapchain->swapChainExtent.width)
+                    / static_cast<float>(_swapchain->swapChainExtent.height);
 
         UniformBufferObject ubo{};
-        ubo.view  = sceneCamera.getViewMatrix();
-        ubo.proj  = sceneCamera.getProjectionMatrix(aspect);
-        ubo.light = sceneDirLight;
-        ubo.camPos = sceneCamera.cam.pos;
-
+        ubo.view   = camera.getViewMatrix();
+        ubo.proj   = camera.getProjectionMatrix(aspect);
+        ubo.light  = scene.getLight();
+        ubo.camPos = camera.cam.pos;
         memcpy(uniformBuffers[currentImage].mapped, &ubo, sizeof(ubo));
 
-        std::vector<ObjBufferObject> allObjectsData;
-        allObjectsData.reserve(renderObjects.size());
-
-        for (size_t i = 0; i < renderObjects.size(); i++) {
-            ObjBufferObject data {};
-            data.model = sceneObjects[i].transform.getModelMatrix();
-            // ubo.model = sceneObjects[i].transform.getModelMatrix();
-            allObjectsData.push_back(data);
-        }
-
-        size_t ssboSize = allObjectsData.size() * sizeof(ObjBufferObject);
-        memcpy(objectSSBOs[currentImage].mapped, allObjectsData.data(), ssboSize);
+        auto* dst = static_cast<ObjBufferObject*>(objectSSBOs[currentImage].mapped);
+        for (size_t i = 0; i < items.size(); i++)
+            dst[i].model = items[i].model;
     }
 
     void Renderer::recordCommandBuffer(uint32_t imageIndex, bool showEditor)

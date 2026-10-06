@@ -7,6 +7,9 @@
 #include "frames.h"
 #include "../Scene.hpp"
 #include "../Vertex.hpp"
+#include <sigel/ecs/Entity.hpp>
+#include <span>
+#include <sigel/ecs/systems/RenderItem.hpp>
 
 namespace sigel
 {
@@ -22,17 +25,10 @@ namespace sigel
         glm::mat4 model;
     };
 
-    struct LightBufferObject {
-        alignas(16) DirLight light;
-    };
-
     struct MeshRenderData
     {
         uint32_t meshID;
-        uint32_t  diffuseID;
-        uint32_t  metallicID;
-        uint32_t  roughnessID;
-        uint32_t  normalID;
+        Material material;
         std::vector<vk::raii::DescriptorSet> descriptorSets;
     };
 
@@ -40,7 +36,6 @@ namespace sigel
     {
         uint32_t pipelineID;
         std::vector<MeshRenderData> meshes;
-        // std::vector<Buffer> uniformBuffers;
     };
 
     struct ObjectPushConstants {
@@ -73,18 +68,17 @@ namespace sigel
 
         public:
             void init(Device *device, Swapchain *swapchain, PipelineManager *pipelineManager, ResourceManager *resourceManager);
-            void drawFrame(Scene& scene, bool showEditor);
+            void drawFrame(Scene& scene, std::span<const RenderItem> items, bool showEditor);
             void createCommandPool();
             void createDescriptorPool();
             void createDescriptorSets();
             void recordCommandBuffer(uint32_t imageIndex, bool showEditor);
             void createFrameData();
-            void updateUniformBuffer(uint32_t currentImage, Scene& scene);
+            void updateUniformBuffer(uint32_t currentImage, Scene& scene, std::span<const RenderItem> items);
             void createUniformBuffers(std::vector<Buffer> &uniformBuffers);
             FrameData &currentFrame();
 
-            void loadObject(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t pipelineID, Material &mat);
-            void prepareScene(Scene& scene);
+            void prepareScene(std::span<const RenderItem> items);
             void cleanupRenderObjects();
 
         private:

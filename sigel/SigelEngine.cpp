@@ -39,6 +39,21 @@ namespace sigel
     {
         vctx.init(window);
         editor.init(window, vctx);
+
+        //ECS Setup
+        coordinator.Init();
+
+        coordinator.RegisterComponent<Transform>();
+        coordinator.RegisterComponent<RenderComponent>();
+
+        renderSystem = coordinator.RegisterSystem<RenderSystem>();
+
+        Signature signature;
+        signature.set(coordinator.GetComponentType<Transform>());
+	    signature.set(coordinator.GetComponentType<RenderComponent>());
+
+        coordinator.SetSystemSignature<RenderSystem>(signature);
+
         status("CORE", "Vulkan context ready");
         vctx.resourceManager.createTextureImage("../assets/textures/texture0.jpg");
         addScene("default", new DefaultScene());
@@ -69,10 +84,11 @@ namespace sigel
             if (activeScene)
             {
                 activeScene->onUpdate(dt);
+                renderSystem->Update(coordinator);
                 editor.update(activeScene);
             }
 
-            vctx.renderer.drawFrame(*activeScene, editor.display);
+            vctx.renderer.drawFrame(*activeScene, renderSystem->items(), editor.display);
         }
         vctx.waitIdle();
     }
@@ -135,7 +151,9 @@ namespace sigel
         }
 
         scene->onEnter();
-        vctx.renderer.prepareScene(*scene);
+        renderSystem->Update(coordinator);
+        vctx.renderer.prepareScene(renderSystem->items());
+
         activeScene = scene;
     }
 

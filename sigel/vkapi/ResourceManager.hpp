@@ -15,6 +15,11 @@ namespace sigel
 
             std::unordered_map<std::string, uint32_t> texPathIndex;
             std::unordered_map<uint32_t, AllocatedImage> textures;
+
+            // std::unordered_map<uint32_t, Material> materials;
+
+            std::unordered_map<uint32_t, std::vector<uint32_t>> models;
+
         private:
             GpuAllocator *_allocator;
             Device *_device;
