@@ -7,8 +7,8 @@ namespace factory
 {
     void TestScene::onSetup()
     {
-        uint32_t flotex = ResourceManager::get().createTextureImage("../assets/textures/flo.jpg");
-        uint32_t cubemesh = ResourceManager::get().createMesh(cube_vertices, cube_indices);
+        // uint32_t flotex = ResourceManager::get().createTextureImage("../assets/textures/flo.jpg");
+        // uint32_t cubemesh = ResourceManager::get().createMesh(cube_vertices, cube_indices);
         uint32_t defaultPipeline = PipelineManager::get().getPipelineID("default");
 
         PipelineConfig pbrconfig
@@ -19,50 +19,17 @@ namespace factory
 
         uint32_t pbrPipeline =  PipelineManager::get().createPipeline(pbrconfig);
 
-        auto& c = SigelEngine::get().coordinator;
-        Entity cube2 = c.CreateEntity();
-        c.AddComponent(cube2, Transform{glm::vec3(-2.5f, 2.0f, 0.0f)});
-        // c.AddComponent(cube2, RenderComponent{ .pipelineID = 0, .meshes = {cubemesh, flotex }});
-
-        Entity ak = c.CreateEntity();
-        c.AddComponent(ak, Transform{glm::vec3(-4.0f, 0.0f, 0.0f)});
-        c.AddComponent(ak, RenderComponent{.pipelineID = pbrPipeline, .meshes = loadAssimpModel("../assets/models/ak47/ak.obj")});
-
-        // SceneObject cube;
-
-        // cube.pipelineID = defaultPipeline;
-        // cube.meshes.push_back({
-        //     cubemesh,
-        //     flotex
-        // });
-
-        // cube.transform.position = glm::vec3(-2.5f, 2.0f, 0.0f);
-        // objects.push_back(cube);
-
-
-        // SceneObject chips;
-        // chips.pipelineID = defaultPipeline;
-        // chips.meshes = loadAssimpModel("../assets/models/chipsbag/chips2.obj");
-        // objects.push_back(chips);
-
-        // SceneObject ak;
-        // ak.pipelineID = pbrPipeline;
-        // ak.meshes = loadAssimpModel("../assets/models/ak47/ak.obj");
-        // ak.transform.position = glm::vec3(-4.0f, 0.0f, 0.0f);
-        // // ak.transform.scale *= 0.01f;
-        // objects.push_back(ak);
-
-        // SceneObject building;
-        // building.pipelineID = pbrPipeline;
-        // building.meshes = loadAssimpModel("../assets/models/building/old_residential_building.fbx");
-        // building.transform.scale *= 0.01f;
-        // objects.push_back(building);
-
         glfwSetInputMode(SigelEngine::get().window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 
     void TestScene::onEnter()
     {
+        uint32_t pbr = PipelineManager::get().getPipelineID("pbr");
+        auto &c = SigelEngine::get().coordinator;
+
+        Entity ak = createEntity();
+        c.AddComponent(ak, Transform{glm::vec3(-4.0f, 0.0f, 0.0f)});
+        c.AddComponent(ak, RenderComponent{.pipelineID = pbr, .meshes = loadAssimpModel("../assets/models/ak47/ak.obj")});
         status("TESTSCENE", "enter test scene");
     }
 

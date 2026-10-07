@@ -4,18 +4,14 @@
 #include <vector>
 
 #include <sigel/Material.hpp>
+#include <sigel/MeshItem.hpp>
 
 namespace sigel
 {
-    struct MeshItem
-    {
-        uint32_t meshID;
-        Material material;
-    };
-
     struct RenderComponent
     {
         uint32_t pipelineID;
         std::vector<MeshItem> meshes;
+        //uint32_t modelID;
     };
 }

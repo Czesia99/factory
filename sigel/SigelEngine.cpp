@@ -86,9 +86,17 @@ namespace sigel
                 activeScene->onUpdate(dt);
                 renderSystem->Update(coordinator);
                 editor.update(activeScene);
+
+                const auto& cam = activeScene->getCamera();
+                CameraData camData{
+                    .view = cam.getViewMatrix(),
+                    .proj = cam.getProjectionMatrix(vctx.renderer.aspectRatio()),
+                    .pos  = cam.settings.pos
+                };
+
+                vctx.renderer.drawFrame(renderSystem->items(), camData, activeScene->getLight(), editor.display);
             }
 
-            vctx.renderer.drawFrame(*activeScene, renderSystem->items(), editor.display);
         }
         vctx.waitIdle();
     }
@@ -141,6 +149,7 @@ namespace sigel
         if (activeScene)
         {
             activeScene->onExit();
+            activeScene->destroyEntities();
             vctx.renderer.cleanupRenderObjects();
         }
 
@@ -151,9 +160,6 @@ namespace sigel
         }
 
         scene->onEnter();
-        renderSystem->Update(coordinator);
-        vctx.renderer.prepareScene(renderSystem->items());
-
         activeScene = scene;
     }
 

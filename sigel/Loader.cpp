@@ -70,6 +70,7 @@ namespace sigel
     {
         if (texPath.empty()) return 0;
 
+        auto &rm = SigelEngine::get().vctx.resourceManager;
         // Vérification texture embarquée
         const aiTexture* embeddedTex = scene->GetEmbeddedTexture(texPath.c_str());
         if (!embeddedTex && texPath[0] == '*' && scene->HasTextures()) {
@@ -81,11 +82,11 @@ namespace sigel
 
         if (embeddedTex) {
             size_t size = (embeddedTex->mHeight == 0) ? embeddedTex->mWidth : embeddedTex->mWidth * embeddedTex->mHeight * 4;
-            return SigelEngine::get().vctx.resourceManager.createTextureImageFromMemory(embeddedTex->pcData, size, embeddedTex->mFilename.C_Str());
+            return rm.createTextureImageFromMemory(embeddedTex->pcData, size, embeddedTex->mFilename.C_Str());
         } else {
             std::string fullPath = base_dir + texPath;
             try {
-                uint32_t id = SigelEngine::get().vctx.resourceManager.createTextureImage(fullPath);
+                uint32_t id = rm.createTextureImage(fullPath);
                 std::cout << "  [Mat] Loaded: " << texPath << " (ID: " << id << ")" << std::endl;
                 return id;
             } catch (const std::exception& e) {

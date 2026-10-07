@@ -5,7 +5,7 @@
 #include "Pipeline.hpp"
 #include "ResourceManager.hpp"
 #include "frames.h"
-#include "../Scene.hpp"
+#include "../Light.hpp"
 #include "../Vertex.hpp"
 #include <sigel/ecs/Entity.hpp>
 #include <span>
@@ -25,22 +25,31 @@ namespace sigel
         glm::mat4 model;
     };
 
-    struct MeshRenderData
-    {
-        uint32_t meshID;
-        Material material;
-        std::vector<vk::raii::DescriptorSet> descriptorSets;
-    };
-
-    struct RenderObject
-    {
-        uint32_t pipelineID;
-        std::vector<MeshRenderData> meshes;
-    };
-
     struct ObjectPushConstants {
         uint32_t objectIndex;
     };
+
+    struct CameraData {
+        glm::mat4 view;
+        glm::mat4 proj;
+        glm::vec3 pos;
+    };
+
+    struct MaterialKey {
+        uint32_t pipelineID, diffuse, metallic, roughness, normal;
+        bool operator==(const MaterialKey&) const = default;
+    };
+
+    struct MaterialKeyHash {
+        size_t operator()(const MaterialKey& k) const {
+            size_t h = 0;
+            for (uint32_t v : { k.pipelineID, k.diffuse, k.metallic, k.roughness, k.normal })
+                h ^= std::hash<uint32_t>{}(v) + 0x9e3779b9 + (h << 6) + (h >> 2);
+            return h;
+        }
+    };
+
+    constexpr uint32_t MAX_MATERIAL_SETS = 512;
 
     class Renderer
     {
@@ -60,28 +69,30 @@ namespace sigel
             std::array<FrameData, MAX_FRAMES_IN_FLIGHT> frames;
             std::vector<vk::raii::Semaphore> renderSemaphores;
 
-            std::vector<RenderObject> renderObjects;
-
             std::vector<Buffer> uniformBuffers;
             std::vector<Buffer> objectSSBOs;
             std::vector<vk::raii::DescriptorSet> globalDescriptorSets;
 
+            std::unordered_map<MaterialKey, vk::raii::DescriptorSet, MaterialKeyHash> materialSets;
+            size_t objectCapacity = 0;
+
         public:
             void init(Device *device, Swapchain *swapchain, PipelineManager *pipelineManager, ResourceManager *resourceManager);
-            void drawFrame(Scene& scene, std::span<const RenderItem> items, bool showEditor);
+            void drawFrame(std::span<const RenderItem> items, const CameraData& camera, const DirLight& light, bool showEditor);
             void createCommandPool();
             void createDescriptorPool();
-            void createDescriptorSets();
-            void recordCommandBuffer(uint32_t imageIndex, bool showEditor);
+            void recordCommandBuffer(uint32_t imageIndex, std::span<const RenderItem> items, bool showEditor);
             void createFrameData();
-            void updateUniformBuffer(uint32_t currentImage, Scene& scene, std::span<const RenderItem> items);
             void createUniformBuffers(std::vector<Buffer> &uniformBuffers);
             FrameData &currentFrame();
-
-            void prepareScene(std::span<const RenderItem> items);
+            float aspectRatio() const;
             void cleanupRenderObjects();
 
         private:
+            void ensureResources(size_t objectCount);
+            void writeGlobalDescriptorSets();
+            vk::DescriptorSet getMaterialSet(uint32_t pipelineID, const Material& material);
+            void updateUniformBuffer(uint32_t currentImage, std::span<const RenderItem> items, const CameraData& camera, const DirLight& light);
             void waitFence();
             void checkImageResult(vk::Result result);
             void transition_image_layout(vk::raii::CommandBuffer&cmd, vk::Image image, vk::ImageLayout oldLayout,

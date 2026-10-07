@@ -2,14 +2,14 @@
 
 namespace sigel
 {
-    Camera::Camera() : cam{CamSettings {}}
+    Camera::Camera() : settings{CamSettings {}}
     {
         movement_lock = false;
 
         updateCameraVectors();
     }
 
-    Camera::Camera(CamSettings conf) : cam(conf)
+    Camera::Camera(CamSettings conf) : settings(conf)
     {
         movement_lock = false;
 
@@ -18,30 +18,30 @@ namespace sigel
 
     glm::mat4 Camera::getViewMatrix() const
     {
-        return glm::lookAt(cam.pos, cam.pos + cam.front, cam.up);
+        return glm::lookAt(settings.pos, settings.pos + settings.front, settings.up);
     }
 
     glm::mat4 Camera::getProjectionMatrix(float aspect) const
     {
-        glm::mat4 proj = glm::perspective(glm::radians(cam.fov), aspect, cam.near_plane, cam.far_plane);
+        glm::mat4 proj = glm::perspective(glm::radians(settings.fov), aspect, settings.near_plane, settings.far_plane);
         return proj;
     }
 
     void Camera::processKeyboardMovement(CamDirection direction, float delta_time)
     {
-        float velocity = cam.speed * delta_time;
+        float velocity = settings.speed * delta_time;
         if (direction == FORWARD)
-            cam.pos += cam.front * velocity;
+            settings.pos += settings.front * velocity;
         if (direction == BACKWARD)
-            cam.pos -= cam.front * velocity;
+            settings.pos -= settings.front * velocity;
         if (direction == LEFT)
-            cam.pos -= cam.right * velocity;
+            settings.pos -= settings.right * velocity;
         if (direction == RIGHT)
-            cam.pos += cam.right * velocity;
+            settings.pos += settings.right * velocity;
         if (direction == UP)
-            cam.pos += cam.up * velocity; //* -1.0f;
+            settings.pos += settings.up * velocity; //* -1.0f;
         if (direction == DOWN)
-            cam.pos -= cam.up * velocity;// * -1.0f;
+            settings.pos -= settings.up * velocity;// * -1.0f;
     }
 
     void Camera::processMouseMovement(float dx, float dy)
@@ -49,19 +49,19 @@ namespace sigel
         if (movement_lock == true)
             return;
 
-        dx *= cam.sensitivity;
-        dy *= cam.sensitivity;
+        dx *= settings.sensitivity;
+        dy *= settings.sensitivity;
 
-        cam.yaw   += dx;
-        cam.pitch -= dy; //* -1.0f;
+        settings.yaw   += dx;
+        settings.pitch -= dy; //* -1.0f;
 
 
         if (constrain_pitch)
         {
-            if (cam.pitch > 89.0f)
-                cam.pitch = 89.0f;
-            if (cam.pitch < -89.0f)
-                cam.pitch = -89.0f;
+            if (settings.pitch > 89.0f)
+                settings.pitch = 89.0f;
+            if (settings.pitch < -89.0f)
+                settings.pitch = -89.0f;
         }
 
         updateCameraVectors();
@@ -70,11 +70,11 @@ namespace sigel
     void Camera::updateCameraVectors()
     {
         glm::vec3 nfront;
-        nfront.x = cos(glm::radians(cam.yaw)) * cos(glm::radians(cam.pitch));
-        nfront.y = sin(glm::radians(cam.pitch));
-        nfront.z = sin(glm::radians(cam.yaw)) * cos(glm::radians(cam.pitch));
-        cam.front = glm::normalize(nfront);
-        cam.right = glm::normalize(glm::cross(cam.front, WORLD_UP));
-        cam.up = glm::normalize(glm::cross(cam.right, cam.front));
+        nfront.x = cos(glm::radians(settings.yaw)) * cos(glm::radians(settings.pitch));
+        nfront.y = sin(glm::radians(settings.pitch));
+        nfront.z = sin(glm::radians(settings.yaw)) * cos(glm::radians(settings.pitch));
+        settings.front = glm::normalize(nfront);
+        settings.right = glm::normalize(glm::cross(settings.front, WORLD_UP));
+        settings.up = glm::normalize(glm::cross(settings.right, settings.front));
     }
 }

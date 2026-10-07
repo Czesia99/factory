@@ -10,6 +10,8 @@
 
 #include <GLFW/glfw3.h>
 
+#include <sigel/Scene.hpp>
+
 namespace sigel
 {
     class EditorUI

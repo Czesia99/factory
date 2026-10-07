@@ -153,18 +153,18 @@ namespace sigel
         {
             sigel::Camera& camera = scene->getCamera();
 
-            ImGui::DragFloat3("Position", glm::value_ptr(camera.cam.pos), 0.1f);
+            ImGui::DragFloat3("Position", glm::value_ptr(camera.settings.pos), 0.1f);
 
             ImGui::Separator();
 
-            ImGui::SliderFloat("FOV", &camera.cam.fov, 10.0f, 120.0f);
-            ImGui::SliderFloat("Speed", &camera.cam.speed, 0.1f, 100.0f);
-            ImGui::DragFloat("Sensitivity", &camera.cam.sensitivity, 0.01f, 0.01f, 1.0f);
+            ImGui::SliderFloat("FOV", &camera.settings.fov, 10.0f, 120.0f);
+            ImGui::SliderFloat("Speed", &camera.settings.speed, 0.1f, 100.0f);
+            ImGui::DragFloat("Sensitivity", &camera.settings.sensitivity, 0.01f, 0.01f, 1.0f);
 
             ImGui::Separator();
 
-            ImGui::DragFloat("Near Plane", &camera.cam.near_plane, 0.05f, 0.01f, 10.0f);
-            ImGui::DragFloat("Far Plane", &camera.cam.far_plane, 5.0f, 10.0f, 2000.0f);
+            ImGui::DragFloat("Near Plane", &camera.settings.near_plane, 0.05f, 0.01f, 10.0f);
+            ImGui::DragFloat("Far Plane", &camera.settings.far_plane, 5.0f, 10.0f, 2000.0f);
 
             ImGui::Checkbox("Lock Movement", &camera.movement_lock);
         }

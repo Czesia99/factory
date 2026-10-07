@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 #include "vkapi/VulkanContext.hpp"
 #include "Utils.hpp"
-// #include "Scene.hpp"
+#include "Scene.hpp"
 #include "EditorUI.hpp"
 #include <sigel/ecs/Coordinator.hpp>
 #include <sigel/ecs/systems/RenderSystem.hpp>

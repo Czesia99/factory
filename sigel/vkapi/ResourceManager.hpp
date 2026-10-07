@@ -5,6 +5,7 @@
 #include "../Mesh.hpp"
 #include "../Vertex.hpp"
 #include <unordered_map>
+#include <sigel/MeshItem.hpp>
 
 namespace sigel
 {
@@ -16,9 +17,11 @@ namespace sigel
             std::unordered_map<std::string, uint32_t> texPathIndex;
             std::unordered_map<uint32_t, AllocatedImage> textures;
 
-            // std::unordered_map<uint32_t, Material> materials;
+            std::unordered_map<std::string, uint32_t> matPathIndex;
+            std::unordered_map<uint32_t, std::array<AllocatedImage, 4>> materials;
 
-            std::unordered_map<uint32_t, std::vector<uint32_t>> models;
+            std::unordered_map<std::string, uint32_t> modelPathIndex;
+            std::unordered_map<uint32_t, std::vector<MeshItem>> models;
 
         private:
             GpuAllocator *_allocator;

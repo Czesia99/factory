@@ -31,19 +31,19 @@ namespace sigel
         UP,
         DOWN
     };
-    
+
     const glm::vec3 WORLD_UP = glm::vec3(0.0f, 1.0f, 0.0f);
 
     class Camera
     {
         public:
-            CamSettings cam;
+            CamSettings settings;
 
             bool movement_lock;
             bool constrain_pitch = true;
-    
+
         private:
-        
+
         public:
             Camera();
             Camera(CamSettings conf);
@@ -53,7 +53,7 @@ namespace sigel
 
             void processKeyboardMovement(CamDirection direction, float delta_time);
             void processMouseMovement(float dx, float dy);
-            
+
         private:
             void updateCameraVectors();
     };

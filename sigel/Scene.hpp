@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+#include <sigel/ecs/Entity.hpp>
 #include "InputManager.hpp"
 #include "Camera.hpp"
 #include "Material.hpp"
@@ -14,6 +16,9 @@ namespace sigel
             DirLight dirLight;
             float elapsed = 0.0f;
 
+        protected:
+            Entity createEntity();
+
 
         public:
             virtual ~Scene() = default;
@@ -22,12 +27,16 @@ namespace sigel
             virtual DirLight& getLight() { return dirLight; }
 
             virtual void onSetup();
-            virtual void onEnter() {}
+            virtual void onEnter();
             virtual void onExit() {}
             virtual void onUpdate(float dt);
-            virtual void onDestroy() { /* bjects.clear(); */ }
+            virtual void onDestroy() { }
+
+            void destroyEntities();
 
             bool isSetup = false;
+        private:
+            std::vector<Entity> entities;
     };
 
     class DefaultScene : public Scene {};
