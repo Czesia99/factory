@@ -52,24 +52,24 @@ include_directories(${IMGUI_DIR} ${IMGUI_DIR}/backends ..)
 #SOURCES
 set(SRC
     src/main.cpp
-    sigel/stb.cpp
-    sigel/vkapi/vma.cpp
-    sigel/SigelEngine.cpp
-    sigel/vkapi/Instance.cpp
-    sigel/vkapi/Device.cpp
-    sigel/vkapi/GpuAllocator.cpp
-    sigel/vkapi/WindowSurface.cpp
-    sigel/vkapi/Swapchain.cpp
-    sigel/vkapi/Pipeline.cpp
-    sigel/vkapi/ResourceManager.cpp
-    sigel/vkapi/Renderer.cpp
-    sigel/InputManager.cpp
-    sigel/Camera.cpp
-    sigel/Scene.cpp
-    sigel/EditorUI.cpp
-    sigel/Loader.cpp
-    sigel/ecs/EntityManager.cpp
-    sigel/ecs/systems/RenderSystem.cpp
+    mvel/stb.cpp
+    mvel/vkapi/vma.cpp
+    mvel/MvelEngine.cpp
+    mvel/vkapi/Instance.cpp
+    mvel/vkapi/Device.cpp
+    mvel/vkapi/GpuAllocator.cpp
+    mvel/vkapi/WindowSurface.cpp
+    mvel/vkapi/Swapchain.cpp
+    mvel/vkapi/Pipeline.cpp
+    mvel/vkapi/ResourceManager.cpp
+    mvel/vkapi/Renderer.cpp
+    mvel/InputManager.cpp
+    mvel/Camera.cpp
+    mvel/Scene.cpp
+    mvel/EditorUI.cpp
+    mvel/Loader.cpp
+    mvel/ecs/EntityManager.cpp
+    mvel/ecs/systems/RenderSystem.cpp
     src/TestScene.cpp
 )
 

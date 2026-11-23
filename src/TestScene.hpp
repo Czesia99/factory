@@ -1,10 +1,10 @@
 #pragma once
 
-#include <sigel/Scene.hpp>
+#include <mvel/Scene.hpp>
 
 namespace factory
 {
-    using namespace sigel;
+    using namespace mvel;
 
     class TestScene : public Scene
     {

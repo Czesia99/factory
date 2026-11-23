@@ -1,6 +1,6 @@
 #include "TestScene.hpp"
-#include "../sigel/SigelEngine.hpp"
-#include <sigel/Loader.hpp>
+#include <mvel/MvelEngine.hpp>
+#include <mvel/Loader.hpp>
 #include <print>
 
 namespace factory
@@ -14,18 +14,18 @@ namespace factory
         PipelineConfig pbrconfig
         {
             .name = "pbr",
-            .shaderPath = "../sigel/shaders/pbr.spv"
+            .shaderPath = "../mvel/shaders/pbr.spv"
         };
 
         uint32_t pbrPipeline =  PipelineManager::get().createPipeline(pbrconfig);
 
-        glfwSetInputMode(SigelEngine::get().window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwSetInputMode(MvelEngine::get().window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 
     void TestScene::onEnter()
     {
         uint32_t pbr = PipelineManager::get().getPipelineID("pbr");
-        auto &c = SigelEngine::get().coordinator;
+        auto &c = MvelEngine::get().coordinator;
 
         Entity ak = createEntity();
         c.AddComponent(ak, Transform{glm::vec3(-4.0f, 0.0f, 0.0f)});
@@ -47,10 +47,10 @@ namespace factory
         //     objects[i].transform = glm::rotate(model, elapsed * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         // }
 
-        auto& input = SigelEngine::get().inputManager;
-        if (input.isPressed(GLFW_KEY_LEFT_ALT))  SigelEngine::get().editor.swapMode();
+        auto& input = MvelEngine::get().inputManager;
+        if (input.isPressed(GLFW_KEY_LEFT_ALT))  MvelEngine::get().editor.swapMode();
 
-        if (SigelEngine::get().editor.display) { return; }
+        if (MvelEngine::get().editor.display) { return; }
 
         if (input.isHeld(GLFW_KEY_W)) camera.processKeyboardMovement(FORWARD, dt);
         if (input.isHeld(GLFW_KEY_S)) camera.processKeyboardMovement(BACKWARD, dt);
@@ -59,8 +59,8 @@ namespace factory
         if (input.isHeld(GLFW_KEY_SPACE)) camera.processKeyboardMovement(UP, dt);
         if (input.isHeld(GLFW_KEY_LEFT_CONTROL)) camera.processKeyboardMovement(DOWN, dt);
 
-        if (input.isPressed(GLFW_KEY_TAB))  SigelEngine::get().drawScene("default");
-        if (input.isPressed(GLFW_KEY_ESCAPE)) glfwSetWindowShouldClose(SigelEngine::get().window, true);
+        if (input.isPressed(GLFW_KEY_TAB))  MvelEngine::get().drawScene("default");
+        if (input.isPressed(GLFW_KEY_ESCAPE)) glfwSetWindowShouldClose(MvelEngine::get().window, true);
 
         camera.processMouseMovement(input.getMouseDeltaX(), input.getMouseDeltaY());
     }

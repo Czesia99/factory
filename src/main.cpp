@@ -2,13 +2,13 @@
 #include <stdexcept>
 #include <cstdlib>
 
-#include "../sigel/SigelEngine.hpp"
+#include "../mvel/MvelEngine.hpp"
 #include "TestScene.hpp"
 
-using namespace sigel;
+using namespace mvel;
 
 int main() {
-    SigelEngine &app = SigelEngine::get();
+    MvelEngine &app = MvelEngine::get();
 
     app.addScene("testscene", new factory::TestScene());
     app.drawScene("testscene");
