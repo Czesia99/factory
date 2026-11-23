@@ -91,7 +91,7 @@ namespace mvel
         private:
             void ensureResources(size_t objectCount);
             void writeGlobalDescriptorSets();
-            vk::DescriptorSet getMaterialSet(uint32_t pipelineID, const Material& material);
+            vk::DescriptorSet getMaterialSet(uint32_t pipelineID, uint32_t matID);
             void updateUniformBuffer(uint32_t currentImage, std::span<const RenderItem> items, const CameraData& camera, const DirLight& light);
             void waitFence();
             void checkImageResult(vk::Result result);

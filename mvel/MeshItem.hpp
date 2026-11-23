@@ -7,6 +7,6 @@ namespace mvel
     struct MeshItem
     {
         uint32_t meshID;
-        Material material;
+        uint32_t matID;
     };
 }

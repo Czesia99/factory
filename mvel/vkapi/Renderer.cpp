@@ -192,9 +192,15 @@ namespace mvel
         }
     }
 
-    vk::DescriptorSet Renderer::getMaterialSet(uint32_t pipelineID, const Material& m)
+    vk::DescriptorSet Renderer::getMaterialSet(uint32_t pipelineID, uint32_t matID)
     {
-        MaterialKey key{ pipelineID, m.diffuseID, m.metallicID, m.roughnessID, m.normalID };
+        uint32_t diffuseID = _resourceManager->materials[matID].diffuseID;
+        uint32_t metallicID = _resourceManager->materials[matID].metallicID;
+        uint32_t roughnessID = _resourceManager->materials[matID].roughnessID;
+        uint32_t normalID = _resourceManager->materials[matID].normalID;
+
+        MaterialKey key{ pipelineID, diffuseID, metallicID, roughnessID, normalID};
+
         if (auto it = materialSets.find(key); it != materialSets.end())
             return *it->second;
 
@@ -206,7 +212,7 @@ namespace mvel
         };
         auto sets = _device->logicalDevice.allocateDescriptorSets(allocInfo);
 
-        const std::array<uint32_t, 4> texIDs{ m.diffuseID, m.metallicID, m.roughnessID, m.normalID };
+        const std::array<uint32_t, 4> texIDs{diffuseID, metallicID, roughnessID, normalID};
         std::array<vk::DescriptorImageInfo, 4> infos;
         std::array<vk::WriteDescriptorSet, 4> writes;
 
@@ -384,7 +390,7 @@ namespace mvel
 
                 cmd.bindVertexBuffers(0, vk::Buffer(mesh.vertexBuffer.buffer), { 0 });
                 cmd.bindIndexBuffer(vk::Buffer(mesh.indexBuffer.buffer), 0, vk::IndexType::eUint32);
-                cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelineLayout, 1, getMaterialSet(item.pipelineID, meshItem.material), nullptr);
+                cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelineLayout, 1, getMaterialSet(item.pipelineID, meshItem.matID), nullptr);
                 cmd.drawIndexed(mesh.indexCount, 1, 0, 0, 0);
             }
         }

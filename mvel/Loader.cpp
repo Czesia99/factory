@@ -96,10 +96,28 @@ namespace mvel
         return 0;
     }
 
-    static Material loadMeshMaterial(aiMesh* ai_mesh, const aiScene* scene, const std::string& base_dir)
+    //TODO: create mat names with serial number
+    static uint32_t loadMeshMaterial(aiMesh* ai_mesh, const aiScene* scene, const std::string& base_dir)
     {
+        auto &rm = MvelEngine::get().vctx.resourceManager;
+
         Material mat{0, 0, 0, 0};
-        if (ai_mesh->mMaterialIndex < 0) return mat;
+        if (ai_mesh->mMaterialIndex < 0)
+        {
+            auto it = rm.matPathIndex.find("unknownMat");
+            if (it != rm.matPathIndex.end())
+            {
+                status("RESOURCE MANAGER", "Material found in cache [unknownMat]");
+                return it->second;
+            } else
+            {
+                uint32_t id = static_cast<uint32_t>(rm.materials.size());
+                rm.materials[id] = std::move(mat);
+                rm.matPathIndex["unknownMat"] = id;
+                return id;
+            }
+        }
+
 
         aiMaterial* material = scene->mMaterials[ai_mesh->mMaterialIndex];
 
@@ -107,6 +125,13 @@ namespace mvel
         std::string materialName = "";
         if (material->Get(AI_MATKEY_NAME, matName) == AI_SUCCESS) {
             materialName = matName.C_Str();
+        }
+
+        auto it = rm.matPathIndex.find(materialName);
+        if (it != rm.matPathIndex.end())
+        {
+            status("RESOURCE MANAGER", "Material found in cache [" + materialName + "]");
+            return it->second;
         }
 
         std::cout << "\n[Material Processing] " << materialName << std::endl;
@@ -147,7 +172,11 @@ namespace mvel
         );
         mat.normalID = loadSingleTexture(normPath, scene, base_dir);
 
-        return mat;
+        //store mat in cache
+        uint32_t id = static_cast<uint32_t>(rm.materials.size());
+        rm.materials[id] = std::move(mat);
+        rm.matPathIndex[materialName] = id;
+        return id;
     }
 
     static void processNode(aiNode* node, const aiScene* scene, const glm::mat4& parentTransform,
@@ -225,11 +254,15 @@ namespace mvel
             }
 
             // Chargement du matériau PBR
-            Material mat = loadMeshMaterial(ai_mesh, scene, base_dir);
+            // auto it = matPathIndex.find()
+            auto &rm = MvelEngine::get().vctx.resourceManager;
+
+
+            uint32_t matID = loadMeshMaterial(ai_mesh, scene, base_dir);
 
             // Upload Mesh
             uint32_t mesh = MvelEngine::get().vctx.resourceManager.createMesh(vertices, indices);
-            outMeshes.push_back({mesh, mat});
+            outMeshes.push_back({mesh, matID});
         }
 
         for (unsigned int i = 0; i < node->mNumChildren; i++) {
