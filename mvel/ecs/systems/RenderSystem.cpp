@@ -14,9 +14,9 @@ namespace mvel
 
             renderItems.push_back({
                 .entity = entity,
-                .model = transform.getModelMatrix(),
+                .modelMatrix = transform.getModelMatrix(),
                 .pipelineID = render.pipelineID,
-                .meshes = render.meshes
+                .modelID = render.modelID
             });
         }
     }

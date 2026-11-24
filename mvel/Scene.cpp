@@ -32,7 +32,7 @@ namespace mvel
         Entity ak = createEntity();
         auto& c = MvelEngine::get().coordinator;
         c.AddComponent(ak, Transform{glm::vec3(-4.0f, 0.0f, 0.0f)});
-        c.AddComponent(ak, RenderComponent{.pipelineID = 0, .meshes = loadAssimpModel("../assets/models/chipsbag/chips2.obj")});
+        c.AddComponent(ak, RenderComponent{.pipelineID = 0, .modelID = loadAssimpModel("../assets/models/chipsbag/chips2.obj")});
     }
 
     void Scene::onUpdate(float dt)

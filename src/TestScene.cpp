@@ -28,9 +28,17 @@ namespace factory
         auto &c = MvelEngine::get().coordinator;
 
         Entity ak = createEntity();
-        c.AddComponent(ak, Transform{glm::vec3(-4.0f, 0.0f, 0.0f)});
-        c.AddComponent(ak, RenderComponent{.pipelineID = pbr, .meshes = loadAssimpModel("../assets/models/ak47/ak.obj")});
+        c.AddComponent(ak, Transform{glm::vec3(0.0f, 0.0f, 0.0f)});
+        c.AddComponent(ak, RenderComponent{.pipelineID = pbr, .modelID = loadAssimpModel("../assets/models/ak47/ak.obj")});
         status("TESTSCENE", "enter test scene");
+
+        Entity aks[50];
+        for (int i = 0; i < 50; i++)
+        {
+            aks[i] = createEntity();
+            c.AddComponent(aks[i], Transform{glm::vec3(0.0f + (4 * i), 0.0f, 0.0f)});
+            c.AddComponent(aks[i], RenderComponent{.pipelineID = pbr, .modelID = loadAssimpModel("../assets/models/ak47/ak.obj")});
+        }
     }
 
     void TestScene::onExit()
@@ -44,7 +52,7 @@ namespace factory
         // elapsed += dt;
         // for (size_t i = 0; i < objects.size(); i++) {
         //     glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(i * 1.5f, 0.0f, - 4.0f));
-        //     objects[i].transform = glm::rotate(model, elapsed * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        //     objects[i].transform = glm::rotate(modelMatrix, elapsed * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         // }
 
         auto& input = MvelEngine::get().inputManager;

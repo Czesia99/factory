@@ -7,5 +7,5 @@
 namespace mvel
 {
    // std::vector<SubMesh> loadTinyModel(const std::string &path);
-   std::vector<MeshItem> loadAssimpModel(const std::string &path);
+   uint32_t loadAssimpModel(const std::string &path);
 }

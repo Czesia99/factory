@@ -253,11 +253,7 @@ namespace mvel
                 }
             }
 
-            // Chargement du matériau PBR
-            // auto it = matPathIndex.find()
             auto &rm = MvelEngine::get().vctx.resourceManager;
-
-
             uint32_t matID = loadMeshMaterial(ai_mesh, scene, base_dir);
 
             // Upload Mesh
@@ -270,8 +266,17 @@ namespace mvel
         }
     }
 
-    std::vector<MeshItem> loadAssimpModel(const std::string& path)
+    uint32_t loadAssimpModel(const std::string& path)
     {
+        auto &rm = MvelEngine::get().vctx.resourceManager;
+
+        auto it = rm.modelPathIndex.find(path);
+        if (it != rm.modelPathIndex.end())
+        {
+            status("RESOURCE MANAGER", "Model found in cache [" + path + "]");
+            return it->second;
+        }
+
         Assimp::Importer importer;
 
         std::cout << "\n==========================================" << std::endl;
@@ -296,11 +301,11 @@ namespace mvel
         std::cout << "==========================================\n" << std::endl;
 
         std::vector<MeshItem> meshes;
-
         processNode(scene->mRootNode, scene, glm::mat4(1.0f), base_dir, meshes);
 
-        std::cout << "\n[ASSIMP] Finished loading model.\n" << std::endl;
-
-        return meshes;
+        uint32_t id = static_cast<uint32_t>(rm.models.size());
+        rm.models[id] = std::move(meshes);
+        rm.modelPathIndex[path] = id;
+        return id;
     }
 }

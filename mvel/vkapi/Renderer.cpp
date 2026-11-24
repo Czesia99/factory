@@ -256,7 +256,7 @@ namespace mvel
 
         auto* dst = static_cast<ObjBufferObject*>(objectSSBOs[currentImage].mapped);
         for (size_t i = 0; i < items.size(); i++)
-            dst[i].model = items[i].model;
+            dst[i].model = items[i].modelMatrix;
     }
 
     void Renderer::recordCommandBuffer(uint32_t imageIndex, std::span<const RenderItem> items, bool showEditor)
@@ -384,7 +384,9 @@ namespace mvel
             ObjectPushConstants push{ .objectIndex = i };
             cmd.pushConstants(*pipeline.pipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(ObjectPushConstants), &push);
 
-            for (const auto& meshItem : item.meshes)
+            std::vector<MeshItem>& meshes = _resourceManager->models[item.modelID];
+
+            for (const auto& meshItem : meshes)
             {
                 const Mesh& mesh = _resourceManager->getMesh(meshItem.meshID);
 

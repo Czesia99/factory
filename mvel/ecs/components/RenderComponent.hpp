@@ -11,7 +11,7 @@ namespace mvel
     struct RenderComponent
     {
         uint32_t pipelineID;
-        std::vector<MeshItem> meshes;
-        //uint32_t modelID;
+        uint32_t modelID;
+        //std::vector<MeshItem> meshes;
     };
 }

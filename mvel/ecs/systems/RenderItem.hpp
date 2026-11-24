@@ -10,8 +10,9 @@ namespace mvel
     struct RenderItem
     {
         Entity entity;
-        glm::mat4 model;
+        glm::mat4 modelMatrix;
         uint32_t pipelineID;
-        std::span<const MeshItem> meshes;
+        uint32_t modelID;
+        // std::span<const MeshItem> meshes;
     };
 }
