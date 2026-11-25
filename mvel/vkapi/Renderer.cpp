@@ -7,6 +7,7 @@
 #include "imgui_impl_vulkan.h"
 
 #include <mvel/Utils.hpp>
+#include <mvel/Vertex.hpp>
 
 namespace mvel
 {
@@ -20,6 +21,41 @@ namespace mvel
         createCommandPool();
         createFrameData();
         status("RENDERER", "renderer initialized");
+
+        //skybox
+        const std::string skyboxFolder = "../assets/skybox01/";
+        const std::array faceFiles{
+            "px.png", "nx.png", "py.png", "ny.png", "pz.png", "nz.png"
+        };
+
+        auto vertices = cube_vertices;
+        for (auto& vertex : vertices) {
+            if (vertex.normal.z < 0.0f) {
+                vertex.texCoord.x = 1.0f - vertex.texCoord.x;
+            }
+        }
+        skyboxMeshID = _resourceManager->createMesh(vertices, cube_indices);
+
+        for (std::size_t face = 0; face < faceFiles.size(); ++face) {
+            const auto textureID =
+                _resourceManager->createTextureImage(skyboxFolder + faceFiles[face]);
+
+            const auto materialID =
+                static_cast<uint32_t>(_resourceManager->materials.size());
+
+            _resourceManager->materials.emplace(
+                materialID, Material{textureID, textureID, textureID, textureID});
+            skyboxMaterialIDs[face] = materialID;
+        }
+        //
+
+        _pipelineManager->createPipeline({
+            .name = "skybox",
+            .shaderPath = "../mvel/shaders/skybox.spv",
+            .cullMode = vk::CullModeFlagBits::eNone,
+            .depthTest = false,
+            .depthWrite = false,
+        });
     }
 
     void Renderer::cleanupRenderObjects()
@@ -141,7 +177,7 @@ namespace mvel
 
     void Renderer::ensureResources(size_t objectCount)
     {
-        if (objectCount == 0) return;
+        // if (objectCount == 0) return;
 
         const bool firstInit = uniformBuffers.empty();
         if (!firstInit && objectCount <= objectCapacity) return;
@@ -366,6 +402,29 @@ namespace mvel
         );
 
         cmd.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _swapchain->swapChainExtent));
+
+        //skybox
+        const auto skyboxID = _pipelineManager->getPipelineID("skybox");
+        const auto& skybox = _pipelineManager->getPipeline(skyboxID);
+        const auto& mesh = _resourceManager->getMesh(skyboxMeshID);
+
+        cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, *skybox.pipeline);
+        cmd.bindVertexBuffers(0, vk::Buffer(mesh.vertexBuffer.buffer), {0});
+        cmd.bindIndexBuffer(vk::Buffer(mesh.indexBuffer.buffer), 0, vk::IndexType::eUint32);
+
+        cmd.bindDescriptorSets(
+            vk::PipelineBindPoint::eGraphics, *skybox.pipelineLayout,
+            0, *globalDescriptorSets[frameIndex], nullptr);
+
+        constexpr uint32_t indicesPerFace = 6;
+        for (uint32_t face = 0; face < skyboxMaterialIDs.size(); ++face) {
+            cmd.bindDescriptorSets(
+                vk::PipelineBindPoint::eGraphics, *skybox.pipelineLayout,
+                1, getMaterialSet(skyboxID, skyboxMaterialIDs[face]), nullptr);
+
+            cmd.drawIndexed(indicesPerFace, 1, face * indicesPerFace, 0, 0);
+        }
+        //
 
         uint32_t lastPipeline = UINT32_MAX;
 

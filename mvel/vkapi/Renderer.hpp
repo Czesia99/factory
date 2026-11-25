@@ -76,6 +76,11 @@ namespace mvel
             std::unordered_map<MaterialKey, vk::raii::DescriptorSet, MaterialKeyHash> materialSets;
             size_t objectCapacity = 0;
 
+            //skybox
+            uint32_t skyboxMeshID;
+            uint32_t skyboxMaterialID;
+            std::array<uint32_t, 6> skyboxMaterialIDs{};
+
         public:
             void init(Device *device, Swapchain *swapchain, PipelineManager *pipelineManager, ResourceManager *resourceManager);
             void drawFrame(std::span<const RenderItem> items, const CameraData& camera, const DirLight& light, bool showEditor);

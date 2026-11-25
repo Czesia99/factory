@@ -24,21 +24,17 @@ namespace factory
 
     void TestScene::onEnter()
     {
+        status("TESTSCENE", "enter test scene");
         uint32_t pbr = PipelineManager::get().getPipelineID("pbr");
         auto &c = MvelEngine::get().coordinator;
 
         Entity ak = createEntity();
         c.AddComponent(ak, Transform{glm::vec3(0.0f, 0.0f, 0.0f)});
         c.AddComponent(ak, RenderComponent{.pipelineID = pbr, .modelID = loadAssimpModel("../assets/models/ak47/ak.obj")});
-        status("TESTSCENE", "enter test scene");
 
-        Entity aks[50];
-        for (int i = 0; i < 50; i++)
-        {
-            aks[i] = createEntity();
-            c.AddComponent(aks[i], Transform{glm::vec3(0.0f + (4 * i), 0.0f, 0.0f)});
-            c.AddComponent(aks[i], RenderComponent{.pipelineID = pbr, .modelID = loadAssimpModel("../assets/models/ak47/ak.obj")});
-        }
+        Entity silverwolf = createEntity();
+        c.AddComponent(silverwolf, Transform{glm::vec3(0.0f, 0.0f, 0.0f)});
+        c.AddComponent(silverwolf, RenderComponent{.pipelineID = 0, .modelID = loadAssimpModel("../assets/models/silverwolf/source/SilverWolfV2.fbx")});
     }
 
     void TestScene::onExit()

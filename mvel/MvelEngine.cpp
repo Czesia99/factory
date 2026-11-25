@@ -7,8 +7,6 @@
 #include <volk.h>
 #endif
 
-#include <tiny_obj_loader.h>
-
 namespace mvel
 {
     void MvelEngine::run()

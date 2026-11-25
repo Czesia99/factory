@@ -45,12 +45,18 @@ struct VSOutput {
 };
 
 [shader("vertex")]
-VSOutput vertMain(VSInput input) {
+VSOutput vertMain(VSInput input, uint instanceID: SV_InstanceID) {
     VSOutput output;
 
     float4x4 modelMatrix = objectSSBO[push.objectIndex].model;
-
-    output.pos = mul(ubo.proj, mul(ubo.view, mul(modelMatrix, float4(input.inPosition, 1.0))));
+    float3 pos = input.inPosition;
+    int x = (instanceID / 22) % 22;
+    int y = instanceID % 22;
+    int z = instanceID / (22 * 22);
+    pos.x += x;
+    pos.z += y;
+    pos.y +=  z;
+    output.pos = mul(ubo.proj, mul(ubo.view, mul(modelMatrix, float4(pos, 1.0))));
 
     float3x3 normalMatrix = (float3x3)modelMatrix;
     output.normal = mul(normalMatrix, input.inNormal);
